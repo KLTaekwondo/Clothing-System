@@ -1,0 +1,31 @@
+# ============ 依赖文件夹 ============
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# ============ 编辑器/IDE 配置 ============
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ============ 系统文件 ============
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ============ 日志文件 ============
+*.log
+logs/
+
+# ============ 运行时数据 ============
+*.pid
+*.seed
+*.pid.lock

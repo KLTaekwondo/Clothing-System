@@ -1,0 +1,260 @@
+
+FLEX布局（一维布局）
+/* 容器属性 */
+.container {
+  display: flex;
+  flex-direction: row;         /* 方向: row | row-reverse | column | column-reverse */
+  justify-content: center;     /* 主轴对齐: flex-start | center | flex-end | space-between | space-around */
+  align-items: center;         /* 交叉轴对齐: stretch | flex-start | center | flex-end */
+  flex-wrap: wrap;            /* 换行: nowrap | wrap | wrap-reverse */
+  gap: 10px;                  /* 子项间距 */
+}
+
+/* 子项属性 */
+.item {
+  flex: 1;                    /* 比例分配: flex-grow flex-shrink flex-basis */
+  align-self: flex-start;     /* 单个项目对齐 */
+  order: 1;                   /* 排序 */
+}
+
+
+
+Grid布局（二维布局）
+/* 容器属性 */
+.container {
+  display: grid;
+  grid-template-columns: 100px 1fr 2fr;        /* 列定义 */
+  grid-template-rows: 50px auto 100px;         /* 行定义 */
+  grid-template-areas: 
+    "header header header"
+    "sidebar main aside"
+    "footer footer footer";    /* 区域命名 */
+  gap: 20px;                  /* 间距 */
+  justify-items: center;      /* 单元格水平对齐 */
+  align-items: center;        /* 单元格垂直对齐 */
+}
+
+/* 子项属性 */
+.item {
+  grid-column: 1 / 3;         /* 列范围 */
+  grid-row: 1;                /* 行范围 */
+  grid-area: header;          /* 区域名称 */
+}
+
+
+
+
+定位方式
+.element {
+  position: static;   /* 默认，正常文档流 */
+  position: relative; /* 相对自身定位，不脱离文档流 */
+  position: absolute; /* 绝对定位，相对于最近的非static父元素 */
+  position: fixed;    /* 固定定位，相对于视口 */
+  position: sticky;   /* 粘性定位，relative + fixed的结合 */
+  
+  /* 定位偏移 */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  
+  /* 层叠顺序 */
+  z-index: 10;
+}
+
+颜色系统
+.element {
+  /* 颜色表示法 */
+  color: red;                    /* 关键词 */
+  color: #ff0000;               /* 十六进制 */
+  color: rgb(255, 0, 0);        /* RGB */
+  color: rgba(255, 0, 0, 0.5);  /* RGB + 透明度 */
+  color: hsl(0, 100%, 50%);     /* 色相、饱和度、亮度 */
+  
+  /* 背景 */
+  background-color: #fff;
+  background-image: url('image.jpg');
+  background-size: cover;       /* cover | contain | 具体尺寸 */
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* 渐变 */
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  background: radial-gradient(circle, #ff6b6b, #4ecdc4);
+}
+
+
+
+盒模型
+.box {
+  /* 内容区 */
+  width: 100px;
+  height: 100px;
+  
+  /* 内边距 */
+  padding: 10px;               /* 全部 */
+  padding: 10px 20px;          /* 上下 | 左右 */
+  padding: 10px 20px 15px 5px; /* 上 | 右 | 下 | 左 */
+  
+  /* 外边距 */
+  margin: 10px;
+  margin: 10px auto;           /* 水平居中 */
+  
+  /* 边框 */
+  border: 2px solid #333;      /* 宽度 | 样式 | 颜色 */
+  border-radius: 8px;          /* 圆角 */
+  
+  /* 盒子计算方式 */
+  box-sizing: border-box;      /* width包含padding和border */
+  box-sizing: content-box;     /* width只包含内容 */
+}
+
+
+
+过渡动画
+.element {
+  /* 过渡属性 */
+  transition: all 0.3s ease-in-out;
+  transition: opacity 0.3s, transform 0.5s;
+  
+  /* 具体属性 */
+  transition-property: opacity, transform;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+  transition-delay: 0.1s;
+}
+
+/* 缓动函数 */
+.timing {
+  transition-timing-function: ease;        /* 慢-快-慢 */
+  transition-timing-function: ease-in;     /* 慢开始 */
+  transition-timing-function: ease-out;    /* 慢结束 */
+  transition-timing-function: linear;      /* 匀速 */
+  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+
+
+
+变换效果
+.element {
+  /* 2D变换 */
+  transform: translateX(100px);    /* 水平移动 */
+  transform: translateY(50px);     /* 垂直移动 */
+  transform: translate(100px, 50px); /* 同时移动 */
+  transform: scale(1.2);           /* 缩放 */
+  transform: rotate(45deg);        /* 旋转 */
+  transform: skew(30deg);          /* 倾斜 */
+  
+  /* 组合变换 */
+  transform: translateX(100px) rotate(45deg) scale(1.2);
+  
+  /* 3D变换 */
+  transform: perspective(500px) rotateX(45deg);
+}
+
+
+
+
+移动布局
+/* 移动端优先 */
+.container {
+  padding: 10px;
+}
+
+/* 平板 */
+@media (min-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+}
+
+/* 桌面端 */
+@media (min-width: 1024px) {
+  .container {
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* 常见断点 */
+/* 手机: < 768px */
+/* 平板: 768px - 1024px */
+/* 桌面: > 1024px */
+
+
+
+
+常用工具
+
+/* 居中方案 */
+.center-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.center-grid {
+  display: grid;
+  place-items: center;
+}
+
+.center-absolute {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 文字截断 */
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 玻璃拟态效果 */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 阴影效果 */
+.shadow-soft {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-medium {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+
+
+
+
+自定义属性
+:root {
+  /* 颜色系统 */
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  
+  /* 间距系统 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  
+  /* 字体系统 */
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+}
+
+.element {
+  color: var(--primary-color);
+  padding: var(--spacing-md);
+  font-size: var(--font-size-md);
+}

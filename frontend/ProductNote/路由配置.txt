@@ -1,0 +1,37 @@
+路由配置，首先需要一个router.js来保存所有的路由
+例如：
+//这里是引用vue-router中现成的组件
+import {createRouter,createWebHistory} from 'vue-router'
+
+//配置所有的路由
+const routers=([
+    {
+        path:'/home',
+        name:'Home',
+        component:()=>import('组件位置')
+    }
+])
+
+//这里将路由包装好
+const router = createRouter({
+    history: createWebHistory();
+    routers
+})
+
+//作为模块导出
+export default router
+
+
+//其他模块需要使用的时候，则先引入useRoute
+import {useRoute} from 'vue-router'
+
+//配置好该组件或者页面的路由
+const route = useRoute();
+
+//使用方法，寄存在某个函数中
+const Translation()=>{
+    route.push('/home')
+}
+
+注意：路由不止可以跳转页面，甚至还能再某个区域显示内容，常见的有左侧导航，右侧内容
+该情况下，需要将页面作为子页面路由才可生效

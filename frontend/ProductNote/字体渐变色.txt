@@ -1,0 +1,39 @@
+渐变元素变化
+
+//背景位置切换法
+.LoginButton {
+    background: linear-gradient(90deg, red, orange, red);
+    background-size: 200% 100%;
+    transition: background-position 0.3s ease;
+}
+
+.LoginButton:hover {
+    background-position: 100% 0;
+}
+
+
+
+//背景尺寸动画
+.LoginButton {
+    background: 
+        linear-gradient(to right, red, orange),
+        linear-gradient(to right, orange, red);
+    background-size: 100% 100%, 0% 100%;
+    background-position: left top, right top;
+    background-repeat: no-repeat;
+    transition: background-size 0.3s ease;
+}
+
+.LoginButton:hover {
+    background-size: 0% 100%, 100% 100%;
+}
+
+//Css滤镜（最简单的方法）
+.LoginButton {
+    background: linear-gradient(to right, red, orange);
+    transition: filter 0.3s ease;
+}
+
+.LoginButton:hover {
+    filter: hue-rotate(180deg);
+}

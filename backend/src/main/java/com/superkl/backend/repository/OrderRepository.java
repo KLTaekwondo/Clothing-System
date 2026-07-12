@@ -1,0 +1,22 @@
+package com.superkl.backend.repository;
+
+import com.superkl.backend.entity.Order;
+import com.superkl.backend.entity.WareHouse;
+import com.superkl.backend.enums.OrderStatusEnum;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface OrderRepository extends JpaRepository<Order,Long> {
+    @Query("SELECT o FROM Order o WHERE o.wareHouse.wareHouseId = :warehouseId")
+    List<Order> findByWareHouseId(@Param("warehouseId") Long warehouseId);
+
+    List<Order> findByStatus(OrderStatusEnum status);
+
+    Optional<Order> findByOrderNo(String orderNo);
+}

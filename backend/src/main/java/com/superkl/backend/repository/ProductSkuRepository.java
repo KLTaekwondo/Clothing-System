@@ -1,0 +1,15 @@
+package com.superkl.backend.repository;
+
+import com.superkl.backend.entity.ProductSku;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface ProductSkuRepository extends JpaRepository<ProductSku, Long> {
+    @Query("SELECT p FROM ProductSku p WHERE p.product.productId = :id")
+    List<ProductSku> findByProductId(@Param("id") Long id);
+}
