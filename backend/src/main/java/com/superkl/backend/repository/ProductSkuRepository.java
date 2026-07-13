@@ -7,9 +7,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductSkuRepository extends JpaRepository<ProductSku, Long> {
     @Query("SELECT p FROM ProductSku p WHERE p.product.productId = :id")
     List<ProductSku> findByProductId(@Param("id") Long id);
+
+    @Query("SELECT p FROM ProductSku p WHERE p.skuCode = :skuCode")
+    Optional<ProductSku> findBySkuCode(@Param("skuCode") String skuCode);
 }

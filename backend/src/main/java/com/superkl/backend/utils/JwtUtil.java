@@ -81,7 +81,7 @@ public class JwtUtil {
                     .getPayload();
 
             Long requestId = Long.parseLong(claims.getSubject());
-            String requestRole = claims.get("role").toString();
+            String requestRole = "ROLE_" + claims.get("role").toString();
 
             return RequestUser.builder()
                     .requestId(requestId)

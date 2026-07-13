@@ -56,4 +56,24 @@ public class WareHouseStockService {
         wareHouseStockRepository.save(sourceWs);
         wareHouseStockRepository.save(targetWs);
     }
+
+    @Transactional
+    public void decreaseStock(Long wareHouseId, Long skuId, Integer stock) {
+        WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
+                .orElseThrow(() -> new BusinessException("库存记录不存在"));
+
+        if (ws.getStock() - stock < 0) {
+            throw new BusinessException("库存不足");
+        }
+        ws.setStock(ws.getStock() - stock);
+        wareHouseStockRepository.save(ws);
+    }
+
+    @Transactional
+    public void increaseStock(Long wareHouseId, Long skuId, Integer stock) {
+        WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
+                .orElseThrow(() -> new BusinessException("库存记录不存在"));
+        ws.setStock(ws.getStock() + stock);
+        wareHouseStockRepository.save(ws);
+    }
 }

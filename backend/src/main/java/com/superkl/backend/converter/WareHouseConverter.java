@@ -35,7 +35,6 @@ public class WareHouseConverter {
         return WareHouse.builder()
                 .wareHouseCode(wareHouseCreateDto.getCode())
                 .wareHouseName(wareHouseCreateDto.getName())
-                .wareHousePassword(wareHouseCreateDto.getPassword())
                 .admin(admin)
                 .build();
     }
@@ -44,7 +43,6 @@ public class WareHouseConverter {
     public static void updateEntity(WareHouse wareHouse, WareHouseUpdateDto wareHouseUpdateDto) {
         wareHouse.setWareHouseCode(wareHouseUpdateDto.getCode());
         wareHouse.setWareHouseName(wareHouseUpdateDto.getName());
-        wareHouse.setWareHousePassword(wareHouseUpdateDto.getPassword());
         wareHouse.setStatus(wareHouseUpdateDto.getStatus());
     }
 }

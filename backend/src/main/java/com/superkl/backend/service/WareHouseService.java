@@ -40,6 +40,9 @@ public class WareHouseService {
 
         // 转换为仓库实体
         WareHouse wareHouse = WareHouseConverter.toEntity(wareHouseCreateDto, admin);
+        // 加密密码
+        String encryptedPassword = passwordEncoder.encode(wareHouseCreateDto.getPassword());
+        wareHouse.setWareHousePassword(encryptedPassword);
         wareHouseRepository.save(wareHouse);
     }
 
@@ -52,7 +55,9 @@ public class WareHouseService {
 
         // 更新仓库实体
         WareHouseConverter.updateEntity(wareHouse, wareHouseUpdateDto);
-
+        // 加密密码
+        String encryptedPassword = passwordEncoder.encode(wareHouseUpdateDto.getPassword());
+        wareHouse.setWareHousePassword(encryptedPassword);
         // 保存更新后的仓库实体
         wareHouseRepository.save(wareHouse);
     }

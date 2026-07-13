@@ -56,7 +56,7 @@ public class AdminService {
         Map<String,Object> claims = new HashMap<>();
         claims.put("code",code);
         claims.put("username",username);
-        claims.put("role","admin");
+        claims.put("role","ADMIN");
 
         // 3.登录成功，开始处理Cookie
         String token = jwtUtil.generateToken(adminId, claims);

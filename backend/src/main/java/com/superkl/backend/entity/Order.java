@@ -43,6 +43,9 @@ public class Order extends BaseEntity {
     @Column(nullable =false)
     private BigDecimal actualPrice;// 实际支付金额
 
+    @Column(length = 100)
+    private String remark;// 订单备注
+
     // 关联属性
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @Builder.Default
