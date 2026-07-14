@@ -1,10 +1,9 @@
 package com.superkl.backend.entity;
 
+import com.superkl.backend.enums.SeasonEnum;
+import com.superkl.backend.enums.StatusEnum;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -29,9 +28,19 @@ public class ProductSku extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String specAttributes;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private StatusEnum status = StatusEnum.ENABLE;// 状态
+
     // 关联属性
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;// 商品
 
+
+    // 辅助方法
+    public boolean isEnabled() {
+        return status.equals(StatusEnum.ENABLE);
+    }
 }

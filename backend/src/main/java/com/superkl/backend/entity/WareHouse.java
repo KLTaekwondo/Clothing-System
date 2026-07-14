@@ -48,4 +48,9 @@ public class WareHouse extends BaseEntity{
     @OneToMany(mappedBy = "wareHouse",fetch = FetchType.LAZY)
     @Builder.Default
     private Set<Employee> employees = new HashSet<>();
+
+    // 辅助方法
+    public boolean isEnabled() {
+        return status.equals(StatusEnum.ENABLE);
+    }
 }

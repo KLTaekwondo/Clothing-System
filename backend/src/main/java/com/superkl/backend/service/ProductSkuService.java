@@ -6,6 +6,7 @@ import com.superkl.backend.dto.ProductSkuUpdateDto;
 import com.superkl.backend.entity.Product;
 import com.superkl.backend.entity.ProductSku;
 import com.superkl.backend.entity.WareHouseStock;
+import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.ProductSkuInfo;
 import com.superkl.backend.repository.ProductRepository;
@@ -39,7 +40,19 @@ public class ProductSkuService {
 
         // 转化为Sku实体
         ProductSku productSku = ProductSkuConverter.toEntity(dto, product);
+
+        //保存商品SKU实体
         productSkuRepository.save(productSku);
+
+        //添加库存
+        wareHouseRepository.findAll().forEach(wareHouse -> {
+            wareHouseStockRepository.save(WareHouseStock.builder()
+                    .wareHouse(wareHouse)
+                    .productSku(productSku)
+                    .stock(0)
+                    .build());
+        });
+
     }
 
     //2. 更新商品SKU
@@ -61,8 +74,9 @@ public class ProductSkuService {
         ProductSku productSku = productSkuRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("商品SKU不存在"));
 
-        // 删除商品SKU
-        productSkuRepository.delete(productSku);
+        // 禁用商品SKU状态
+        productSku.setStatus(StatusEnum.DISABLE);
+        productSkuRepository.save(productSku);
     }
 
     // 4. 根据商品ID查询商品SKU列表
@@ -78,7 +92,17 @@ public class ProductSkuService {
         return ProductSkuConverter.toInfo(productSku);
     }
 
-    // 6. 特殊创建方法
+    // 6. 验证商品SKU是否启用
+    public ProductSkuInfo verify(Long id) {
+        ProductSku productSku = productSkuRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("商品SKU不存在"));
+        if(!productSku.isEnabled()){
+            throw new BusinessException("商品SKU已禁用!");
+        }
+        return ProductSkuConverter.toInfo(productSku);
+    }
+
+    // 7. 特殊创建方法
     @Transactional
     public void createFromProduct(Product product , Map<String , String>combo) {
         ProductSku sku = ProductSku.builder()

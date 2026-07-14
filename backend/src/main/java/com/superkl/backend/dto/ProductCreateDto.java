@@ -1,9 +1,7 @@
 package com.superkl.backend.dto;
 
 import com.superkl.backend.enums.SeasonEnum;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -21,8 +19,10 @@ public class ProductCreateDto {
     @NotNull(message = "季节不能为空")
     private SeasonEnum season;
     @NotNull(message = "进货价格不能为空")
+    @DecimalMin(value = "0.00", message = "进货价格不得小于0")
     private BigDecimal importPrice;
     @NotNull(message = "销售价格不能为空")
+    @DecimalMin(value = "0.00", message = "销售价格不得小于0")
     private BigDecimal salePrice;
     @NotNull(message = "是否特价不能为空")
     private boolean special;

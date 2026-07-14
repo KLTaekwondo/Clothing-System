@@ -19,6 +19,7 @@ public class ProductSkuConverter {
                 .code(productSku.getSkuCode())
                 .name(productSku.getSkuName())
                 .spec(productSku.getSpecAttributes())
+                .status(productSku.getStatus())
                 .createTime(productSku.getCreateTime())
                 .updateTime(productSku.getUpdateTime())
                 .build();
@@ -45,5 +46,6 @@ public class ProductSkuConverter {
     public static void updateEntity(ProductSku productSku, ProductSkuUpdateDto dto) {
         productSku.setSkuName(dto.getName());
         productSku.setSpecAttributes(dto.getSpec());
+        productSku.setStatus(dto.getStatus());
     }
 }

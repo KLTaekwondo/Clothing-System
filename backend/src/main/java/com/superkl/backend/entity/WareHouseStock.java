@@ -8,7 +8,12 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "t_ware_house_stock")
+@Table(
+        name = "t_ware_house_stock",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "unique_sku_warehouse", columnNames = {"sku_id", "ware_house_id"})
+        }
+)
 @Getter
 @Setter
 @AllArgsConstructor

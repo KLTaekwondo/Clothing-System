@@ -20,6 +20,7 @@ public class ProductConverter {
                 .importPrice(product.getImportPrice())
                 .salePrice(product.getSalePrice())
                 .special(product.isSpecial())
+                .status(product.getStatus())
                 .createTime(product.getCreateTime())
                 .updateTime(product.getUpdateTime())
                 .build();
@@ -52,6 +53,7 @@ public class ProductConverter {
         product.setImportPrice(productUpdateDto.getImportPrice());
         product.setSalePrice(productUpdateDto.getSalePrice());
         product.setSpecial(productUpdateDto.isSpecial());
+        product.setStatus(productUpdateDto.getStatus());
     }
 
 

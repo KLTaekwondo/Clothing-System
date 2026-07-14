@@ -9,7 +9,12 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "t_product_option_value")
+@Table(
+        name = "t_product_option_value",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_option_type_option_value", columnNames = {"option_type", "option_value"})
+                       }
+)
 @Getter
 @Setter
 @AllArgsConstructor

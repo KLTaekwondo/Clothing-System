@@ -7,6 +7,7 @@ import com.superkl.backend.entity.Order;
 import com.superkl.backend.entity.OrderItem;
 import com.superkl.backend.entity.WareHouse;
 import com.superkl.backend.enums.OrderStatusEnum;
+import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.OrderInfo;
 import com.superkl.backend.info.OrderItemInfo;
@@ -76,6 +77,22 @@ public class OrderService {
                 .orElseThrow(() -> new BusinessException("销售员不存在"));
         WareHouse wareHouse = wareHouseRepository.findById(dto.getWareHouseId())
                 .orElseThrow(() -> new BusinessException("仓库不存在"));
+        // 1.1 检查仓库和销售员状态是否正常
+        if(!employee.isEnabled()){
+            throw new BusinessException("员工已禁用！不可创建订单！");
+        }
+        if(!wareHouse.isEnabled()){
+            throw new BusinessException("仓库已禁用！不可创建订单！");
+        }
+
+        // 1.2 检查员工是否属于该仓库
+        Long employeeWareHouseId = employee.getWareHouse().getWareHouseId();
+        Long targetWareHouseId = wareHouse.getWareHouseId();
+
+        if(!employeeWareHouseId.equals(targetWareHouseId)){
+            throw new BusinessException("员工不属于该仓库！不可创建订单！");
+        }
+
         // 2.创建商品项
         List<OrderItem> items = orderItemService.createList(dto.getOrderItems(), order);
         // 3.校验金额
@@ -91,7 +108,7 @@ public class OrderService {
             b_TotalAmount = b_TotalAmount.add(item.getTotalPrice());
         }
         // 校验金额是否一致
-        if (!f_ActualAmount.equals(b_ActualAmount) || !f_TotalAmount.equals(b_TotalAmount)) {
+        if (f_ActualAmount.compareTo(b_ActualAmount) != 0 || f_TotalAmount.compareTo(b_TotalAmount) != 0) {
             throw new BusinessException("订单金额与商品项金额不一致");
         }
 

@@ -43,7 +43,7 @@ public class AdminService {
         }
 
         // 2. 账号状态是否启用
-        if(!admin.getStatus().equals(StatusEnum.ENABLE)){
+        if(!admin.isEnabled()){
             throw new BusinessException("账号已禁用");
         }
 
@@ -74,6 +74,7 @@ public class AdminService {
     public void logout(HttpServletResponse response){
         Cookie cookie = new Cookie("token", "");
         cookie.setMaxAge(0);
+        cookie.setPath("/");
         response.addCookie(cookie);
     }
 
@@ -89,14 +90,14 @@ public class AdminService {
         Admin admin = adminRepository.findByAccount(account).orElseThrow(() -> new BusinessException("账号不存在"));
 
         // 先编码新密码，再比较是否匹配
-        String encodedOldPassword = passwordEncoder.encode(oldPassword);
+        String adminPassword = admin.getPassword();
 
-        if(!passwordEncoder.matches(encodedOldPassword,admin.getPassword())){
+        if(!passwordEncoder.matches(oldPassword,adminPassword)){
             throw new BusinessException("旧密码错误");
         }
 
         // 新旧密码比较，不能相同
-        if(passwordEncoder.matches(newPassword,oldPassword)){
+        if(passwordEncoder.matches(newPassword,adminPassword)){
             throw new BusinessException("新密码不能与旧密码相同");
         }
 

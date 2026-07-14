@@ -31,4 +31,9 @@ public class Employee extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ware_house_id")
     private WareHouse wareHouse; // 关联仓库
+
+    // 辅助方法
+    public boolean isEnabled() {
+        return status.equals(StatusEnum.ENABLE);
+    }
 }

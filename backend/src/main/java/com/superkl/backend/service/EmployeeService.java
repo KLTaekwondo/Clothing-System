@@ -5,6 +5,7 @@ import com.superkl.backend.dto.EmployeeCreateDto;
 import com.superkl.backend.dto.EmployeeUpdateDto;
 import com.superkl.backend.entity.Employee;
 import com.superkl.backend.entity.WareHouse;
+import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.EmployeeInfo;
 import com.superkl.backend.repository.EmployeeRepository;
@@ -60,8 +61,9 @@ public class EmployeeService {
         // 从员工ID查询员工
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new BusinessException("员工不存在"));
-        // 删除员工
-        employeeRepository.deleteById(employeeId);
+        // 禁用员工
+        employee.setStatus(StatusEnum.DISABLE);
+        employeeRepository.save(employee);
     }
 
     // 查询员工
@@ -79,5 +81,18 @@ public class EmployeeService {
         List<Employee> employees = employeeRepository.findAll();
         // 转换信息
         return EmployeeConverter.toInfoList(employees);
+    }
+
+    // 收银前端验证员工
+    public EmployeeInfo verify(Long employeeId) {
+        // 从员工ID查询员工
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new BusinessException("员工不存在"));
+        // 验证员工是否启用
+        if(!employee.isEnabled()){
+            throw new BusinessException("员工已禁用!");
+        }
+        // 转换信息
+        return EmployeeConverter.toInfo(employee);
     }
 }

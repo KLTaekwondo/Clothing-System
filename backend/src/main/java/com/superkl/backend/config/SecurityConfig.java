@@ -5,6 +5,7 @@ import com.superkl.backend.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,6 +18,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
@@ -58,7 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/login", "/api/warehouse/login").permitAll()
                         // 收银员
                         .requestMatchers("/api/order/**", "/api/stock/**",
-                                "/api/product/search/**", "/api/productSku/search/**")
+                                "/api/product/search/**", "/api/productSku/search/**", "/api/warehouse/logout")
                         .hasAnyRole("ADMIN", "WAREHOUSE")
                         // 其他全部 ADMIN
                         .requestMatchers("/api/**").hasRole("ADMIN")
@@ -84,7 +86,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // 允许 Content-Type 请求头
         // 注意这里不建议使用通配符，因为这样会导致前端在发送请求时，会因为 Content-Type 头为空而被拒绝。
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of("Content-Type"));
         // 允许携带 Cookie，重点，否则前端无法发送 Cookie 到后端
         // 前端需要设置 withCredentials: true 才能发送 Cookie 到后端
         configuration.setAllowCredentials(true);  // 关键：允许携带 Cookie

@@ -16,7 +16,7 @@ public class BarCodeUtil {
         int sum = 0;
         for(int i = 0; i < raw.length(); i++){
             int digit = Character.getNumericValue(raw.charAt(i));
-            sum += (i + 1) % 2 == 0 ? digit : digit * 3;
+            sum += (i + 1) % 2 == 0 ? digit * 3 : digit;
         }
         return (10 - (sum % 10)) % 10;
     }

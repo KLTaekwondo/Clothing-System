@@ -5,6 +5,7 @@ import com.superkl.backend.dto.OrderItemCreateDto;
 import com.superkl.backend.entity.Order;
 import com.superkl.backend.entity.OrderItem;
 import com.superkl.backend.entity.ProductSku;
+import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.OrderItemInfo;
 import com.superkl.backend.repository.OrderItemRepository;
@@ -27,6 +28,13 @@ public class OrderItemService {
         ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode())
                 .orElseThrow(() -> new BusinessException("商品SKU不存在"));
 
+        if(!productSku.getProduct().isEnabled()){
+            throw new BusinessException("商品已禁用！不可创建订单项！");
+        }
+
+        if(!productSku.isEnabled()){
+            throw new BusinessException("商品SKU已禁用！不可创建订单项！");
+        }
         // 转换为实体
         OrderItem orderItem = OrderItemConverter.toEntity(dto,productSku);
         orderItem.setOrder(order);

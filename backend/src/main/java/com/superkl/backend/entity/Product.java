@@ -1,6 +1,7 @@
 package com.superkl.backend.entity;
 
 import com.superkl.backend.enums.SeasonEnum;
+import com.superkl.backend.enums.StatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -32,6 +33,11 @@ public class Product extends BaseEntity {
     private SeasonEnum season;// 季节
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private StatusEnum status = StatusEnum.ENABLE;
+
+    @Column(nullable = false)
     private BigDecimal importPrice;// 进货价格
 
     @Column(nullable = false)
@@ -46,5 +52,8 @@ public class Product extends BaseEntity {
     @Builder.Default
     private Set<ProductSku> productSkuList = new HashSet<>();
 
-
+    // 辅助方法
+    public boolean isEnabled() {
+        return status.equals(StatusEnum.ENABLE);
+    }
 }

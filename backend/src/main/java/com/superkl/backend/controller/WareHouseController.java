@@ -66,7 +66,7 @@ public class WareHouseController {
     // 纯RESTful风格
     // @PostMapping
     @PostMapping("/login")
-    public Result<WareHouseInfo> login(@RequestBody LoginDto loginDto, HttpServletResponse response) {
+    public Result<WareHouseInfo> login(@Valid @RequestBody LoginDto loginDto, HttpServletResponse response) {
         return Result.success(wareHouseService.login(loginDto,response));
     }
 

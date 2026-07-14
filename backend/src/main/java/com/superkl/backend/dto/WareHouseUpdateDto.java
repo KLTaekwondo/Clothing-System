@@ -21,9 +21,6 @@ public class WareHouseUpdateDto {
     @Size(min = 2, max = 10, message = "仓库编码长度必须在2到10之间")
     private String code;// 仓库编码
 
-    @NotNull(message = "管理员ID不能为空")
-    private Long adminId;// 管理员ID
-
     @NotNull(message = "仓库状态不能为空")
     private StatusEnum status;// 仓库状态
 }

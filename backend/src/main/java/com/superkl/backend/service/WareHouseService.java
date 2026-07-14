@@ -5,12 +5,16 @@ import com.superkl.backend.dto.LoginDto;
 import com.superkl.backend.dto.WareHouseCreateDto;
 import com.superkl.backend.dto.WareHouseUpdateDto;
 import com.superkl.backend.entity.Admin;
+import com.superkl.backend.entity.ProductSku;
 import com.superkl.backend.entity.WareHouse;
+import com.superkl.backend.entity.WareHouseStock;
 import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.WareHouseInfo;
 import com.superkl.backend.repository.AdminRepository;
+import com.superkl.backend.repository.ProductSkuRepository;
 import com.superkl.backend.repository.WareHouseRepository;
+import com.superkl.backend.repository.WareHouseStockRepository;
 import com.superkl.backend.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +32,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class WareHouseService {
     private final WareHouseRepository wareHouseRepository;
+    private final WareHouseStockRepository wareHouseStockRepository;
+    private final ProductSkuRepository productSkuRepository;
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -43,7 +50,23 @@ public class WareHouseService {
         // 加密密码
         String encryptedPassword = passwordEncoder.encode(wareHouseCreateDto.getPassword());
         wareHouse.setWareHousePassword(encryptedPassword);
+        // 保存仓库实体
         wareHouseRepository.save(wareHouse);
+
+        // 处理库存问题
+        List<WareHouseStock> stocks = new ArrayList<>();
+        // 遍历商品SKU列表，创建库存实体
+        productSkuRepository.findAll().forEach(productSku -> {
+            WareHouseStock stock = new WareHouseStock();
+            stock.setWareHouse(wareHouse);
+            stock.setProductSku(productSku);
+            stock.setStock(0);
+            stocks.add(stock);
+        });
+
+        // 保存库存实体
+        wareHouseStockRepository.saveAll(stocks);
+
     }
 
     // 更新仓库
@@ -69,8 +92,9 @@ public class WareHouseService {
         WareHouse wareHouse = wareHouseRepository.findById(wareHouseId)
                 .orElseThrow(() -> new BusinessException("仓库不存在"));
 
-        // 删除仓库实体
-        wareHouseRepository.delete(wareHouse);
+        // 禁用仓库状态
+        wareHouse.setStatus(StatusEnum.DISABLE);
+        wareHouseRepository.save(wareHouse);
     }
 
     // 查询单个仓库
@@ -131,6 +155,7 @@ public class WareHouseService {
     public void logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("token", "");
         cookie.setMaxAge(0);
+        cookie.setPath("/");
         response.addCookie(cookie);
     }
 }

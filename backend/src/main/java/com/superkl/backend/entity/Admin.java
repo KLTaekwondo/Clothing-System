@@ -38,4 +38,10 @@ public class Admin extends BaseEntity{
     @OneToMany(mappedBy = "admin" , fetch = FetchType.LAZY)// 懒加载，避免查询所有仓库，同时防止嵌套查询
     @Builder.Default
     private Set<WareHouse> warehouses = new HashSet<>();
+
+
+    // 辅助方法
+    public boolean isEnabled() {
+        return status.equals(StatusEnum.ENABLE);
+    }
 }

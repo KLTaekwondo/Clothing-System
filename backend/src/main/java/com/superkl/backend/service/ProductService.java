@@ -4,6 +4,7 @@ import com.superkl.backend.converter.ProductConverter;
 import com.superkl.backend.dto.ProductCreateDto;
 import com.superkl.backend.dto.ProductUpdateDto;
 import com.superkl.backend.entity.Product;
+import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.ProductInfo;
 import com.superkl.backend.repository.ProductRepository;
@@ -26,15 +27,18 @@ public class ProductService {
     @Transactional
     public void create(ProductCreateDto productCreateDto) {
         // 分成两部分处理
-        // 1.创建商品本体的信息，然后入库
+        // 1.开始处理规格信息
+        Map<String , List<String>> selectedOptions = productCreateDto.getSelectedOptions();
+        SkuUtil.validateSelectedOptions(selectedOptions);
+        // 1.1 组合选中的选项，生成SKU名称
+        List<Map<String , String>> skuList = SkuUtil.generateSkuList(selectedOptions);
+        if (skuList.isEmpty()) {
+            throw new BusinessException("商品规格不能为空");
+        }
+        // 2.创建商品本体的信息，然后入库
         Product product = ProductConverter.toEntity(productCreateDto);
         productRepository.save(product);
-
-        // 2.开始处理规格信息
-        Map<String , List<String>> selectedOptions = productCreateDto.getSelectedOptions();
-        // 2.1 组合选中的选项，生成SKU名称
-        List<Map<String , String>> skuList = SkuUtil.generateSkuList(selectedOptions);
-        // 2.2 保存SKU信息
+        // 3. 保存SKU信息
         for (Map<String, String> combo : skuList) {
             productSkuService.createFromProduct(product, combo);
         }
@@ -55,8 +59,9 @@ public class ProductService {
     public void delete(Long id) {
         // 现找是否存在商品
         Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException("商品不存在"));
-        // 2.删除商品
-        productRepository.deleteById(id);
+        // 2.禁用商品
+        product.setStatus(StatusEnum.DISABLE);
+        productRepository.save(product);
     }
 
     // 查询单个商品详情
