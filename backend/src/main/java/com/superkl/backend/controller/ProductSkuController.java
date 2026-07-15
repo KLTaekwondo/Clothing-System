@@ -49,4 +49,10 @@ public class ProductSkuController {
     public Result<List<ProductSkuInfo>> searchByProductId(@PathVariable Long productId) {
         return Result.success(productSkuService.searchByProductId(productId));
     }
+
+    // 6.扫描编码获取商品SKU列表
+    @GetMapping("/scan/{code}")
+    public Result<List<ProductSkuInfo>> scanByCode(@PathVariable String code) {
+        return Result.success(productSkuService.verify(code));
+    }
 }

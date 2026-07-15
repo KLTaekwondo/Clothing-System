@@ -1,6 +1,7 @@
 package com.superkl.backend.repository;
 
 import com.superkl.backend.entity.ProductSku;
+import com.superkl.backend.enums.StatusEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,4 +17,7 @@ public interface ProductSkuRepository extends JpaRepository<ProductSku, Long> {
 
     @Query("SELECT p FROM ProductSku p WHERE p.skuCode = :skuCode")
     Optional<ProductSku> findBySkuCode(@Param("skuCode") String skuCode);
+
+    @Query("SELECT p FROM ProductSku p WHERE p.product.productCode = :productCode AND p.status = :status")
+    List<ProductSku> findByProductCodeAndStatus(@Param("productCode") String productCode, @Param("status") StatusEnum status);
 }

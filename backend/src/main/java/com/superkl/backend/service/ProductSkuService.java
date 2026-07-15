@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -79,30 +80,7 @@ public class ProductSkuService {
         productSkuRepository.save(productSku);
     }
 
-    // 4. 根据商品ID查询商品SKU列表
-    public List<ProductSkuInfo> searchByProductId(Long productId) {
-        List<ProductSku> productSkus = productSkuRepository.findByProductId(productId);
-        return ProductSkuConverter.toInfoList(productSkus);
-    }
-
-    // 5. 查询单个的商品属性
-    public ProductSkuInfo searchById(Long id) {
-        ProductSku productSku = productSkuRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("商品SKU不存在"));
-        return ProductSkuConverter.toInfo(productSku);
-    }
-
-    // 6. 验证商品SKU是否启用
-    public ProductSkuInfo verify(Long id) {
-        ProductSku productSku = productSkuRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("商品SKU不存在"));
-        if(!productSku.isEnabled()){
-            throw new BusinessException("商品SKU已禁用!");
-        }
-        return ProductSkuConverter.toInfo(productSku);
-    }
-
-    // 7. 特殊创建方法
+    // 4. 特殊创建方法
     @Transactional
     public void createFromProduct(Product product , Map<String , String>combo) {
         ProductSku sku = ProductSku.builder()
@@ -121,5 +99,49 @@ public class ProductSkuService {
                     .stock(0)
                     .build());
         });
+    }
+
+    // 5. 根据商品ID查询商品SKU列表
+    public List<ProductSkuInfo> searchByProductId(Long productId) {
+        List<ProductSku> productSkus = productSkuRepository.findByProductId(productId);
+        return ProductSkuConverter.toInfoList(productSkus);
+    }
+
+    // 6. 查询单个的商品属性
+    public ProductSkuInfo searchById(Long id) {
+        ProductSku productSku = productSkuRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("商品SKU不存在"));
+        return ProductSkuConverter.toInfo(productSku);
+    }
+
+    // 7. 验证商品SKU是否启用
+    public List<ProductSkuInfo> verify(String code) {
+        // 1. 先当 SKU 条码查
+        ProductSku productSku = productSkuRepository.findBySkuCode(code).orElse(null);
+        if (productSku != null) {
+            if (!productSku.getProduct().isEnabled()) {
+                throw new BusinessException("商品已禁用");
+            }
+            if (!productSku.isEnabled()) {
+                throw new BusinessException("商品SKU已禁用");
+            }
+            return List.of(ProductSkuConverter.toInfo(productSku));
+        }
+
+        // 2. 没查到，当商品编码查
+        Product product = productRepository.findByProductCode(code)
+                .orElseThrow(() -> new BusinessException("商品不存在"));
+
+        if (!product.isEnabled()) {
+            throw new BusinessException("商品已禁用");
+        }
+
+        // 只返回启用状态的商品SKU列表
+        List<ProductSku> productSkus = productSkuRepository.findByProductCodeAndStatus(code, StatusEnum.ENABLE);
+        if (productSkus.isEmpty()) {
+            throw new BusinessException("该商品下没有可用SKU");
+        }
+
+        return ProductSkuConverter.toInfoList(productSkus);
     }
 }

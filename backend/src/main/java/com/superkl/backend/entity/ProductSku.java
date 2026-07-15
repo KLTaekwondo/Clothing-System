@@ -41,6 +41,6 @@ public class ProductSku extends BaseEntity {
 
     // 辅助方法
     public boolean isEnabled() {
-        return status.equals(StatusEnum.ENABLE);
+        return StatusEnum.ENABLE.equals(status);
     }
 }

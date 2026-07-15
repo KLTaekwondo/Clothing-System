@@ -57,13 +57,15 @@ public class SecurityConfig {
                 // anyRequest() 表示其他所有请求，特别是你没有明确指出的路径，都需要登录。
                 // hasRole("role") 表示该路径的全部请求需要登录，且用户角色必须是 role 角色。
                 .authorizeHttpRequests(auth -> auth
+                        // 登录全面放行
                         .requestMatchers("/api/admin/login", "/api/warehouse/login").permitAll()
-                        // 收银员
-                        .requestMatchers("/api/order/**", "/api/stock/**",
-                                "/api/product/search/**", "/api/productSku/search/**", "/api/warehouse/logout")
-                        .hasAnyRole("ADMIN", "WAREHOUSE")
-                        // 其他全部 ADMIN
+                        // 管理员可以访问所有接口
                         .requestMatchers("/api/**").hasRole("ADMIN")
+                        // 前端收银员可以访问所有接口
+                        .requestMatchers("/api/order/**", "/api/stock/**",
+                                "/api/product/search/**", "/api/productSku/search/**",
+                                "/api/productSku/scan/**", "/api/warehouse/logout")
+                        .hasAnyRole("ADMIN", "WAREHOUSE")
                         .anyRequest().authenticated()
                 )
                 // 如果启动，那么Spring boot会提供一个会话管理页面，但是我们不需要，所以我们禁用它。

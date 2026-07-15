@@ -60,4 +60,12 @@ public class EmployeeController {
         return Result.success(employeeService.searchList());
     }
 
+    // 6.收银前端验证员工
+    // 纯RESTful风格
+    // @GetMapping("/{id}")
+    @GetMapping("/verify/{id}")
+    public Result<EmployeeInfo> verify(@PathVariable Long id) {
+        return Result.success(employeeService.verify(id));
+    }
+
 }
