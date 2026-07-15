@@ -10,6 +10,7 @@ import com.superkl.backend.info.ProductInfo;
 import com.superkl.backend.repository.ProductRepository;
 import com.superkl.backend.utils.SkuUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -48,7 +50,8 @@ public class ProductService {
     @Transactional
     public void update(Long id , ProductUpdateDto dto) {
         // 1.先查一下，看是否存在商品
-        Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException("商品不存在"));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
         // 2.更新商品信息
         ProductConverter.updateEntity(product, dto);
         productRepository.save(product);
@@ -58,7 +61,8 @@ public class ProductService {
     @Transactional
     public void delete(Long id) {
         // 现找是否存在商品
-        Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException("商品不存在"));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
         // 2.禁用商品
         product.setStatus(StatusEnum.DISABLE);
         productRepository.save(product);
@@ -66,7 +70,8 @@ public class ProductService {
 
     // 查询单个商品详情
     public ProductInfo search(Long id){
-        Product product = productRepository.findById(id).orElseThrow(() -> new BusinessException("商品不存在"));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
         return ProductConverter.toInfo(product);
     }
 

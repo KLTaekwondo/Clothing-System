@@ -8,12 +8,14 @@ import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.WareHouseStockInfo;
 import com.superkl.backend.repository.WareHouseStockRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WareHouseStockService {
@@ -25,7 +27,7 @@ public class WareHouseStockService {
     public void batchUpdate(List<WarehouseStockUpdateDto> dtos) {
         for (WarehouseStockUpdateDto dto : dtos) {
             WareHouseStock ws = wareHouseStockRepository.findById(dto.getStockId())
-                    .orElseThrow(() -> new BusinessException("库存记录不存在"));
+                    .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
             ws.setStock(dto.getStock());
             wareHouseStockRepository.save(ws);
         }
@@ -55,9 +57,9 @@ public class WareHouseStockService {
         }
 
         WareHouseStock sourceWs = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, sourceWarehouseId)
-                .orElseThrow(() -> new BusinessException("库存记录不存在"));
+                .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
         WareHouseStock targetWs = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, targetWarehouseId)
-                .orElseThrow(() -> new BusinessException("库存记录不存在"));
+                .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
 
         if (sourceWs.getStock() < stock) {
             throw new BusinessException("库存不足");
@@ -78,7 +80,7 @@ public class WareHouseStockService {
 
         // 查询库存记录是否存在
         WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
-                .orElseThrow(() -> new BusinessException("库存记录不存在"));
+                .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
 
         // 检查库存是否足够
         if (ws.getStock() - stock < 0) {
@@ -99,7 +101,7 @@ public class WareHouseStockService {
 
         // 查询库存记录是否存在
         WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
-                .orElseThrow(() -> new BusinessException("库存记录不存在"));
+                .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
 
         // 增加库存
         ws.setStock(ws.getStock() + stock);

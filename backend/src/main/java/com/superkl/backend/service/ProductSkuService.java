@@ -17,6 +17,7 @@ import com.superkl.backend.utils.BarCodeUtil;
 import com.superkl.backend.utils.SkuUtil;
 import com.superkl.backend.utils.JsonUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductSkuService {
@@ -37,7 +39,7 @@ public class ProductSkuService {
     public void create(ProductSkuCreateDto dto) {
         // 校验商品是否存在
         Product product = productRepository.findById(dto.getProductId())
-                .orElseThrow(() -> new BusinessException("商品不存在"));
+                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
 
         // 转化为Sku实体
         ProductSku productSku = ProductSkuConverter.toEntity(dto, product);
@@ -61,7 +63,7 @@ public class ProductSkuService {
     public void update(Long id , ProductSkuUpdateDto dto) {
         // 校验商品SKU是否存在
         ProductSku productSku = productSkuRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("商品SKU不存在"));
+                .orElseThrow(() -> new BusinessException(403, "商品SKU不存在"));
 
         // 更新商品SKU
         ProductSkuConverter.updateEntity(productSku, dto);
@@ -73,7 +75,7 @@ public class ProductSkuService {
     public void delete(Long id) {
         // 校验商品SKU是否存在
         ProductSku productSku = productSkuRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("商品SKU不存在"));
+                .orElseThrow(() -> new BusinessException(403, "商品SKU不存在"));
 
         // 禁用商品SKU状态
         productSku.setStatus(StatusEnum.DISABLE);
@@ -110,7 +112,7 @@ public class ProductSkuService {
     // 6. 查询单个的商品属性
     public ProductSkuInfo searchById(Long id) {
         ProductSku productSku = productSkuRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("商品SKU不存在"));
+                .orElseThrow(() -> new BusinessException(403, "商品SKU不存在"));
         return ProductSkuConverter.toInfo(productSku);
     }
 
@@ -120,20 +122,20 @@ public class ProductSkuService {
         ProductSku productSku = productSkuRepository.findBySkuCode(code).orElse(null);
         if (productSku != null) {
             if (!productSku.getProduct().isEnabled()) {
-                throw new BusinessException("商品已禁用");
+                throw new BusinessException(405, "商品已禁用");
             }
             if (!productSku.isEnabled()) {
-                throw new BusinessException("商品SKU已禁用");
+                throw new BusinessException(405, "商品SKU已禁用");
             }
             return List.of(ProductSkuConverter.toInfo(productSku));
         }
 
         // 2. 没查到，当商品编码查
         Product product = productRepository.findByProductCode(code)
-                .orElseThrow(() -> new BusinessException("商品不存在"));
+                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
 
         if (!product.isEnabled()) {
-            throw new BusinessException("商品已禁用");
+            throw new BusinessException(405, "商品已禁用");
         }
 
         // 只返回启用状态的商品SKU列表

@@ -11,11 +11,13 @@ import com.superkl.backend.info.EmployeeInfo;
 import com.superkl.backend.repository.EmployeeRepository;
 import com.superkl.backend.repository.WareHouseRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmployeeService {
@@ -27,7 +29,7 @@ public class EmployeeService {
     public void create(EmployeeCreateDto employeeCreateDto) {
         // 从仓库仓库ID查询仓库
         WareHouse wareHouse = wareHouseRepository.findById(employeeCreateDto.getWareHouseId())
-                .orElseThrow(() -> new BusinessException("仓库不存在"));
+                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
 
         // 转换实体
         Employee employee = EmployeeConverter.toEntity(employeeCreateDto , wareHouse);
@@ -39,7 +41,7 @@ public class EmployeeService {
     public void update(Long employeeId, EmployeeUpdateDto employeeUpdateDto) {
         // 从员工ID查询员工
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new BusinessException("员工不存在"));
+                .orElseThrow(() -> new BusinessException(403, "员工不存在"));
 
         // 判断一下是否更新了仓库
         Long newId = employeeUpdateDto.getWareHouseId();
@@ -47,7 +49,7 @@ public class EmployeeService {
         if (!newId.equals(currentId)) {
             // 从新仓库ID查询仓库
             WareHouse wareHouse = wareHouseRepository.findById(newId)
-                    .orElseThrow(() -> new BusinessException("仓库不存在"));
+                    .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
             employee.setWareHouse(wareHouse);
         }
         // 转换器更新员工
@@ -60,7 +62,7 @@ public class EmployeeService {
     public void delete(Long employeeId) {
         // 从员工ID查询员工
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new BusinessException("员工不存在"));
+                .orElseThrow(() -> new BusinessException(403, "员工不存在"));
         // 禁用员工
         employee.setStatus(StatusEnum.DISABLE);
         employeeRepository.save(employee);
@@ -70,7 +72,7 @@ public class EmployeeService {
     public EmployeeInfo search(Long employeeId) {
         // 从员工ID查询员工
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new BusinessException("员工不存在"));
+                .orElseThrow(() -> new BusinessException(403, "员工不存在"));
         // 转换信息
         return EmployeeConverter.toInfo(employee);
     }
@@ -87,10 +89,10 @@ public class EmployeeService {
     public EmployeeInfo verify(Long employeeId) {
         // 从员工ID查询员工
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new BusinessException("员工不存在"));
+                .orElseThrow(() -> new BusinessException(403, "员工不存在"));
         // 验证员工是否启用
         if(!employee.isEnabled()){
-            throw new BusinessException("员工已禁用!");
+            throw new BusinessException(405, "员工已禁用!");
         }
         // 转换信息
         return EmployeeConverter.toInfo(employee);

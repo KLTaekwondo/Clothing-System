@@ -11,11 +11,13 @@ import com.superkl.backend.info.OrderItemInfo;
 import com.superkl.backend.repository.OrderItemRepository;
 import com.superkl.backend.repository.ProductSkuRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderItemService {
@@ -26,14 +28,14 @@ public class OrderItemService {
     public OrderItem create(OrderItemCreateDto dto , Order order){
         // 查找商品SKU是否存在
         ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode())
-                .orElseThrow(() -> new BusinessException("商品SKU不存在"));
+                .orElseThrow(() -> new BusinessException(403, "商品SKU不存在"));
 
         if(!productSku.getProduct().isEnabled()){
-            throw new BusinessException("商品已禁用！不可创建订单项！");
+            throw new BusinessException(405, "商品已禁用！不可创建订单项！");
         }
 
         if(!productSku.isEnabled()){
-            throw new BusinessException("商品SKU已禁用！不可创建订单项！");
+            throw new BusinessException(405, "商品SKU已禁用！不可创建订单项！");
         }
         // 转换为实体
         OrderItem orderItem = OrderItemConverter.toEntity(dto,productSku);

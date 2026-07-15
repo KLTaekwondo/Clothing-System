@@ -19,6 +19,7 @@ import com.superkl.backend.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WareHouseService {
@@ -43,7 +45,7 @@ public class WareHouseService {
     public void create(WareHouseCreateDto wareHouseCreateDto) {
         // 先查找管理员是否存在
         Admin admin = adminRepository.findById(wareHouseCreateDto.getAdminId())
-                .orElseThrow(() -> new BusinessException("管理员不存在"));
+                .orElseThrow(() -> new BusinessException(403, "管理员不存在"));
 
         // 转换为仓库实体
         WareHouse wareHouse = WareHouseConverter.toEntity(wareHouseCreateDto, admin);
@@ -74,7 +76,7 @@ public class WareHouseService {
     public void update(Long wareHouseId, WareHouseUpdateDto wareHouseUpdateDto) {
         // 先查找仓库是否存在
         WareHouse wareHouse = wareHouseRepository.findById(wareHouseId)
-                .orElseThrow(() -> new BusinessException("仓库不存在"));
+                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
 
         // 更新仓库实体
         WareHouseConverter.updateEntity(wareHouse, wareHouseUpdateDto);
@@ -90,7 +92,7 @@ public class WareHouseService {
     public void delete(Long wareHouseId) {
         // 先查找仓库是否存在
         WareHouse wareHouse = wareHouseRepository.findById(wareHouseId)
-                .orElseThrow(() -> new BusinessException("仓库不存在"));
+                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
 
         // 禁用仓库状态
         wareHouse.setStatus(StatusEnum.DISABLE);
@@ -101,7 +103,7 @@ public class WareHouseService {
     @Transactional
     public WareHouseInfo search(Long wareHouseId) {
         WareHouse wareHouse =  wareHouseRepository.findById(wareHouseId)
-                .orElseThrow(() -> new BusinessException("仓库不存在"));
+                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
 
         return WareHouseConverter.toInfo(wareHouse);
     }
@@ -120,7 +122,7 @@ public class WareHouseService {
 
         // 先查找仓库是否存在
         WareHouse wareHouse = wareHouseRepository.findByAccount(account)
-                .orElseThrow(() -> new BusinessException("仓库不存在"));
+                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
 
         // 校验密码
         String dbPassword = wareHouse.getWareHousePassword();
@@ -133,7 +135,7 @@ public class WareHouseService {
 
         // 校验仓库状态是否启用
         if(status.equals(StatusEnum.DISABLE)) {
-            throw new BusinessException("仓库已禁用！请联系管理员处理！");
+            throw new BusinessException(405, "仓库已禁用！请联系管理员处理！");
         }
 
         Long wareHouseId = wareHouse.getWareHouseId();

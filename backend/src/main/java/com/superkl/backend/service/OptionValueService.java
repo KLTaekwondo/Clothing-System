@@ -9,11 +9,13 @@ import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.OptionValueInfo;
 import com.superkl.backend.repository.OptionValueRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OptionValueService {
@@ -33,7 +35,8 @@ public class OptionValueService {
     @Transactional
     public void update(Long id ,  OptionValueUpdateDto optionValueUpdateDto) {
         // 1. 从数据库中查询选项值
-        OptionValue optionValue = optionValueRepository.findById(id).orElseThrow(() -> new BusinessException("选项值不存在"));
+        OptionValue optionValue = optionValueRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(403, "选项值不存在"));
         // 2. 更新选项值
         OptionValueConverter.updateEntity(optionValue, optionValueUpdateDto);
         // 3. 保存更新后的选项值
@@ -44,7 +47,8 @@ public class OptionValueService {
     @Transactional
     public void delete(Long id) {
         // 1. 从数据库中查询选项值
-        OptionValue optionValue = optionValueRepository.findById(id).orElseThrow(() -> new BusinessException("选项值不存在"));
+        OptionValue optionValue = optionValueRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(403, "选项值不存在"));
         // 2. 删除选项值
         optionValueRepository.deleteById(id);
     }
@@ -52,7 +56,8 @@ public class OptionValueService {
     // 4. 查询选项值
     public OptionValueInfo search(Long id) {
         // 1. 从数据库中查询选项值
-        OptionValue optionValue = optionValueRepository.findById(id).orElseThrow(() -> new BusinessException("选项值不存在"));
+        OptionValue optionValue = optionValueRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(403, "选项值不存在"));
         // 2. 转换为选项值信息
         return OptionValueConverter.toInfo(optionValue);
     }

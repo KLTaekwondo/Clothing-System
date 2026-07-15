@@ -12,6 +12,7 @@ import com.superkl.backend.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -34,7 +36,8 @@ public class AdminService {
         String password = dto.getPassword();
 
         // 先查找管理员是否存在
-        Admin admin = adminRepository.findByAccount(account).orElseThrow(() -> new BusinessException("账号不存在"));
+        Admin admin = adminRepository.findByAccount(account)
+                .orElseThrow(() -> new BusinessException(403, "账号不存在"));
 
         // 检查两部分是否匹配
         // 1. 密码是否匹配
@@ -44,7 +47,7 @@ public class AdminService {
 
         // 2. 账号状态是否启用
         if(!admin.isEnabled()){
-            throw new BusinessException("账号已禁用");
+            throw new BusinessException(405, "账号已禁用");
         }
 
         // 提前解析出来，避免调用过长
@@ -87,7 +90,8 @@ public class AdminService {
         String newPassword = resetDto.getNewPassword();
 
         // 先查找管理员是否存在
-        Admin admin = adminRepository.findByAccount(account).orElseThrow(() -> new BusinessException("账号不存在"));
+        Admin admin = adminRepository.findByAccount(account)
+                .orElseThrow(() -> new BusinessException(403, "账号不存在"));
 
         // 先编码新密码，再比较是否匹配
         String adminPassword = admin.getPassword();

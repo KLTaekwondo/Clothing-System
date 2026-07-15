@@ -16,6 +16,7 @@ import com.superkl.backend.repository.EmployeeRepository;
 import com.superkl.backend.repository.OrderRepository;
 import com.superkl.backend.repository.WareHouseRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -56,7 +58,7 @@ public class OrderService {
     @Transactional
     public OrderWithItemsInfo search(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new BusinessException("订单不存在"));
+                .orElseThrow(() -> new BusinessException(403, "订单不存在"));
         List<OrderItemInfo> items = orderItemService.findByOrderId(orderId);
         return OrderConverter.toInfoWithItems(order,items);
     }
@@ -74,15 +76,15 @@ public class OrderService {
         // 1.创建订单本体，同时校验仓库和销售员是否存在
         Order order = OrderConverter.toEntity(dto);
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new BusinessException("销售员不存在"));
+                .orElseThrow(() -> new BusinessException(403, "销售员不存在"));
         WareHouse wareHouse = wareHouseRepository.findById(dto.getWareHouseId())
-                .orElseThrow(() -> new BusinessException("仓库不存在"));
+                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
         // 1.1 检查仓库和销售员状态是否正常
         if(!employee.isEnabled()){
-            throw new BusinessException("员工已禁用！不可创建订单！");
+            throw new BusinessException(405, "员工已禁用！不可创建订单！");
         }
         if(!wareHouse.isEnabled()){
-            throw new BusinessException("仓库已禁用！不可创建订单！");
+            throw new BusinessException(405, "仓库已禁用！不可创建订单！");
         }
 
         // 1.2 检查员工是否属于该仓库
