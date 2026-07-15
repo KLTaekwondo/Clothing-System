@@ -21,19 +21,19 @@ function employeeInterface() {
 
     // 根据编号查询具体员工
     const search = async (id) =>{
-        const {data} = await employeeAPI.searchEmployee(id);
+        const data = await employeeAPI.searchEmployee(id);
         return data || {};
     }
 
     // 查找所有员工
     const searchList = async () =>{
-        const {data} = await employeeAPI.searchEmployeeList();
+        const data = await employeeAPI.searchEmployeeList();
         return Array.isArray(data) ? data : [];
     }
 
     // 查验员工是否可用
     const verify = async (id) => {
-        const {data} = await employeeAPI.verifyEmployee(id);
+        const data = await employeeAPI.verifyEmployee(id);
         return data || {};
     }
 

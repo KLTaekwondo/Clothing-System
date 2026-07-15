@@ -3,7 +3,7 @@ import wareHouseStockAPI from "../api/WareHouseStockAPI.js";
 function wareHouseStockInterface(){
     // 搜索库存
     const searchStock = async (warehouseId,productId) =>{
-        const {data} = await wareHouseStockAPI.searchStock(warehouseId,productId);
+        const data = await wareHouseStockAPI.searchStock(warehouseId,productId);
         return Array.isArray(data) ? data : [];
     }
 

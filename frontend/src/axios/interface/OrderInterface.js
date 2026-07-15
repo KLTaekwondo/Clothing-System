@@ -21,14 +21,14 @@ function orderInterface(){
 
     // 搜索订单
     const search = async (id) =>{
-        const {data} = await orderAPI.searchOrder(id);
+        const data = await orderAPI.searchOrder(id);
         return data || {};
     }
 
 
     // 搜索订单列表
     const searchList = async () =>{
-        const {data} = await orderAPI.searchOrderList();
+        const data = await orderAPI.searchOrderList();
         return Array.isArray(data) ? data : [];
     }
 

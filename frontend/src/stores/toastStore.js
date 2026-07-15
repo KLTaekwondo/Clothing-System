@@ -5,7 +5,7 @@ export const useToastStore = defineStore('toast', () => {
     const toasts = ref([])
     let nextId = 0
 
-    function showToast(message, duration = 3000) {
+    function showToast(type, message, duration = 3000) {
         const id = ++nextId
         toasts.value.push({ id, type, message })
         setTimeout(() => remove(id), duration)

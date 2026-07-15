@@ -19,6 +19,7 @@ import java.util.List;
 @RequestMapping("/api/order")
 @RequiredArgsConstructor
 public class OrderController {
+
     private final OrderService orderService;
     private final OrderItemService orderItemService;
 
@@ -50,7 +51,7 @@ public class OrderController {
     }
 
     // 5.查询订单订单列表
-    @GetMapping("/searchList")
+    @GetMapping("/search/list")
     public Result<List<OrderInfo>> searchList() {
         return Result.success(orderService.searchList());
     }

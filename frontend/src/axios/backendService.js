@@ -1,12 +1,10 @@
 import axios from "axios";
 import { useToastStore } from "../stores/toastStore.js";
 
-// 启动http携带Cookie
-axios.default.withCredentials = true;
-
 const backendService = axios.create({
     baseURL: "http://localhost:8080/api",
     timeout: 10000,
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     }
@@ -43,11 +41,15 @@ backendService.interceptors.response.use(
 
     (error) => {
         const status = error.response?.status;
-        const msg = error?.data?.msg || error.message;
+        const msg = error.response?.data?.msg || error.message;
 
         const toast = useToastStore();
-        if(status === 500){
+        if (status === 403) {
+            toast.error("登录已过期，请重新登录");
+        } else if (status === 500) {
             toast.error("网络异常，请稍后重试");
+        } else if (msg) {
+            toast.error(msg);
         }
         return Promise.reject(error);
     }

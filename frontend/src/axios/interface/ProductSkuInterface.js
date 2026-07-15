@@ -21,19 +21,19 @@ function productSkuInterface(){
 
     // 搜索商品SKU
     const search = async (id) =>{
-        const {data} = await productSkuAPI.searchProductSku(id);
+        const data = await productSkuAPI.searchProductSku(id);
         return data || {};
     }
 
     // 根据商品ID搜索商品SKU列表
     const searchListByProductId = async (productId) =>{
-        const {data} = await productSkuAPI.searchSkuListByProductId(productId);
+        const data = await productSkuAPI.searchSkuListByProductId(productId);
         return Array.isArray(data) ? data : [];
     }
 
     // 扫描商品SKU
     const scan = async (code) =>{
-        const {data} = await productSkuAPI.scanProductSku(code);
+        const data = await productSkuAPI.scanProductSku(code);
         return data || {};
     }
 

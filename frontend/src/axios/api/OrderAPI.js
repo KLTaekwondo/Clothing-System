@@ -7,3 +7,5 @@ const orderAPI = {
     searchOrder:(id) => backendService.get(`/order/search/${id}`),
     searchOrderList: () => backendService.get("/order/search/list"),
 }
+
+export default orderAPI;

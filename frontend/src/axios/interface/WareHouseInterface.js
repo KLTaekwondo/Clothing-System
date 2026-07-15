@@ -21,19 +21,19 @@ function wareHouseInterface(){
 
     // 搜索仓库
     const search = async (id) =>{
-        const {data} = await wareHouseAPI.searchWareHouse(id);
+        const data = await wareHouseAPI.searchWareHouse(id);
         return data || {};
     }
 
     // 搜索仓库列表
     const searchList = async () =>{
-        const {data} = await wareHouseAPI.searchWareHouseList();
+        const data = await wareHouseAPI.searchWareHouseList();
         return Array.isArray(data) ? data : [];
     }
 
     // 登录
     const login = async (body) =>{
-        const {data} = await wareHouseAPI.login(body);
+        const data = await wareHouseAPI.login(body);
         return data || {};
     }
 

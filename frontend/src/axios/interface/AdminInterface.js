@@ -3,8 +3,9 @@ import adminAPI from "../api/AdminAPI.js";
 function adminInterface(){
     // 登录
     const login = async (body) =>{
-        const {data} = await adminAPI.login(body);
-        return data || {};
+        const result = await adminAPI.login(body);
+        console.log(result);
+        return result || {};
     }
 
     // 登出

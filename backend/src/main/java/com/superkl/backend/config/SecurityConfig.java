@@ -59,13 +59,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 登录全面放行
                         .requestMatchers("/api/admin/login", "/api/warehouse/login").permitAll()
-                        // 管理员可以访问所有接口
-                        .requestMatchers("/api/**").hasRole("ADMIN")
                         // 前端收银员可以访问所有接口
                         .requestMatchers("/api/order/**", "/api/stock/**",
                                 "/api/product/search/**", "/api/productSku/search/**",
                                 "/api/productSku/scan/**", "/api/warehouse/logout")
                         .hasAnyRole("ADMIN", "WAREHOUSE")
+                        // 管理员可以访问所有接口
+                        .requestMatchers("/api/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 // 如果启动，那么Spring boot会提供一个会话管理页面，但是我们不需要，所以我们禁用它。
