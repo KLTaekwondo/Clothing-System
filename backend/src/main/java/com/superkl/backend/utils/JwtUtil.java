@@ -86,6 +86,8 @@ public class JwtUtil {
             return RequestUser.builder()
                     .requestId(requestId)
                     .requestRole(requestRole)
+                    .requestName(claims.get("username",String.class))
+                    .requestCode(claims.get("code",String.class))
                     .build();
         }catch(Exception e){
             throw new BusinessException("token无效");

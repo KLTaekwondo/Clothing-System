@@ -1,5 +1,6 @@
 package com.superkl.backend.service;
 
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.AdminConverter;
 import com.superkl.backend.dto.LoginDto;
 import com.superkl.backend.dto.ResetDto;
@@ -30,7 +31,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
 
     //1.管理员登录
-    public AdminInfo login(LoginDto dto, HttpServletResponse response){
+    public AdminInfo login(LoginDto dto, HttpServletResponse response) {
         // 先提取出来，更加方便操作
         String account = dto.getAccount();
         String password = dto.getPassword();
@@ -41,12 +42,12 @@ public class AdminService {
 
         // 检查两部分是否匹配
         // 1. 密码是否匹配
-        if(!passwordEncoder.matches(password,admin.getPassword())){
+        if (!passwordEncoder.matches(password, admin.getPassword())) {
             throw new BusinessException("密码错误");
         }
 
         // 2. 账号状态是否启用
-        if(!admin.isEnabled()){
+        if (!admin.isEnabled()) {
             throw new BusinessException(405, "账号已禁用");
         }
 
@@ -56,34 +57,35 @@ public class AdminService {
         String username = admin.getUsername();
 
         // 副属性处理
-        Map<String,Object> claims = new HashMap<>();
-        claims.put("code",code);
-        claims.put("username",username);
-        claims.put("role","ADMIN");
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("code", code);
+        claims.put("username", username);
+        claims.put("role", "ADMIN");
 
         // 3.登录成功，开始处理Cookie
         String token = jwtUtil.generateToken(adminId, claims);
         Cookie cookie = new Cookie("token", token);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(7*24*3600);
-        // cookie.setSecure(true); //暂时不启用，因为本地开发环境不支持HTTPS
+        cookie.setMaxAge(7 * 24 * 3600);
         response.addCookie(cookie);
-        // 登录成功，返回管理员信息
+        log.info("管理员登录成功：{}", account);
         return AdminConverter.toInfo(admin);
     }
 
     // 2.管理员退出登录
-    public void logout(HttpServletResponse response){
+    public void logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("token", "");
         cookie.setMaxAge(0);
         cookie.setPath("/");
         response.addCookie(cookie);
+        log.info("管理员退出登录");
+        RequestUser.log();
     }
 
     // 3.管理员重置密码
     @Transactional
-    public void resetPassword(ResetDto resetDto){
+    public void resetPassword(ResetDto resetDto) {
         // 先提取出来，更加方便操作
         String account = resetDto.getAccount();
         String oldPassword = resetDto.getOldPassword();
@@ -96,12 +98,12 @@ public class AdminService {
         // 先编码新密码，再比较是否匹配
         String adminPassword = admin.getPassword();
 
-        if(!passwordEncoder.matches(oldPassword,adminPassword)){
+        if (!passwordEncoder.matches(oldPassword, adminPassword)) {
             throw new BusinessException("旧密码错误");
         }
 
         // 新旧密码比较，不能相同
-        if(passwordEncoder.matches(newPassword,adminPassword)){
+        if (passwordEncoder.matches(newPassword, adminPassword)) {
             throw new BusinessException("新密码不能与旧密码相同");
         }
 
@@ -109,5 +111,7 @@ public class AdminService {
         String newEncodedPassword = passwordEncoder.encode(newPassword);
         admin.setPassword(newEncodedPassword);
         adminRepository.save(admin);
+        log.info("管理员密码已重置：{}", account);
+        RequestUser.log();
     }
 }

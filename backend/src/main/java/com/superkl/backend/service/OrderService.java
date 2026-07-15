@@ -1,5 +1,6 @@
 package com.superkl.backend.service;
 
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.OrderConverter;
 import com.superkl.backend.dto.OrderCreateDto;
 import com.superkl.backend.entity.Employee;
@@ -122,6 +123,13 @@ public class OrderService {
         order.setWareHouse(wareHouse);
         order.setStatus(orderStatus);
         orderRepository.save(order);
+
+        log.info("订单{}：{}，金额：{}，员工：{}，仓库：{}",
+                orderStatus == OrderStatusEnum.COMPLETED ? "完成" :
+                orderStatus == OrderStatusEnum.REFUND ? "退款" : "挂单",
+                order.getOrderNo(), b_ActualAmount,
+                employee.getEmployeeName(), wareHouse.getWareHouseName());
+        RequestUser.log();
 
         // 5.更新库存
         for (OrderItem item : items) {

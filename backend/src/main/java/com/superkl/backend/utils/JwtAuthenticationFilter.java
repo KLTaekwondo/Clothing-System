@@ -42,12 +42,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 从请求中获取认证信息
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         RequestUser requestUser = AuthContext.getRequestUserFromCookie(request, jwtUtil);
-        Long requestId = requestUser.getRequestId();
-        String requestRole = requestUser.getRequestRole();
         // 第一个参数 userId：存的是“谁”（principal）。
         // 第二个参数 null：凭证（credentials），这里没有密码之类的，所以填 null。
         // 第三个参数：权限集合（authorities）。这里用了 Collections.singleton(() -> role)，实际上是一个 lambda 表达式实现的 GrantedAuthority，意思是这个用户只有一个角色，就是 role 字符串。
         // 这个 lambda 写法虽然能跑，但一般用 new SimpleGrantedAuthority(role) 更直观。
-        return new UsernamePasswordAuthenticationToken(requestId, null, Collections.singleton(() -> requestRole));
+        return new UsernamePasswordAuthenticationToken(requestUser, null, Collections.singleton(requestUser::getRequestRole));
     }
 }

@@ -1,5 +1,6 @@
 package com.superkl.backend.service;
 
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.WareHouseConverter;
 import com.superkl.backend.dto.LoginDto;
 import com.superkl.backend.dto.WareHouseCreateDto;
@@ -54,6 +55,8 @@ public class WareHouseService {
         wareHouse.setWareHousePassword(encryptedPassword);
         // 保存仓库实体
         wareHouseRepository.save(wareHouse);
+        log.info("新增仓库：{}", wareHouse.getWareHouseName());
+        RequestUser.log();
 
         // 处理库存问题
         List<WareHouseStock> stocks = new ArrayList<>();
@@ -85,6 +88,8 @@ public class WareHouseService {
         wareHouse.setWareHousePassword(encryptedPassword);
         // 保存更新后的仓库实体
         wareHouseRepository.save(wareHouse);
+        log.info("更新仓库：{}", wareHouse.getWareHouseName());
+        RequestUser.log();
     }
 
     // 删除仓库(物理删除，等级危险)
@@ -97,6 +102,8 @@ public class WareHouseService {
         // 禁用仓库状态
         wareHouse.setStatus(StatusEnum.DISABLE);
         wareHouseRepository.save(wareHouse);
+        log.info("禁用仓库：{}", wareHouse.getWareHouseName());
+        RequestUser.log();
     }
 
     // 查询单个仓库
@@ -141,6 +148,8 @@ public class WareHouseService {
         Long wareHouseId = wareHouse.getWareHouseId();
         Map<String , Object> claims = new HashMap<>();
         claims.put("role","WAREHOUSE");
+        claims.put("username", wareHouse.getWareHouseName());
+        claims.put("code", wareHouse.getWareHouseCode());
         String token = jwtUtil.generateToken(wareHouseId,claims);
 
         // 设置Cookie
@@ -150,6 +159,7 @@ public class WareHouseService {
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
 
+        log.info("仓库登录成功：{}", account);
         return WareHouseConverter.toInfo(wareHouse);
     }
 

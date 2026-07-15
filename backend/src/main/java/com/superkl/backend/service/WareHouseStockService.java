@@ -1,5 +1,6 @@
 package com.superkl.backend.service;
 
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.WareHouseStockConverter;
 import com.superkl.backend.dto.StockTransferDto;
 import com.superkl.backend.dto.WarehouseStockUpdateDto;
@@ -30,11 +31,16 @@ public class WareHouseStockService {
                     .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
             ws.setStock(dto.getStock());
             wareHouseStockRepository.save(ws);
+            log.info("管理员手动修改库存：stockId={}，新库存={}", dto.getStockId(), dto.getStock());
+            RequestUser.log();
         }
     }
 
     // 查询某一个商品的某一个仓库的库存记录
     public List<WareHouseStockInfo> findByWareHouseIdAndProductId(Long warehouseId, Long productId) {
+        if (!RequestUser.isCurrentWareHouse(warehouseId) && !RequestUser.isAdmin()) {
+            throw new BusinessException(403, "您没有权限查询该仓库的库存记录");
+        }
         return WareHouseStockConverter.toInfoList(wareHouseStockRepository.findByProductIdAndWareHouseId(productId, warehouseId));
     }
 
@@ -48,11 +54,11 @@ public class WareHouseStockService {
         Long sourceWarehouseId = dto.getSourceWarehouseId();
         Integer stock = dto.getStock();
 
-        if(sourceWarehouseId.equals(targetWarehouseId)) {
+        if (sourceWarehouseId.equals(targetWarehouseId)) {
             throw new BusinessException("源仓库和目标仓库不能相同");
         }
 
-        if(stock <= 0) {
+        if (stock <= 0) {
             throw new BusinessException("调货库存数量不得小于等于0");
         }
 
@@ -68,6 +74,8 @@ public class WareHouseStockService {
         targetWs.setStock(targetWs.getStock() + stock);
         wareHouseStockRepository.save(sourceWs);
         wareHouseStockRepository.save(targetWs);
+        log.info("调货：SKU={}，从仓库{}到仓库{}，数量={}", skuId, sourceWarehouseId, targetWarehouseId, stock);
+        RequestUser.log();
     }
 
     // 减少库存
@@ -89,6 +97,8 @@ public class WareHouseStockService {
         // 减少库存
         ws.setStock(ws.getStock() - stock);
         wareHouseStockRepository.save(ws);
+        log.info("扣减库存：仓库{}，SKU{}，数量{}，剩余{}", wareHouseId, skuId, stock, ws.getStock());
+        RequestUser.log();
     }
 
     // 增加库存
@@ -106,5 +116,7 @@ public class WareHouseStockService {
         // 增加库存
         ws.setStock(ws.getStock() + stock);
         wareHouseStockRepository.save(ws);
+        log.info("增加库存：仓库{}，SKU{}，数量{}，剩余{}", wareHouseId, skuId, stock, ws.getStock());
+        RequestUser.log();
     }
 }

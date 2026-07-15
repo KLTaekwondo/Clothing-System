@@ -41,7 +41,9 @@ public class OrderItemService {
         OrderItem orderItem = OrderItemConverter.toEntity(dto,productSku);
         orderItem.setOrder(order);
 
-        return orderItemRepository.save(orderItem);
+        OrderItem saved = orderItemRepository.save(orderItem);
+        log.debug("创建订单项：SKU={}，数量={}，金额={}", dto.getSkuCode(), dto.getQuantity(), saved.getActualPrice());
+        return saved;
     }
 
     // 2.创建订单项列表

@@ -1,5 +1,6 @@
 package com.superkl.backend.service;
 
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.ProductConverter;
 import com.superkl.backend.dto.ProductCreateDto;
 import com.superkl.backend.dto.ProductUpdateDto;
@@ -40,6 +41,8 @@ public class ProductService {
         // 2.创建商品本体的信息，然后入库
         Product product = ProductConverter.toEntity(productCreateDto);
         productRepository.save(product);
+        log.info("新增商品：{}，编码：{}", product.getProductName(), product.getProductCode());
+        RequestUser.log();
         // 3. 保存SKU信息
         for (Map<String, String> combo : skuList) {
             productSkuService.createFromProduct(product, combo);
@@ -55,6 +58,8 @@ public class ProductService {
         // 2.更新商品信息
         ProductConverter.updateEntity(product, dto);
         productRepository.save(product);
+        log.info("更新商品：{}", product.getProductName());
+        RequestUser.log();
     }
 
     // 删除商品
@@ -66,6 +71,8 @@ public class ProductService {
         // 2.禁用商品
         product.setStatus(StatusEnum.DISABLE);
         productRepository.save(product);
+        log.info("禁用商品：{}", product.getProductName());
+        RequestUser.log();
     }
 
     // 查询单个商品详情

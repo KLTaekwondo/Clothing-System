@@ -1,5 +1,6 @@
 package com.superkl.backend.service;
 
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.EmployeeConverter;
 import com.superkl.backend.dto.EmployeeCreateDto;
 import com.superkl.backend.dto.EmployeeUpdateDto;
@@ -34,6 +35,8 @@ public class EmployeeService {
         // 转换实体
         Employee employee = EmployeeConverter.toEntity(employeeCreateDto , wareHouse);
         employeeRepository.save(employee);
+        log.info("新增员工：{}，所属仓库：{}", employee.getEmployeeName(), wareHouse.getWareHouseName());
+        RequestUser.log();
     }
 
     // 更新员工
@@ -55,6 +58,8 @@ public class EmployeeService {
         // 转换器更新员工
         EmployeeConverter.updateEntity(employee, employeeUpdateDto);
         employeeRepository.save(employee);
+        log.info("更新员工：{}", employee.getEmployeeName());
+        RequestUser.log();
     }
 
     // 删除员工（物理删除！极其严重操作！谨慎使用！）
@@ -66,6 +71,8 @@ public class EmployeeService {
         // 禁用员工
         employee.setStatus(StatusEnum.DISABLE);
         employeeRepository.save(employee);
+        log.info("禁用员工：{}", employee.getEmployeeName());
+        RequestUser.log();
     }
 
     // 查询员工
