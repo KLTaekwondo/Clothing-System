@@ -17,6 +17,10 @@ public class ProductConverter {
                 .code(product.getProductCode())
                 .name(product.getProductName())
                 .season(product.getSeason())
+                .type(product.getType())
+                .category(product.getCategory())
+                .unit(product.getUnit())
+                .composition(product.getComposition())
                 .importPrice(product.getImportPrice())
                 .salePrice(product.getSalePrice())
                 .special(product.isSpecial())
@@ -40,6 +44,10 @@ public class ProductConverter {
                 .productCode(productCreateDto.getCode())
                 .productName(productCreateDto.getName())
                 .season(productCreateDto.getSeason())
+                .type(productCreateDto.getType())
+                .category(productCreateDto.getCategory())
+                .unit(productCreateDto.getUnit())
+                .composition(productCreateDto.getComposition())
                 .importPrice(productCreateDto.getImportPrice())
                 .salePrice(productCreateDto.getSalePrice())
                 .special(productCreateDto.isSpecial())
@@ -50,6 +58,10 @@ public class ProductConverter {
         product.setProductCode(productUpdateDto.getCode());
         product.setProductName(productUpdateDto.getName());
         product.setSeason(productUpdateDto.getSeason());
+        product.setType(productUpdateDto.getType());
+        product.setCategory(productUpdateDto.getCategory());
+        product.setUnit(productUpdateDto.getUnit());
+        product.setComposition(productUpdateDto.getComposition());
         product.setImportPrice(productUpdateDto.getImportPrice());
         product.setSalePrice(productUpdateDto.getSalePrice());
         product.setSpecial(productUpdateDto.isSpecial());

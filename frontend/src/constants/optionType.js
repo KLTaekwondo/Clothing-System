@@ -8,12 +8,12 @@ export const OPTION_TYPE = Object.freeze({
 })
 
 export const OPTION_TYPE_OPTIONS = [
-    { value: OPTION_TYPE.COLOR, label: '颜色' },
-    { value: OPTION_TYPE.SIZE, label: '尺码' },
-    { value: OPTION_TYPE.TYPE, label: '类型' },
-    { value: OPTION_TYPE.CATEGORY, label: '种类' },
-    { value: OPTION_TYPE.UNIT, label: '单位' },
-    { value: OPTION_TYPE.COMPOSITION, label: '面料组合' }
+    {value: OPTION_TYPE.COLOR, label: '颜色'},
+    {value: OPTION_TYPE.SIZE, label: '尺码'},
+    {value: OPTION_TYPE.TYPE, label: '类型'},
+    {value: OPTION_TYPE.CATEGORY, label: '种类'},
+    {value: OPTION_TYPE.UNIT, label: '单位'},
+    {value: OPTION_TYPE.COMPOSITION, label: '面料组合'}
 ]
 
 export const OPTION_TYPE_LABELS = Object.freeze(

@@ -8,8 +8,8 @@ function employeeInterface() {
     }
 
     // 更新员工
-    const update = async (id,employeeInfo) => {
-        await employeeAPI.updateEmployee(id,employeeInfo);
+    const update = async (id, employeeInfo) => {
+        await employeeAPI.updateEmployee(id, employeeInfo);
         return true;
     }
 
@@ -20,13 +20,13 @@ function employeeInterface() {
     }
 
     // 根据编号查询具体员工
-    const search = async (id) =>{
+    const search = async (id) => {
         const data = await employeeAPI.searchEmployee(id);
         return data || {};
     }
 
     // 查找所有员工
-    const searchList = async () =>{
+    const searchList = async () => {
         const data = await employeeAPI.searchEmployeeList();
         return Array.isArray(data) ? data : [];
     }

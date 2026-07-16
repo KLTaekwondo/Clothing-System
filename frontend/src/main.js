@@ -1,9 +1,9 @@
-import { createApp } from 'vue'
+import {createApp} from 'vue'
 import './style.css'
 import App from './App.vue'
-import router from './utils/router/router.js'
-import { createPinia } from 'pinia'
-import { setupTabGuard, restoreCurrentTab } from './utils/stores/tabGuard.js'
+import router from './router/router.js'
+import {createPinia} from 'pinia'
+import {restoreCurrentTab, setupTabGuard} from './stores/tabGuard.js'
 
 const app = createApp(App)
 const pinia = createPinia()

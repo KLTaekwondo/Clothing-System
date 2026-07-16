@@ -6,10 +6,10 @@ export const PAY_METHOD = Object.freeze({
 })
 
 export const PAY_METHOD_OPTIONS = [
-    { value: PAY_METHOD.CASH, label: '现金' },
-    { value: PAY_METHOD.CARD, label: '信用卡' },
-    { value: PAY_METHOD.ALIPAY, label: '支付宝' },
-    { value: PAY_METHOD.WECHAT, label: '微信' }
+    {value: PAY_METHOD.CASH, label: '现金'},
+    {value: PAY_METHOD.CARD, label: '信用卡'},
+    {value: PAY_METHOD.ALIPAY, label: '支付宝'},
+    {value: PAY_METHOD.WECHAT, label: '微信'}
 ]
 
 export const PAY_METHOD_LABELS = Object.freeze(

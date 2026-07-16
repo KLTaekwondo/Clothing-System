@@ -32,6 +32,18 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private SeasonEnum season;// 季节
 
+    @Column(nullable = false ,length = 20)
+    private String type;// 产品类型：男大童/女大童/男/女
+
+    @Column(nullable = false ,length = 20)
+    private String category;// 产品种类：裤子，衣服，T恤
+
+    @Column(nullable = false ,length = 20)
+    private String unit;// 衣服计数单位
+
+    @Column(nullable = false ,length = 50)
+    private String composition;// 面料组合
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default

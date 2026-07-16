@@ -7,48 +7,71 @@
             </div>
         </div>
 
-        <div class="section-title">数据总览</div>
-        <div class="stat-grid">
-            <div class="stat-card">
-                <div class="stat-icon stat-teal">📦</div>
-                <div class="stat-body">
-                    <span class="stat-value">{{ stats.products }}</span>
-                    <span class="stat-label">商品总数</span>
+        <div class="section-title">工作台</div>
+        <div class="workspace-layout">
+            <div class="overview-card">
+                <div class="workspace-heading">
+                    <div class="workspace-title">数据总览</div>
+                    <span class="workspace-hint">实时数据</span>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon stat-teal">📦</div>
+                        <div class="stat-body">
+                            <span class="stat-value">{{ stats.products }}</span>
+                            <span class="stat-label">商品总数</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-green">👤</div>
+                        <div class="stat-body">
+                            <span class="stat-value">{{ stats.employees }}</span>
+                            <span class="stat-label">员工总数</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-orange">🏭</div>
+                        <div class="stat-body">
+                            <span class="stat-value">{{ stats.warehouses }}</span>
+                            <span class="stat-label">仓库总数</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-purple">📋</div>
+                        <div class="stat-body">
+                            <span class="stat-value">{{ stats.orders }}</span>
+                            <span class="stat-label">订单总数</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon stat-blue">🏷️</div>
-                <div class="stat-body">
-                    <span class="stat-value">{{ stats.skus }}</span>
-                    <span class="stat-label">SKU 总数</span>
+
+            <div class="shortcut-card">
+                <div class="workspace-heading">
+                    <div class="workspace-title">快捷入口</div>
+                    <span class="workspace-hint">常用功能</span>
                 </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon stat-green">👤</div>
-                <div class="stat-body">
-                    <span class="stat-value">{{ stats.employees }}</span>
-                    <span class="stat-label">员工总数</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon stat-orange">🏭</div>
-                <div class="stat-body">
-                    <span class="stat-value">{{ stats.warehouses }}</span>
-                    <span class="stat-label">仓库总数</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon stat-purple">📋</div>
-                <div class="stat-body">
-                    <span class="stat-value">{{ stats.orders }}</span>
-                    <span class="stat-label">订单总数</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon stat-red">⚠️</div>
-                <div class="stat-body">
-                    <span class="stat-value">{{ stats.lowStock }}</span>
-                    <span class="stat-label">库存预警</span>
+                <div class="quick-grid">
+                    <router-link class="quick-card" to="/manage/product">
+                        <span class="quick-icon-box" style="background:#dcfce7">📦</span>
+                        <span class="quick-name">商品管理</span>
+                        <span class="quick-desc">添加、编辑和管理商品</span>
+                    </router-link>
+                    <router-link class="quick-card" to="/manage/employee">
+                        <span class="quick-icon-box" style="background:#e8f0fe">👤</span>
+                        <span class="quick-name">员工管理</span>
+                        <span class="quick-desc">管理员工信息与核验</span>
+                    </router-link>
+                    <router-link class="quick-card" to="/manage/warehouse">
+                        <span class="quick-icon-box" style="background:#fef3c7">🏭</span>
+                        <span class="quick-name">仓库管理</span>
+                        <span class="quick-desc">仓库与库存调拨</span>
+                    </router-link>
+                    <router-link class="quick-card" to="/manage/order">
+                        <span class="quick-icon-box" style="background:#fce7f3">📋</span>
+                        <span class="quick-name">查看订单</span>
+                        <span class="quick-desc">查看订单状态与金额</span>
+                    </router-link>
                 </div>
             </div>
         </div>
@@ -111,40 +134,6 @@
             </div>
         </div>
 
-        <div class="section-title">快捷入口</div>
-        <div class="quick-grid">
-            <router-link to="/manage/product" class="quick-card">
-                <span class="quick-icon-box" style="background:#dcfce7">📦</span>
-                <span class="quick-name">商品管理</span>
-                <span class="quick-desc">添加、编辑和管理商品</span>
-            </router-link>
-            <router-link to="/manage/employee" class="quick-card">
-                <span class="quick-icon-box" style="background:#e8f0fe">👤</span>
-                <span class="quick-name">员工管理</span>
-                <span class="quick-desc">管理员工信息与核验</span>
-            </router-link>
-            <router-link to="/manage/warehouse" class="quick-card">
-                <span class="quick-icon-box" style="background:#fef3c7">🏭</span>
-                <span class="quick-name">仓库管理</span>
-                <span class="quick-desc">仓库与库存调拨</span>
-            </router-link>
-            <router-link to="/manage/option" class="quick-card">
-                <span class="quick-icon-box" style="background:#fce7f3">🏷️</span>
-                <span class="quick-name">选项管理</span>
-                <span class="quick-desc">颜色、尺寸等选项值</span>
-            </router-link>
-            <router-link to="/checkout" class="quick-card">
-                <span class="quick-icon-box" style="background:#fef3c7">🛒</span>
-                <span class="quick-name">收银结账</span>
-                <span class="quick-desc">创建订单与结算</span>
-            </router-link>
-            <div class="quick-card quick-disabled">
-                <span class="quick-icon-box" style="background:#f1f5f9">📊</span>
-                <span class="quick-name">数据报表</span>
-                <span class="quick-desc">销售统计与分析（即将上线）</span>
-            </div>
-        </div>
-
         <div v-if="loading" class="loading-overlay">
             <div class="loading-spinner"></div>
             <span style="margin-left:10px;color:var(--text-muted)">加载中…</span>
@@ -153,14 +142,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import {nextTick, onMounted, ref} from 'vue'
 import * as echarts from 'echarts'
 import productInterface from '../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../axios/interface/ProductSkuInterface.js'
 import employeeInterface from '../../axios/interface/EmployeeInterface.js'
 import wareHouseInterface from '../../axios/interface/WareHouseInterface.js'
 import orderInterface from '../../axios/interface/OrderInterface.js'
-import { STATUS } from '../../constants/status.js'
+import {STATUS} from '../../constants/status.js'
 
 const loading = ref(true)
 const salesChartRef = ref(null)
@@ -214,19 +203,19 @@ function initCharts() {
     if (salesChartRef.value) {
         const salesChart = echarts.init(salesChartRef.value)
         salesChart.setOption({
-            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-            grid: { left: '3%', right: '3%', bottom: '8%', top: '8%', containLabel: true },
+            tooltip: {trigger: 'axis', axisPointer: {type: 'shadow'}},
+            grid: {left: '3%', right: '3%', bottom: '8%', top: '8%', containLabel: true},
             xAxis: {
                 type: 'category',
                 data: salesDays,
-                axisLine: { show: false },
-                axisTick: { show: false },
-                axisLabel: { color: '#94a3b8', fontSize: 11 }
+                axisLine: {show: false},
+                axisTick: {show: false},
+                axisLabel: {color: '#94a3b8', fontSize: 11}
             },
             yAxis: {
                 type: 'value',
-                splitLine: { lineStyle: { color: '#f1f5f9' } },
-                axisLabel: { color: '#94a3b8', fontSize: 11 }
+                splitLine: {lineStyle: {color: '#f1f5f9'}},
+                axisLabel: {color: '#94a3b8', fontSize: 11}
             },
             series: [{
                 data: salesData,
@@ -234,12 +223,12 @@ function initCharts() {
                 smooth: true,
                 symbol: 'circle',
                 symbolSize: 6,
-                lineStyle: { color: '#0d9488', width: 2 },
-                itemStyle: { color: '#0d9488' },
+                lineStyle: {color: '#0d9488', width: 2},
+                itemStyle: {color: '#0d9488'},
                 areaStyle: {
                     color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: 'rgba(13,148,136,0.25)' },
-                        { offset: 1, color: 'rgba(13,148,136,0.02)' }
+                        {offset: 0, color: 'rgba(13,148,136,0.25)'},
+                        {offset: 1, color: 'rgba(13,148,136,0.02)'}
                     ])
                 }
             }]
@@ -251,21 +240,21 @@ function initCharts() {
     if (categoryChartRef.value) {
         const categoryChart = echarts.init(categoryChartRef.value)
         categoryChart.setOption({
-            tooltip: { trigger: 'item' },
+            tooltip: {trigger: 'item'},
             series: [{
                 type: 'pie',
                 radius: ['45%', '70%'],
                 center: ['50%', '50%'],
                 avoidLabelOverlap: true,
-                itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
-                label: { show: true, color: '#636e72', fontSize: 12, formatter: '{b}' },
-                labelLine: { lineStyle: { color: '#e8e8e8' } },
+                itemStyle: {borderRadius: 4, borderColor: '#fff', borderWidth: 2},
+                label: {show: true, color: '#636e72', fontSize: 12, formatter: '{b}'},
+                labelLine: {lineStyle: {color: '#e8e8e8'}},
                 data: [
-                    { value: 38, name: '上衣', itemStyle: { color: '#0d9488' } },
-                    { value: 22, name: '裤装', itemStyle: { color: '#3b82f6' } },
-                    { value: 15, name: '裙装', itemStyle: { color: '#f59e0b' } },
-                    { value: 10, name: '配饰', itemStyle: { color: '#8b5cf6' } },
-                    { value: 6,  name: '鞋履', itemStyle: { color: '#ec4899' } }
+                    {value: 38, name: '上衣', itemStyle: {color: '#0d9488'}},
+                    {value: 22, name: '裤装', itemStyle: {color: '#3b82f6'}},
+                    {value: 15, name: '裙装', itemStyle: {color: '#f59e0b'}},
+                    {value: 10, name: '配饰', itemStyle: {color: '#8b5cf6'}},
+                    {value: 6, name: '鞋履', itemStyle: {color: '#ec4899'}}
                 ]
             }]
         })
@@ -276,7 +265,8 @@ function initCharts() {
 
 <style scoped>
 .dashboard {
-    max-width: 1100px;
+    width: 100%;
+    min-width: 0;
 }
 
 .welcome-section {
@@ -296,6 +286,110 @@ function initCharts() {
     margin-bottom: 14px;
 }
 
+/* ── 工作台 ── */
+.workspace-layout {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.overview-card,
+.shortcut-card {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e3efed;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
+}
+
+.overview-card {
+    width: 58%;
+}
+
+.shortcut-card {
+    width: 42%;
+}
+
+.workspace-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.workspace-title {
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.workspace-hint {
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #eef9f7;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.overview-card .stat-grid {
+    gap: 10px;
+    margin-bottom: 0;
+}
+
+.overview-card .stat-card {
+    width: calc(50% - 5px);
+    min-width: 0;
+    padding: 14px;
+    gap: 11px;
+    border-radius: 12px;
+    box-shadow: none;
+    background: #f9fcfb;
+}
+
+.overview-card .stat-card:hover {
+    transform: none;
+    background: #f1faf8;
+    box-shadow: none;
+}
+
+.overview-card .stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 21px;
+    border-radius: 10px;
+}
+
+.overview-card .stat-value {
+    font-size: 22px;
+}
+
+.shortcut-card .quick-grid {
+    gap: 10px;
+}
+
+.shortcut-card .quick-card {
+    width: calc(50% - 5px);
+    min-width: 0;
+    padding: 14px;
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.shortcut-card .quick-card:hover {
+    box-shadow: 0 8px 18px rgba(22, 83, 78, 0.1);
+}
+
+.shortcut-card .quick-icon-box {
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+}
+
+.shortcut-card .quick-desc {
+    display: none;
+}
+
 /* ── 统计卡片 ── */
 .stat-grid {
     display: flex;
@@ -310,11 +404,17 @@ function initCharts() {
     display: flex;
     align-items: center;
     gap: 16px;
-    background: #fff;
-    border-radius: 12px;
-    padding: 18px 20px;
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow);
+    background: linear-gradient(145deg, #fff, #fbfefd);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e3efed;
+    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(22, 83, 78, 0.1);
 }
 
 .stat-icon {
@@ -328,12 +428,29 @@ function initCharts() {
     flex-shrink: 0;
 }
 
-.stat-teal { background: rgb(204 251 241 / 0.8); }
-.stat-blue { background: #e8f0fe; }
-.stat-green { background: #dcfce7; }
-.stat-orange { background: #fef3c7; }
-.stat-purple { background: #f3e8ff; }
-.stat-red { background: #fee2e2; }
+.stat-teal {
+    background: rgb(204 251 241 / 0.8);
+}
+
+.stat-blue {
+    background: #e8f0fe;
+}
+
+.stat-green {
+    background: #dcfce7;
+}
+
+.stat-orange {
+    background: #fef3c7;
+}
+
+.stat-purple {
+    background: #f3e8ff;
+}
+
+.stat-red {
+    background: #fee2e2;
+}
 
 .stat-body {
     display: flex;
@@ -366,12 +483,12 @@ function initCharts() {
 }
 
 .chart-card {
-    flex: 1;
+    width: calc(50% - 7px);
     background: #fff;
-    border-radius: 12px;
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow);
-    padding: 18px 16px 10px;
+    border-radius: 16px;
+    border: 1px solid #e3efed;
+    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
+    padding: 20px 18px 12px;
 }
 
 .chart-header {
@@ -400,19 +517,20 @@ function initCharts() {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 18px 20px;
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow);
+    padding: 20px;
+    background: linear-gradient(145deg, #fff, #fbfefd);
+    border-radius: 16px;
+    border: 1px solid #e3efed;
+    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
     text-decoration: none;
     transition: var(--transition);
     cursor: pointer;
 }
 
 .quick-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
+    transform: translateY(-3px);
+    border-color: #bfe4df;
+    box-shadow: 0 14px 28px rgba(22, 83, 78, 0.11);
 }
 
 .quick-disabled {
@@ -446,5 +564,25 @@ function initCharts() {
     font-size: 12px;
     color: var(--text-muted);
     line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+    .workspace-layout,
+    .chart-row {
+        flex-direction: column;
+    }
+
+    .overview-card,
+    .shortcut-card,
+    .chart-card {
+        width: 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    .overview-card .stat-card,
+    .shortcut-card .quick-card {
+        width: 100%;
+    }
 }
 </style>

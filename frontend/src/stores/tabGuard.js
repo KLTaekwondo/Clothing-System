@@ -23,7 +23,7 @@ export function restoreCurrentTab(router) {
         try {
             const route = JSON.parse(saved)
             if (route.name && router.hasRoute(route.name)) {
-                router.push({ name: route.name })
+                router.push({name: route.name})
             }
         } catch {
             // 忽略解析错误

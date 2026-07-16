@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useToastStore } from "../stores/toastStore.js";
+import {useToastStore} from "../stores/toastStore.js";
 
 const backendService = axios.create({
     baseURL: "http://localhost:8080/api",
@@ -20,19 +20,19 @@ backendService.interceptors.response.use(
     (response) => {
         const res = response.data;
 
-        if(res.code === 200) {
-            if(res.msg === "success") {
+        if (res.code === 200) {
+            if (res.msg === "success") {
                 return res.data;
             }
 
-            if(res.msg){
+            if (res.msg) {
                 const toast = useToastStore();
                 toast.success(res.msg);
             }
             return res.data
         }
 
-        if(res.msg){
+        if (res.msg) {
             const toast = useToastStore();
             toast.error(res.msg);
         }

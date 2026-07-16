@@ -1,16 +1,25 @@
 <template>
     <div class="option-manage">
+        <div class="page-heading">
+            <div>
+                <h2 class="page-title">选项管理</h2>
+                <p class="page-desc">管理颜色、尺码、类型等商品选项值</p>
+            </div>
+            <router-link class="btn-primary" to="/manage/option/add">+ 添加选项值</router-link>
+        </div>
         <div class="card">
             <div class="card-header">
-                <span class="card-title">选项值管理</span>
+                <span class="card-title">选项值列表</span>
                 <div class="header-actions">
                     <div class="search-bar">
                         <select v-model="typeFilter" @change="fetchList">
                             <option value="">全部类型</option>
-                            <option v-for="item in typeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+                            <option v-for="item in typeOptions" :key="item.value" :value="item.value">{{
+                                    item.label
+                                }}
+                            </option>
                         </select>
                     </div>
-                    <button class="btn-primary" @click="openAdd">+ 添加选项值</button>
                 </div>
             </div>
 
@@ -25,64 +34,44 @@
 
             <table v-else class="data-table">
                 <thead>
-                    <tr>
-                        <th>编号</th>
-                        <th>选项类型</th>
-                        <th>选项值</th>
-                        <th>操作</th>
-                    </tr>
+                <tr>
+                    <th>编号</th>
+                    <th>选项类型</th>
+                    <th>选项值</th>
+                    <th>操作</th>
+                </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="item in optionList" :key="item.id">
-                        <td>{{ item.id }}</td>
-                        <td>
-                            <span class="type-tag">{{ typeLabels[item.optionType] || item.optionType || '-' }}</span>
-                        </td>
-                        <td><strong>{{ item.optionValue || '-' }}</strong></td>
-                        <td>
-                            <div class="actions">
-                                <button class="btn-outline btn-sm" @click="openEdit(item)">编辑</button>
-                                <button class="btn-danger btn-sm" @click="confirmDelete(item)">删除</button>
-                            </div>
-                        </td>
-                    </tr>
+                <tr v-for="item in optionList" :key="item.id">
+                    <td>{{ item.id }}</td>
+                    <td v-if="editingId !== item.id">
+                        <span class="type-tag">{{ typeLabels[item.optionType] || item.optionType || '-' }}</span>
+                    </td>
+                    <td v-else>
+                        <select v-model="editForm.optionType" class="inline-select">
+                            <option v-for="opt in typeOptions" :key="opt.value" :value="opt.value">{{
+                                    opt.label
+                                }}
+                            </option>
+                        </select>
+                    </td>
+                    <td v-if="editingId !== item.id"><strong>{{ item.optionValue || '-' }}</strong></td>
+                    <td v-else><input v-model="editForm.optionValue" class="inline-input" maxlength="8"/></td>
+                    <td v-if="editingId !== item.id">
+                        <div class="actions">
+                            <button class="btn-outline btn-sm" @click="startEdit(item)">编辑</button>
+                            <button class="btn-danger btn-sm" @click="confirmDelete(item)">删除</button>
+                        </div>
+                    </td>
+                    <td v-else>
+                        <div class="actions">
+                            <button :disabled="saving" class="btn-success btn-sm" @click="saveEdit(item)">保存</button>
+                            <button class="btn-outline btn-sm" @click="cancelEdit">取消</button>
+                        </div>
+                    </td>
+                </tr>
                 </tbody>
             </table>
-        </div>
-
-        <!-- 新增/编辑弹窗 -->
-        <div v-if="showForm" class="modal-overlay" @click.self="closeForm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <span class="modal-title">{{ isEditing ? '编辑选项值' : '添加选项值' }}</span>
-                    <button class="modal-close" @click="closeForm">&times;</button>
-                </div>
-                <form class="modal-body" @submit.prevent="handleSubmit">
-                    <div class="form-group">
-                        <label>选项类型</label>
-                        <select v-model="form.optionType" required>
-                            <option value="" disabled>请选择选项类型</option>
-                            <option v-for="item in typeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>选项值</label>
-                        <input
-                            v-model="form.optionValue"
-                            type="text"
-                            maxlength="8"
-                            placeholder="例如: 红色、XL、棉"
-                            required
-                        />
-                    </div>
-                </form>
-                <div class="modal-footer">
-                    <button type="button" class="btn-outline" @click="closeForm">取消</button>
-                    <button type="button" class="btn-primary" @click="handleSubmit" :disabled="submitting">
-                        {{ submitting ? '提交中...' : '确认' }}
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- 删除确认 -->
@@ -97,7 +86,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn-outline" @click="showDelete = false">取消</button>
-                    <button class="btn-danger" @click="handleDelete" :disabled="deleting">
+                    <button :disabled="deleting" class="btn-danger" @click="handleDelete">
                         {{ deleting ? '删除中...' : '确认删除' }}
                     </button>
                 </div>
@@ -107,10 +96,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useToastStore } from '../../stores/toastStore.js'
+import {onMounted, ref} from 'vue'
+import {useToastStore} from '../../stores/toastStore.js'
 import optionValueInterface from '../../axios/interface/OptionValueInterface.js'
-import { OPTION_TYPE_OPTIONS, OPTION_TYPE_LABELS } from '../../constants/optionType.js'
+import {OPTION_TYPE_LABELS, OPTION_TYPE_OPTIONS} from '../../constants/optionType.js'
 
 const toast = useToastStore()
 const typeOptions = OPTION_TYPE_OPTIONS
@@ -119,6 +108,11 @@ const typeLabels = OPTION_TYPE_LABELS
 const optionList = ref([])
 const typeFilter = ref('')
 const loading = ref(true)
+
+const editingId = ref(null)
+const saving = ref(false)
+const editForm = ref({optionType: '', optionValue: ''})
+const editOrigin = ref(null)
 
 onMounted(() => fetchList())
 
@@ -137,58 +131,39 @@ async function fetchList() {
     }
 }
 
-// 表单
-const showForm = ref(false)
-const isEditing = ref(false)
-const submitting = ref(false)
-const form = ref({ optionType: '', optionValue: '' })
-
-function openAdd() {
-    isEditing.value = false
-    form.value = { optionType: '', optionValue: '' }
-    showForm.value = true
+function startEdit(item) {
+    editingId.value = item.id
+    editOrigin.value = {...item}
+    editForm.value = {optionType: item.optionType || '', optionValue: item.optionValue || ''}
 }
 
-function openEdit(item) {
-    isEditing.value = true
-    form.value = {
-        id: item.id,
-        optionType: item.optionType || '',
-        optionValue: item.optionValue || ''
+function cancelEdit() {
+    if (editOrigin.value) {
+        const idx = optionList.value.findIndex(o => o.id === editingId.value)
+        if (idx !== -1) optionList.value[idx] = {...editOrigin.value}
     }
-    showForm.value = true
+    editingId.value = null
+    editOrigin.value = null
 }
 
-function closeForm() {
-    showForm.value = false
-}
-
-async function handleSubmit() {
-    if (!form.value.optionType || !form.value.optionValue) {
-        toast.warning('请填写完整信息')
+async function saveEdit(item) {
+    if (!editForm.value.optionType || !editForm.value.optionValue) {
+        toast.warning('请填写完整信息');
         return
     }
-    submitting.value = true
+    saving.value = true
     try {
-        if (isEditing.value) {
-            await optionValueInterface.update(form.value.id, {
-                optionType: form.value.optionType,
-                optionValue: form.value.optionValue
-            })
-            toast.success('选项值更新成功')
-        } else {
-            await optionValueInterface.create({
-                optionType: form.value.optionType,
-                optionValue: form.value.optionValue
-            })
-            toast.success('选项值添加成功')
-        }
-        closeForm()
+        await optionValueInterface.update(editingId.value, {
+            optionType: editForm.value.optionType,
+            optionValue: editForm.value.optionValue
+        })
+        // 后端已返回提示
         await fetchList()
+        editingId.value = null
+        editOrigin.value = null
     } catch {
-        // 拦截器已处理
     } finally {
-        submitting.value = false
+        saving.value = false
     }
 }
 
@@ -206,7 +181,7 @@ async function handleDelete() {
     deleting.value = true
     try {
         await optionValueInterface.softDelete(deleteTarget.value.id)
-        toast.success('选项值已删除')
+        // 后端已返回提示
         showDelete.value = false
         await fetchList()
     } catch {
@@ -219,7 +194,31 @@ async function handleDelete() {
 
 <style scoped>
 .option-manage {
-    max-width: 900px;
+    width: 100%;
+    min-width: 0;
+}
+
+.page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    margin-bottom: 6px;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+}
+
+.page-desc {
+    color: var(--text-secondary);
+    font-size: var(--font-sm);
+}
+
+.option-manage > .card {
+    border-radius: 16px;
+    box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
 }
 
 .header-actions {
@@ -230,10 +229,61 @@ async function handleDelete() {
 
 .type-tag {
     display: inline-block;
-    padding: 2px 10px;
-    border-radius: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
     font-size: var(--font-sm);
     background: var(--primary-light);
     color: var(--primary);
+    font-weight: 600;
+}
+
+.inline-input {
+    width: 120px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid #dceae7;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none
+}
+
+.inline-input:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, .12)
+}
+
+.inline-select {
+    width: 120px;
+    height: 32px;
+    padding: 0 22px 0 8px;
+    border: 1px solid #dceae7;
+    border-radius: 8px;
+    font-size: 13px;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364807e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-color: #fff
+}
+
+.inline-select:focus {
+    border-color: #14b8a6
+}
+
+tr:has(.inline-input) {
+    background: #f4fbf9 !important
+}
+
+@media (max-width: 760px) {
+    .header-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .header-actions .search-bar,
+    .header-actions select {
+        width: 100%;
+    }
 }
 </style>

@@ -6,10 +6,10 @@ export const SEASON = Object.freeze({
 })
 
 export const SEASON_OPTIONS = [
-    { value: SEASON.SPRING, label: '春款' },
-    { value: SEASON.SUMMER, label: '夏款' },
-    { value: SEASON.AUTUMN, label: '秋款' },
-    { value: SEASON.WINTER, label: '冬款' }
+    {value: SEASON.SPRING, label: '春款'},
+    {value: SEASON.SUMMER, label: '夏款'},
+    {value: SEASON.AUTUMN, label: '秋款'},
+    {value: SEASON.WINTER, label: '冬款'}
 ]
 
 export const SEASON_LABELS = Object.freeze(

@@ -291,7 +291,9 @@ button {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ── 搜索栏 ── */
@@ -438,9 +440,20 @@ button {
     font-weight: 500;
 }
 
-.status-ok { background: var(--success-light); color: #16a34a; }
-.status-pending { background: var(--warning-light); color: #d97706; }
-.status-error { background: var(--error-light); color: #dc2626; }
+.status-ok {
+    background: var(--success-light);
+    color: #16a34a;
+}
+
+.status-pending {
+    background: var(--warning-light);
+    color: #d97706;
+}
+
+.status-error {
+    background: var(--error-light);
+    color: #dc2626;
+}
 
 .type-tag {
     display: inline-block;
@@ -452,11 +465,125 @@ button {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── 现代化视觉层 ── */
+:root {
+    --bg-body: #f4f8f7;
+    --bg-card: #ffffff;
+    --text: #173b3a;
+    --text-secondary: #64807e;
+    --text-muted: #9ab0ad;
+    --border: #dceae7;
+    --border-light: #eaf2f0;
+    --shadow: 0 4px 16px rgba(22, 83, 78, 0.06);
+    --shadow-hover: 0 12px 28px rgba(22, 83, 78, 0.12);
+    --shadow-lg: 0 18px 48px rgba(22, 83, 78, 0.16);
+}
+
+body {
+    background: radial-gradient(circle at 100% 0%, #e8f7f3 0, transparent 32%), var(--bg-body);
+}
+
+.btn-primary,
+.submit-btn {
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    box-shadow: 0 8px 18px rgba(13, 148, 136, 0.2);
+}
+
+.btn-primary:hover,
+.submit-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0d6d66, #0d9488);
+    box-shadow: 0 10px 24px rgba(13, 148, 136, 0.28);
+}
+
+.btn-outline {
+    border-radius: 10px;
+    background: #fff;
+    border-color: #d8e8e5;
+}
+
+.btn-danger,
+.btn-success {
+    border-radius: 9px;
+}
+
+.card {
+    border-radius: 16px;
+    border-color: #e3efed;
+    box-shadow: var(--shadow);
+}
+
+.card-header {
+    border-bottom-color: #edf4f2;
+}
+
+input, select, textarea {
+    border-radius: 10px;
+    border-color: #dceae7;
+    background: #fbfefd;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.12);
+}
+
+.data-table th {
+    background: #f8fcfb;
+    color: #6c8986;
+    letter-spacing: 0.02em;
+}
+
+.data-table td {
+    border-bottom-color: #edf4f2;
+}
+
+.data-table tr:hover td {
+    background: #f3fbf9;
+}
+
+.modal-overlay {
+    background: rgba(11, 48, 45, 0.38);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 18px;
+}
+
+.status-badge,
+.type-tag {
+    border: 1px solid currentColor;
+    border-color: transparent;
+}
+
+@media (max-width: 760px) {
+    .content-body {
+        padding: 18px 14px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
 }

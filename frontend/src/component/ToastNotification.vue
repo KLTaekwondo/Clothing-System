@@ -5,8 +5,8 @@
                 <div
                     v-for="toast in toasts"
                     :key="toast.id"
-                    class="toast-item"
                     :class="'toast-' + toast.type"
+                    class="toast-item"
                     @click="store.remove(toast.id)"
                 >
                     <span class="toast-icon">{{ icons[toast.type] }}</span>
@@ -19,8 +19,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useToastStore } from '../stores/toastStore.js'
+import {computed} from 'vue'
+import {useToastStore} from '../stores/toastStore.js'
 
 const store = useToastStore()
 const toasts = computed(() => store.toasts)
@@ -51,14 +51,14 @@ const icons = {
     gap: 10px;
     min-width: 280px;
     max-width: 420px;
-    padding: 12px 16px;
-    border-radius: 8px;
+    padding: 13px 16px;
+    border-radius: 12px;
     font-size: 14px;
     line-height: 1.4;
     color: #fff;
     cursor: pointer;
     pointer-events: auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 28px rgba(22, 83, 78, 0.18);
     transition: box-shadow 0.2s;
 }
 
@@ -66,10 +66,21 @@ const icons = {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
-.toast-item.toast-success { background: #22c55e; }
-.toast-item.toast-error   { background: #ef4444; }
-.toast-item.toast-warning { background: #f59e0b; }
-.toast-item.toast-info    { background: #3b82f6; }
+.toast-item.toast-success {
+    background: #22c55e;
+}
+
+.toast-item.toast-error {
+    background: #ef4444;
+}
+
+.toast-item.toast-warning {
+    background: #f59e0b;
+}
+
+.toast-item.toast-info {
+    background: #3b82f6;
+}
 
 .toast-icon {
     flex-shrink: 0;

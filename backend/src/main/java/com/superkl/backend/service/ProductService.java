@@ -29,20 +29,31 @@ public class ProductService {
     // 创建商品（重中之重）
     @Transactional
     public void create(ProductCreateDto productCreateDto) {
-        // 分成两部分处理
-        // 1.开始处理规格信息
-        Map<String , List<String>> selectedOptions = productCreateDto.getSelectedOptions();
-        SkuUtil.validateSelectedOptions(selectedOptions);
-        // 1.1 组合选中的选项，生成SKU名称
-        List<Map<String , String>> skuList = SkuUtil.generateSkuList(selectedOptions);
+        // 1.开始处理规格信息（只取颜色和尺码）
+        Map<String, List<String>> selectedOptions =
+                productCreateDto.getSelectedOptions();
+        Map<String, List<String>> skuOptions = new java.util.HashMap<>();
+        // 只处理颜色和尺码规格
+        if (selectedOptions.containsKey("COLOR")) {
+            skuOptions.put("COLOR", selectedOptions.get("COLOR"));
+        }
+        if (selectedOptions.containsKey("SIZE")) {
+            skuOptions.put("SIZE", selectedOptions.get("SIZE"));
+        }
+        SkuUtil.validateSelectedOptions(skuOptions);
+        List<Map<String, String>> skuList =
+                SkuUtil.generateSkuList(skuOptions);
         if (skuList.isEmpty()) {
             throw new BusinessException("商品规格不能为空");
         }
+
         // 2.创建商品本体的信息，然后入库
         Product product = ProductConverter.toEntity(productCreateDto);
         productRepository.save(product);
-        log.info("新增商品：{}，编码：{}", product.getProductName(), product.getProductCode());
+        log.info("新增商品：{}，编码：{}", product.getProductName(),
+                product.getProductCode());
         RequestUser.log();
+
         // 3. 保存SKU信息
         for (Map<String, String> combo : skuList) {
             productSkuService.createFromProduct(product, combo);

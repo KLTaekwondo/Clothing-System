@@ -49,6 +49,57 @@
 
 ---
 
+# 代码格式规范（血的教训）
+
+## 核心原则：每个属性单独一行，禁止任何属性写在同一行
+
+### CSS/SCSS 硬性规则
+```
+/* ✅ 正确 — 每个属性单独一行 */
+.detail-card {
+    width: calc(33.33% - 10px);
+    min-width: 210px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 16px;
+}
+
+/* ❌ 错误 — 同一行写多个属性 */
+.detail-card { width: calc(33.33% - 10px); min-width: 210px; padding: 20px; background: #fff; border-radius: 16px; }
+
+/* ❌ 错误 — 即使加了空格也还是同一行 */
+.detail-card { width: 100%; min-width: 0; }
+```
+
+**没有例外。** 不管多少个属性，不管内容多短，都必须每个单独一行。
+
+### Vue template 硬性规则
+```
+<!-- ✅ 正确 -->
+<input
+    v-model="form.name"
+    type="text"
+    placeholder="请输入"
+/>
+
+<!-- ❌ 错误 -->
+<input v-model="form.name" type="text" placeholder="请输入" />
+```
+
+### Vue script 硬性规则
+```
+// ✅ 正确
+async function fetchData() {
+    const result = await api.get()
+    data.value = result
+}
+
+// ❌ 错误
+async function fetchData() { const result = await api.get(); data.value = result }
+```
+
+> 违反此规则 = 骗工时 + 浪费用户钱。不允许再犯。
+
 # 代码八荣八耻
 
 > 以简洁明了为荣，以过度设计为耻

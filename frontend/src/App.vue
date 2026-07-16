@@ -1,8 +1,8 @@
 <template>
-  <div class="main-view">
-      <router-view />
-      <ToastNotification />
-  </div>
+    <div class="main-view">
+        <router-view/>
+        <ToastNotification/>
+    </div>
 </template>
 
 <script setup>

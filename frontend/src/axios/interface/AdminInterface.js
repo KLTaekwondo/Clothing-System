@@ -1,21 +1,21 @@
 import adminAPI from "../api/AdminAPI.js";
 
-function adminInterface(){
+function adminInterface() {
     // 登录
-    const login = async (body) =>{
+    const login = async (body) => {
         const result = await adminAPI.login(body);
         console.log(result);
         return result || {};
     }
 
     // 登出
-    const logout = async () =>{
+    const logout = async () => {
         await adminAPI.logout();
         return true;
     }
 
     // 重置密码
-    const resetPassword = async (data) =>{
+    const resetPassword = async (data) => {
         await adminAPI.resetPassword(data);
         return true;
     }

@@ -19,6 +19,10 @@ public class ProductInfo extends BaseInfo {
     private String code; // 商品编码
     private String name; // 商品名称
     private SeasonEnum season; // 商品季节
+    private String type; // 商品类型
+    private String category; // 商品种类
+    private String unit; // 商品单位
+    private String composition; // 商品面料组合
     private BigDecimal importPrice; // 商品进口价格
     private BigDecimal salePrice; // 商品销售价格
     private boolean special; // 是否特价

@@ -14,8 +14,8 @@
                     <div class="product-search">
                         <input
                             v-model="productQuery"
-                            type="text"
                             placeholder="搜索商品名称..."
+                            type="text"
                             @input="searchProducts"
                         />
                     </div>
@@ -54,7 +54,8 @@
                                 <div class="empty-text">该商品暂无可用 SKU</div>
                             </div>
                             <div v-else class="sku-picker-list">
-                                <button v-for="sku in skuList" :key="sku.id" class="sku-picker-item" @click="addToCart(sku)">
+                                <button v-for="sku in skuList" :key="sku.id" class="sku-picker-item"
+                                        @click="addToCart(sku)">
                                     <strong>{{ sku.name }}</strong>
                                     <span>{{ sku.spec }}</span>
                                     <code>{{ sku.code }}</code>
@@ -75,31 +76,31 @@
                     </div>
                     <table v-else class="data-table">
                         <thead>
-                            <tr>
-                                <th>商品</th>
-                                <th>数量</th>
-                                <th>操作</th>
-                            </tr>
+                        <tr>
+                            <th>商品</th>
+                            <th>数量</th>
+                            <th>操作</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item, idx) in cart" :key="idx">
-                                <td>
-                                    <div>{{ item.name }}</div>
-                                    <small>{{ item.skuCode }}</small>
-                                </td>
-                                <td>
-                                    <input
-                                        v-model.number="item.quantity"
-                                        type="number"
-                                        min="1"
-                                        class="qty-input"
-                                        @change="recalcTotal"
-                                    />
-                                </td>
-                                <td>
-                                    <button class="btn-danger btn-sm" @click="removeFromCart(idx)">移除</button>
-                                </td>
-                            </tr>
+                        <tr v-for="(item, idx) in cart" :key="idx">
+                            <td>
+                                <div>{{ item.name }}</div>
+                                <small>{{ item.skuCode }}</small>
+                            </td>
+                            <td>
+                                <input
+                                    v-model.number="item.quantity"
+                                    class="qty-input"
+                                    min="1"
+                                    type="number"
+                                    @change="recalcTotal"
+                                />
+                            </td>
+                            <td>
+                                <button class="btn-danger btn-sm" @click="removeFromCart(idx)">移除</button>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                     <div v-if="cart.length > 0" class="cart-total">
@@ -117,34 +118,38 @@
                     <div class="form-group">
                         <label>支付方式</label>
                         <select v-model="orderForm.payMethod">
-                            <option v-for="item in payMethodOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+                            <option v-for="item in payMethodOptions" :key="item.value" :value="item.value">{{
+                                    item.label
+                                }}
+                            </option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>员工 ID</label>
-                        <input v-model.number="orderForm.employeeId" type="number" min="1" placeholder="请输入员工 ID" />
+                        <input v-model.number="orderForm.employeeId" min="1" placeholder="请输入员工 ID" type="number"/>
                     </div>
                     <div class="form-group">
                         <label>仓库 ID</label>
-                        <input v-model.number="orderForm.wareHouseId" type="number" min="1" placeholder="请输入仓库 ID" />
+                        <input v-model.number="orderForm.wareHouseId" min="1" placeholder="请输入仓库 ID"
+                               type="number"/>
                     </div>
                     <div class="form-group">
                         <label>备注</label>
-                        <input v-model="orderForm.remark" type="text" maxlength="100" placeholder="订单备注（可选）" />
+                        <input v-model="orderForm.remark" maxlength="100" placeholder="订单备注（可选）" type="text"/>
                     </div>
                     <div class="order-actions">
                         <button
+                            :disabled="cart.length === 0 || orderSubmitting"
                             class="btn-primary"
                             style="width:100%;"
-                            :disabled="cart.length === 0 || orderSubmitting"
                             @click="submitOrder('complete')"
                         >
                             {{ orderSubmitting ? '提交中...' : '完成订单' }}
                         </button>
                         <button
+                            :disabled="cart.length === 0 || orderSubmitting"
                             class="btn-outline"
                             style="width:100%;"
-                            :disabled="cart.length === 0 || orderSubmitting"
                             @click="submitOrder('draft')"
                         >
                             保存草稿
@@ -172,16 +177,19 @@
                         >
                             <div class="order-head">
                                 <span class="order-id">订单 #{{ order.orderNo }}</span>
-                                <span class="order-status" :class="'order-' + (order.orderStatus || 'unknown')">
+                                <span :class="'order-' + (order.orderStatus || 'unknown')" class="order-status">
                                     {{ orderStatusLabels[order.orderStatus] || order.orderStatus || '未知' }}
                                 </span>
-                                <span class="order-meta">{{ payMethodLabels[order.payMethod] || order.payMethod || '-' }} · 实付 ¥{{ order.actualPrice ?? '0.00' }}</span>
+                                <span class="order-meta">{{
+                                        payMethodLabels[order.payMethod] || order.payMethod || '-'
+                                    }} · 实付 ¥{{ order.actualPrice ?? '0.00' }}</span>
                             </div>
                             <div class="order-actions-row">
                                 <button
                                     class="btn-success btn-sm"
                                     @click="handleRefund(order)"
-                                >退款</button>
+                                >退款
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -192,15 +200,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useToastStore } from '../stores/toastStore.js'
+import {onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useToastStore} from '../stores/toastStore.js'
 import productInterface from '../axios/interface/ProductInterface.js'
 import productSkuInterface from '../axios/interface/ProductSkuInterface.js'
 import orderInterface from '../axios/interface/OrderInterface.js'
-import { PAY_METHOD_OPTIONS, PAY_METHOD_LABELS } from '../constants/payMethod.js'
-import { STATUS } from '../constants/status.js'
-import { ORDER_STATUS_LABELS } from '../constants/orderStatus.js'
+import {PAY_METHOD_LABELS, PAY_METHOD_OPTIONS} from '../constants/payMethod.js'
+import {STATUS} from '../constants/status.js'
+import {ORDER_STATUS_LABELS} from '../constants/orderStatus.js'
 
 const router = useRouter()
 const payMethodOptions = PAY_METHOD_OPTIONS
@@ -287,7 +295,8 @@ function removeFromCart(idx) {
     cart.value.splice(idx, 1)
 }
 
-function recalcTotal() {}
+function recalcTotal() {
+}
 
 // 提交订单
 async function submitOrder(type) {
@@ -318,10 +327,10 @@ async function submitOrder(type) {
 
         if (type === 'complete') {
             await orderInterface.complete(orderData)
-            toast.success('订单已完成')
+            // 后端已返回提示
         } else {
             await orderInterface.draft(orderData)
-            toast.success('草稿已保存')
+            // 后端已返回提示
         }
         cart.value = []
         orderForm.value.remark = ''
@@ -358,15 +367,23 @@ function goBack() {
 <style scoped>
 .checkout-page {
     height: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
 }
 
 .checkout-header {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 28px;
+}
+
+.checkout-header .page-title {
+    margin: 0;
+    font-size: 27px;
+    letter-spacing: -0.5px;
 }
 
 .page-title {
@@ -383,7 +400,7 @@ function goBack() {
 }
 
 .left-panel {
-    width: 480px;
+    width: 52%;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -392,7 +409,7 @@ function goBack() {
 }
 
 .right-panel {
-    flex: 1;
+    width: calc(48% - 20px);
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -416,22 +433,30 @@ function goBack() {
 
 .product-item {
     width: calc(50% - 4px);
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    min-height: 78px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 14px;
+    border: 1px solid #e3efed;
+    border-radius: 12px;
+    background: #fbfefd;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .product-item:hover {
-    border-color: var(--primary);
-    background: var(--primary-light);
+    border-color: #73cfc5;
+    background: #effbf9;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(13, 148, 136, 0.1);
 }
 
 .product-name {
-    font-weight: 500;
+    font-weight: 700;
     font-size: var(--font-base);
-    color: var(--text-primary);
+    color: var(--text);
 }
 
 .product-id {
@@ -481,9 +506,16 @@ function goBack() {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    padding: 14px;
+    border: 1px solid #e3efed;
+    border-radius: 12px;
+    background: #fbfefd;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.order-item:hover {
+    background: #f3fbf9;
+    border-color: #bfe4df;
 }
 
 .order-head {
@@ -504,8 +536,8 @@ function goBack() {
 
 .order-status {
     font-size: var(--font-sm);
-    padding: 1px 8px;
-    border-radius: 10px;
+    padding: 3px 10px;
+    border-radius: 999px;
     display: inline-block;
     width: fit-content;
 }
@@ -528,5 +560,18 @@ function goBack() {
 .order-unknown {
     background: var(--bg-body);
     color: var(--text-light);
+}
+
+@media (max-width: 920px) {
+    .checkout-body {
+        flex-direction: column;
+        overflow: visible;
+    }
+
+    .left-panel,
+    .right-panel {
+        width: 100%;
+        overflow: visible;
+    }
 }
 </style>

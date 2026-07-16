@@ -17,15 +17,17 @@
 
                     <div class="role-tabs">
                         <button
-                            class="role-btn"
                             :class="{ active: role === 'admin' }"
-                            @click="role = 'admin'"
-                        >管理员</button>
-                        <button
                             class="role-btn"
+                            @click="role = 'admin'"
+                        >管理员
+                        </button>
+                        <button
                             :class="{ active: role === 'warehouse' }"
+                            class="role-btn"
                             @click="role = 'warehouse'"
-                        >仓库员工</button>
+                        >仓库员工
+                        </button>
                     </div>
 
                     <form class="auth-form" @submit.prevent="handleLogin">
@@ -34,10 +36,10 @@
                             <input
                                 id="account"
                                 v-model="form.account"
-                                type="text"
-                                placeholder="请输入账号"
                                 autocomplete="username"
+                                placeholder="请输入账号"
                                 required
+                                type="text"
                             />
                         </div>
                         <div class="field-group">
@@ -45,13 +47,13 @@
                             <input
                                 id="password"
                                 v-model="form.password"
-                                type="password"
-                                placeholder="请输入密码"
                                 autocomplete="current-password"
+                                placeholder="请输入密码"
                                 required
+                                type="password"
                             />
                         </div>
-                        <button type="submit" class="submit-btn" :disabled="loading">
+                        <button :disabled="loading" class="submit-btn" type="submit">
                             {{ loading ? '登录中…' : '登 录' }}
                         </button>
                     </form>
@@ -62,13 +64,14 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import adminInterface from '../axios/interface/AdminInterface.js'
-import wareHouseInterface from '../axios/interface/WareHouseInterface.js'
+import {reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import { useUserStore } from '../stores/userStore.js'
+import {useToastStore} from "../stores/toastStore.js";
 
 const router = useRouter()
 const loading = ref(false)
+const userStore = useUserStore();
 const role = ref('admin')
 
 const form = reactive({
@@ -79,27 +82,22 @@ const form = reactive({
 async function handleLogin() {
     if (!form.account || !form.password) return
     loading.value = true
-    try {
-        let result
-        if (role.value === 'admin') {
-            result = await adminInterface.login({
-                account: form.account,
-                password: form.password
-            })
-        } else {
-            result = await wareHouseInterface.login({
-                account: form.account,
-                password: form.password
-            })
-        }
-        if (result) {
-            router.push('/manage')
-        }
-    } catch {
-        // 拦截器处理
-    } finally {
-        loading.value = false
+    await userStore.login({
+        account: form.account,
+        password: form.password
+    }, role.value)
+
+    if (userStore.isLoggedIn && role.value === 'admin') {
+        await router.push('/manage')
+        useToastStore().success('后端管理登录成功')
     }
+
+    if (userStore.isLoggedIn && role.value === 'warehouse') {
+        await router.push('/checkout')
+        useToastStore().success('仓库员工登录成功')
+    }
+
+    loading.value = false
 }
 </script>
 
@@ -110,18 +108,19 @@ async function handleLogin() {
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: #f5f5f0;
+    background: radial-gradient(circle at 12% 16%, rgba(20, 184, 166, 0.18), transparent 30%), #eef7f5;
 }
 
 .auth-card {
     display: flex;
     width: 100%;
-    max-width: 820px;
-    min-height: 500px;
-    border-radius: 20px;
+    max-width: 860px;
+    min-height: 520px;
+    border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    background: #fff;
+    box-shadow: 0 24px 70px rgba(22, 83, 78, 0.16);
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.9);
     animation: cardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -139,7 +138,7 @@ async function handleLogin() {
 /* ── 品牌面板 ── */
 .brand-panel {
     width: 45%;
-    background: linear-gradient(135deg, #0d9488, #14b8a6);
+    background: linear-gradient(145deg, #0f766e, #14b8a6 68%, #5eead4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -155,7 +154,7 @@ async function handleLogin() {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.08) 0%, transparent 60%);
+    background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
     pointer-events: none;
 }
 
@@ -324,5 +323,46 @@ async function handleLogin() {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+}
+
+@media (max-width: 720px) {
+    .auth-page {
+        padding: 14px;
+    }
+
+    .auth-card {
+        max-width: 430px;
+        min-height: auto;
+        flex-direction: column;
+    }
+
+    .brand-panel,
+    .form-panel {
+        width: 100%;
+    }
+
+    .brand-panel {
+        min-height: 210px;
+        padding: 30px 24px;
+    }
+
+    .brand-icon {
+        width: 58px;
+        height: 58px;
+        margin-bottom: 14px;
+        font-size: 36px;
+    }
+
+    .brand-title {
+        font-size: 25px;
+    }
+
+    .brand-desc {
+        display: none;
+    }
+
+    .form-panel {
+        padding: 34px 24px;
+    }
 }
 </style>

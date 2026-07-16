@@ -1,5 +1,12 @@
 <template>
     <div class="employee-manage">
+        <div class="page-heading">
+            <div>
+                <h2 class="page-title">员工管理</h2>
+                <p class="page-desc">管理员工信息、分配仓库和查看状态</p>
+            </div>
+            <router-link class="btn-primary" to="/manage/employee/add">+ 添加员工</router-link>
+        </div>
         <div class="card">
             <div class="card-header">
                 <span class="card-title">员工列表</span>
@@ -7,12 +14,11 @@
                     <div class="search-bar">
                         <input
                             v-model="searchQuery"
-                            type="text"
                             placeholder="搜索员工姓名..."
+                            type="text"
                             @input="filterList"
                         />
                     </div>
-                    <button class="btn-primary" @click="openAdd">+ 添加员工</button>
                 </div>
             </div>
 
@@ -27,76 +33,33 @@
 
             <table v-else class="data-table">
                 <thead>
-                    <tr>
-                        <th>编码</th>
-                        <th>姓名</th>
-                        <th>状态</th>
-                        <th>操作</th>
-                    </tr>
+                <tr>
+                    <th>编码</th>
+                    <th>姓名</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="item in filteredList" :key="item.id">
-                        <td><code>{{ item.code }}</code></td>
-                        <td><strong>{{ item.name }}</strong></td>
-                        <td>
-                            <span class="status-badge" :class="item.status === STATUS.ENABLE ? 'status-ok' : 'status-error'">
+                <tr v-for="item in filteredList" :key="item.id" style="cursor:pointer" @dblclick="goDetail(item)">
+                    <td><code>{{ item.code }}</code></td>
+                    <td><strong>{{ item.name }}</strong></td>
+                    <td>
+                            <span :class="item.status === STATUS.ENABLE ? 'status-ok' : 'status-error'"
+                                  class="status-badge">
                                 {{ statusLabels[item.status] || item.status || '-' }}
                             </span>
-                        </td>
-                        <td>
-                            <div class="actions">
-                                <button class="btn-outline btn-sm" @click="openEdit(item)">编辑</button>
-                                <button class="btn-danger btn-sm" @click="confirmDelete(item)">删除</button>
-                            </div>
-                        </td>
-                    </tr>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <router-link :to="`/manage/employee/${item.id}`" class="btn-outline btn-sm">详情/编辑
+                            </router-link>
+                            <button class="btn-danger btn-sm" @click="confirmDelete(item)">删除</button>
+                        </div>
+                    </td>
+                </tr>
                 </tbody>
             </table>
-        </div>
-
-        <!-- 新增/编辑弹窗 -->
-        <div v-if="showForm" class="modal-overlay" @click.self="closeForm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <span class="modal-title">{{ isEditing ? '编辑员工' : '添加员工' }}</span>
-                    <button class="modal-close" @click="closeForm">&times;</button>
-                </div>
-                <form class="modal-body" @submit.prevent="handleSubmit">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>员工编码</label>
-                            <input v-model="form.code" type="text" minlength="2" maxlength="10" placeholder="请输入员工编码" required />
-                        </div>
-                        <div class="form-group">
-                            <label>员工姓名</label>
-                            <input v-model="form.name" type="text" minlength="2" maxlength="10" placeholder="请输入员工姓名" required />
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>所属仓库</label>
-                            <select v-model.number="form.wareHouseId" required>
-                                <option value="" disabled>请选择仓库</option>
-                                <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">
-                                    {{ warehouse.name }}
-                                </option>
-                            </select>
-                        </div>
-                        <div v-if="isEditing" class="form-group">
-                            <label>状态</label>
-                            <select v-model="form.status" required>
-                                <option v-for="item in statusOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-                <div class="modal-footer">
-                    <button type="button" class="btn-outline" @click="closeForm">取消</button>
-                    <button type="button" class="btn-primary" @click="handleSubmit" :disabled="submitting">
-                        {{ submitting ? '提交中...' : '确认' }}
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- 删除确认 -->
@@ -111,7 +74,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn-outline" @click="showDelete = false">取消</button>
-                    <button class="btn-danger" @click="handleDelete" :disabled="deleting">
+                    <button :disabled="deleting" class="btn-danger" @click="handleDelete">
                         {{ deleting ? '删除中...' : '确认删除' }}
                     </button>
                 </div>
@@ -121,18 +84,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useToastStore } from '../../stores/toastStore.js'
+import {computed, onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useToastStore} from '../../stores/toastStore.js'
 import employeeInterface from '../../axios/interface/EmployeeInterface.js'
-import wareHouseInterface from '../../axios/interface/WareHouseInterface.js'
-import { STATUS, STATUS_LABELS, STATUS_OPTIONS } from '../../constants/status.js'
+import {STATUS, STATUS_LABELS} from '../../constants/status.js'
 
+const router = useRouter()
 const toast = useToastStore()
 const statusLabels = STATUS_LABELS
-const statusOptions = STATUS_OPTIONS
 
 const employeeList = ref([])
-const warehouses = ref([])
 const searchQuery = ref('')
 const loading = ref(true)
 
@@ -146,17 +108,7 @@ const filteredList = computed(() => {
     )
 })
 
-onMounted(async () => {
-    await Promise.all([fetchList(), fetchWarehouses()])
-})
-
-async function fetchWarehouses() {
-    try {
-        warehouses.value = await wareHouseInterface.searchList()
-    } catch {
-        warehouses.value = []
-    }
-}
+onMounted(fetchList)
 
 async function fetchList() {
     loading.value = true
@@ -169,78 +121,11 @@ async function fetchList() {
     }
 }
 
-function filterList() {}
-
-// 表单
-const showForm = ref(false)
-const isEditing = ref(false)
-const submitting = ref(false)
-const form = ref({
-    code: '',
-    name: '',
-    wareHouseId: '',
-    status: STATUS.ENABLE
-})
-
-function openAdd() {
-    isEditing.value = false
-    form.value = { code: '', name: '', wareHouseId: '', status: STATUS.ENABLE }
-    showForm.value = true
+function filterList() {
 }
 
-function openEdit(item) {
-    isEditing.value = true
-    form.value = {
-        id: item.id,
-        code: item.code || '',
-        name: item.name || '',
-        wareHouseId: item.wareHouseId || '',
-        status: item.status || STATUS.ENABLE
-    }
-    showForm.value = true
-}
-
-function closeForm() {
-    showForm.value = false
-}
-
-async function handleSubmit() {
-    if (!form.value.code || !form.value.name || !form.value.wareHouseId) return
-    submitting.value = true
-    try {
-        const payload = {
-            code: form.value.code,
-            name: form.value.name,
-            wareHouseId: Number(form.value.wareHouseId)
-        }
-        if (isEditing.value) {
-            payload.status = form.value.status
-        }
-        if (isEditing.value) {
-            await employeeInterface.update(form.value.id, payload)
-            toast.success('员工信息更新成功')
-        } else {
-            await employeeInterface.create(payload)
-            toast.success('员工添加成功')
-        }
-        closeForm()
-        await fetchList()
-    } catch {
-        // 拦截器已处理
-    } finally {
-        submitting.value = false
-    }
-}
-
-// 核验
-async function handleVerify(item) {
-    try {
-        await employeeInterface.verify(item.id)
-        toast.success('员工核验成功')
-        await fetchList()
-    } catch {
-        // 拦截器已处理
-    }
+function goDetail(item) {
+    router.push(`/manage/employee/${item.id}`)
 }
 
 // 删除
@@ -257,7 +142,7 @@ async function handleDelete() {
     deleting.value = true
     try {
         await employeeInterface.softDelete(deleteTarget.value.id)
-        toast.success('员工已删除')
+        // 后端已返回提示
         showDelete.value = false
         await fetchList()
     } catch {
@@ -270,7 +155,31 @@ async function handleDelete() {
 
 <style scoped>
 .employee-manage {
-    max-width: 1100px;
+    width: 100%;
+    min-width: 0;
+}
+
+.page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    margin-bottom: 6px;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+}
+
+.page-desc {
+    color: var(--text-secondary);
+    font-size: var(--font-sm);
+}
+
+.employee-manage > .card {
+    border-radius: 16px;
+    box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
 }
 
 .header-actions {
@@ -292,8 +201,20 @@ async function handleDelete() {
     color: #16a34a;
 }
 
-.status-pending {
-    background: var(--warning-light);
-    color: #d97706;
+.status-error {
+    background: var(--error-light);
+    color: #dc2626;
+}
+
+@media (max-width: 760px) {
+    .header-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .header-actions .search-bar,
+    .header-actions .search-bar input {
+        width: 100%;
+    }
 }
 </style>
