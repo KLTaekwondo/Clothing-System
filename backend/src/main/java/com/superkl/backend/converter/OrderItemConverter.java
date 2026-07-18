@@ -14,7 +14,7 @@ public class OrderItemConverter {
     // 实体转Info
     public static OrderItemInfo toInfo(OrderItem orderItem) {
         return OrderItemInfo.builder()
-                .itemId(orderItem.getItemId())
+                .id(orderItem.getItemId())
                 .productName(orderItem.getProductName())
                 .skuName(orderItem.getSkuName())
                 .unitPrice(orderItem.getUnitPrice())

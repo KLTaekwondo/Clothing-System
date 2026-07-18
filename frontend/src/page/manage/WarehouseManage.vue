@@ -56,56 +56,6 @@
             </table>
         </div>
 
-        <!-- 新增/编辑弹窗 -->
-        <div v-if="false && showForm" class="modal-overlay" @click.self="closeForm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <span class="modal-title">{{ isEditing ? '编辑仓库' : '添加仓库' }}</span>
-                    <button class="modal-close" @click="closeForm">&times;</button>
-                </div>
-                <form class="modal-body" @submit.prevent="handleSubmit">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>仓库编码</label>
-                            <input v-model="form.code" maxlength="10" minlength="2" placeholder="请输入仓库编码"
-                                   required type="text"/>
-                        </div>
-                        <div class="form-group">
-                            <label>仓库名称</label>
-                            <input v-model="form.name" maxlength="10" minlength="2" placeholder="请输入仓库名称"
-                                   required type="text"/>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>仓库密码</label>
-                        <input v-model="form.password" maxlength="12" minlength="6"
-                               placeholder="6-12位字母、数字或下划线"
-                               required type="password"/>
-                    </div>
-                    <div v-if="!isEditing" class="form-group">
-                        <label>管理员 ID</label>
-                        <input v-model.number="form.adminId" min="1" placeholder="请输入管理员 ID" required
-                               type="number"/>
-                    </div>
-                    <div v-if="isEditing" class="form-group">
-                        <label>状态</label>
-                        <select v-model="form.status" required>
-                            <option v-for="item in statusOptions" :key="item.value" :value="item.value">{{
-                                    item.label
-                                }}
-                            </option>
-                        </select>
-                    </div>
-                </form>
-                <div class="modal-footer">
-                    <button class="btn-outline" type="button" @click="closeForm">取消</button>
-                    <button :disabled="submitting" class="btn-primary" type="button" @click="handleSubmit">
-                        {{ submitting ? '提交中...' : '确认' }}
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- 删除确认 -->
         <div v-if="showDelete" class="modal-overlay" @click.self="showDelete = false">
             <div class="modal-content" style="min-width: 360px;">

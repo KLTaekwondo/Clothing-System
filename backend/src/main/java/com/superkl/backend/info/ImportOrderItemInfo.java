@@ -13,12 +13,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class OrderItemInfo extends BaseInfo{
+public class ImportOrderItemInfo extends BaseInfo {
     private String productName;
     private String skuName;
-    private BigDecimal unitPrice;
+    private BigDecimal importPrice;
     private Integer quantity;
-    private BigDecimal discount;
     private BigDecimal totalPrice;
-    private BigDecimal actualPrice;
 }

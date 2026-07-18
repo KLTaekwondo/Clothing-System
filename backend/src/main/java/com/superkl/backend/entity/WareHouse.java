@@ -44,6 +44,10 @@ public class WareHouse extends BaseEntity{
     @Builder.Default
     private Set<Order> orders = new HashSet<>();// 订单列表
 
+    @OneToMany(mappedBy = "wareHouse",fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<ImportOrder> importOrders = new HashSet<>();// 进货订单列表
+
     // 关联员工
     @OneToMany(mappedBy = "wareHouse",fetch = FetchType.LAZY)
     @Builder.Default
