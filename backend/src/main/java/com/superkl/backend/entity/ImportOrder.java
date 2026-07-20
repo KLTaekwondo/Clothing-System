@@ -21,7 +21,7 @@ public class ImportOrder extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long importOrderId;// 进货订单Id
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     private String importOrderNo;// 进货订单编号;
 
     @Column(nullable = false)
@@ -36,7 +36,7 @@ public class ImportOrder extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private ImportOrderEnum importOrderEnum = ImportOrderEnum.DRAFT;
+    private ImportOrderEnum status = ImportOrderEnum.DRAFT;
 
     // 关联属性
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,4 +50,21 @@ public class ImportOrder extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ware_house_id")
     private WareHouse wareHouse;// 仓库(追溯仓库，强关联)
+
+    // 辅助方法
+    public boolean isDraft() {
+        return ImportOrderEnum.DRAFT.equals(status);
+    }
+
+    public boolean isChecking() {
+        return ImportOrderEnum.CHECKING.equals(status);
+    }
+
+    public boolean isApproved() {
+        return ImportOrderEnum.APPROVED.equals(status);
+    }
+
+    public boolean isRejected() {
+        return ImportOrderEnum.REJECTED.equals(status);
+    }
 }

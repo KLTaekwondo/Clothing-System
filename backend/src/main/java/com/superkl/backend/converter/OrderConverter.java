@@ -28,6 +28,8 @@ public class OrderConverter {
                 .remark(order.getRemark())
                 .employeeName(order.getEmployee().getEmployeeName())
                 .warehouseName(order.getWareHouse().getWareHouseName())
+                .createTime(order.getCreateTime())
+                .updateTime(order.getUpdateTime())
                 .build();
     }
 
@@ -50,6 +52,8 @@ public class OrderConverter {
                 .remark(order.getRemark())
                 .employeeName(order.getEmployee().getEmployeeName())
                 .warehouseName(order.getWareHouse().getWareHouseName())
+                .createTime(order.getCreateTime())
+                .updateTime(order.getUpdateTime())
                 .items(items)
                 .build();
     }
@@ -68,6 +72,6 @@ public class OrderConverter {
     private static String generateOrderNo(){
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String uuid = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        return date + uuid;
+        return "OR" + date + uuid;
     }
 }

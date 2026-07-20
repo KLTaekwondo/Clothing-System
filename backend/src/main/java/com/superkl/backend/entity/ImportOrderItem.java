@@ -22,7 +22,7 @@ public class ImportOrderItem extends BaseEntity {
     private Long importItemId;// 进货订单项Id
 
     @Column(nullable = false)
-    private Long SkuId;// 商品SKU Id(追溯商品SKU，弱关联)
+    private Long skuId;// 商品SKU Id(追溯商品SKU，弱关联)
 
     @Column(nullable = false)
     private String skuName;// 商品SKU 名称(弱关联快照，用于记录当时进货时的商品SKU名称)

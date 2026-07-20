@@ -1,10 +1,11 @@
 package com.superkl.backend.converter;
 
-import com.superkl.backend.entity.ImportOrder;
+import com.superkl.backend.dto.ImportOrderItemCreateDto;
 import com.superkl.backend.entity.ImportOrderItem;
-import com.superkl.backend.info.ImportOrderInfo;
+import com.superkl.backend.entity.ProductSku;
 import com.superkl.backend.info.ImportOrderItemInfo;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class ImportOrderItemConverter {
@@ -27,5 +28,20 @@ public class ImportOrderItemConverter {
         return importOrderItems.stream()
                 .map(ImportOrderItemConverter::toInfo)
                 .toList();
+    }
+
+    // dto转实体
+    public static ImportOrderItem toEntity(ImportOrderItemCreateDto dto, ProductSku productSku) {
+        BigDecimal importPrice = productSku.getProduct().getImportPrice();
+        BigDecimal importQuantity = BigDecimal.valueOf(dto.getImportQuantity());
+        BigDecimal totalPrice = importPrice.multiply(importQuantity);
+        return ImportOrderItem.builder()
+                .skuId(productSku.getSkuId())
+                .productName(productSku.getProduct().getProductName())
+                .skuName(productSku.getSkuName())
+                .importPrice(importPrice)
+                .quantity(importQuantity.intValue())
+                .totalPrice(totalPrice)
+                .build();
     }
 }
