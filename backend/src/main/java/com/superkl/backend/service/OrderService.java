@@ -7,6 +7,7 @@ import com.superkl.backend.entity.Employee;
 import com.superkl.backend.entity.Order;
 import com.superkl.backend.entity.OrderItem;
 import com.superkl.backend.entity.WareHouse;
+import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.OrderStatusEnum;
 import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
@@ -36,23 +37,78 @@ public class OrderService {
     private final WareHouseRepository wareHouseRepository;
     private final WareHouseStockService wareHouseStockService;
 
-
-    // 1.完成订单
-    @Transactional
-    public void complete(OrderCreateDto dto) {
-        saveOrder(dto,OrderStatusEnum.COMPLETED);
-    }
-
-    // 2.挂单订单
+    // 1.挂单操作
     @Transactional
     public void draft(OrderCreateDto dto) {
-        saveOrder(dto,OrderStatusEnum.DRAFT);
+        Order order = OrderConverter.toEntity(dto);
+        applyOrder(dto,order);
+        order.setStatus(OrderStatusEnum.DRAFT);
+        orderRepository.save(order);
+
     }
 
-    // 3.退货订单
+    // 2.完成订单
     @Transactional
-    public void refund(OrderCreateDto dto) {
-        saveOrder(dto,OrderStatusEnum.REFUND);
+    public void complete(OrderCreateDto dto) {
+        // 先获取订单是否存在
+        Long orderId = dto.getOrderId();
+        Order order;
+
+        // 情况一：新订单
+        if(orderId == null) {
+            // 1.创建新订单
+            order = OrderConverter.toEntity(dto);
+
+            // 2.创建新订单项
+            applyOrder(dto,order);
+
+            // 3.处理库存
+            Long wareHouseId = dto.getWareHouseId();
+            List<OrderItem> items = order.getOrderItems().stream().toList();
+            stockManage(items,wareHouseId);
+
+            // 4.设置为已完成状态
+            order.setStatus(OrderStatusEnum.COMPLETED);
+
+        } else {
+            // 情况二：已保存订单
+            // 1.校验订单是否存在
+            order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+
+            // 2.校验订单状态是否为草稿
+            if(!order.isDraft()){
+                throw new BusinessException(403, "订单不是草稿状态，不可完成！");
+            }
+
+            // 3.删除旧订单项，并添加新的订单项
+            orderItemService.updateDelete(orderId);
+            applyOrder(dto,order);
+
+            // 4.处理库存
+            Long wareHouseId = dto.getWareHouseId();
+            List<OrderItem> items = order.getOrderItems().stream().toList();
+            stockManage(items,wareHouseId);
+
+            // 5.设置为已完成状态
+            order.setStatus(OrderStatusEnum.COMPLETED);
+        }
+
+        // 6.保存订单
+        orderRepository.save(order);
+    }
+
+    // 3.更新草稿订单
+    @Transactional
+    public void update(Long orderId , OrderCreateDto dto) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+        if(!order.isDraft()){
+            throw new BusinessException(403, "订单不是草稿状态，不可更新！");
+        }
+        orderItemService.updateDelete(orderId);
+        applyOrder(dto,order);
+        orderRepository.save(order);
     }
 
     // 4.查询单个订单
@@ -72,10 +128,9 @@ public class OrderService {
     }
 
 
-
-    private void saveOrder(OrderCreateDto dto,OrderStatusEnum orderStatus) {
-        // 1.创建订单本体，同时校验仓库和销售员是否存在
-        Order order = OrderConverter.toEntity(dto);
+    // 6.库存管理
+    private void applyOrder(OrderCreateDto dto ,Order order) {
+        // 1.校验仓库和销售员是否存在
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
                 .orElseThrow(() -> new BusinessException(403, "销售员不存在"));
         WareHouse wareHouse = wareHouseRepository.findById(dto.getWareHouseId())
@@ -97,7 +152,13 @@ public class OrderService {
         }
 
         // 2.创建商品项
-        List<OrderItem> items = orderItemService.createList(dto.getOrderItems(), order);
+        // 2.1 先检查是否有商品项为空
+        boolean isEmpty = dto.getSaleItems().isEmpty() && dto.getRefundItems().isEmpty();
+        if(isEmpty){
+            throw new BusinessException("订单项不能为空");
+        }
+        List<OrderItem> saleItems = orderItemService.createList(dto.getSaleItems(), order , DirectionEnum.IN);
+        List<OrderItem> refundItems = orderItemService.createList(dto.getRefundItems(), order, DirectionEnum.OUT);
         // 3.校验金额
         // 3.1 前端提交的金额
         BigDecimal f_ActualAmount = dto.getActualAmount();
@@ -106,43 +167,48 @@ public class OrderService {
         // 3.2 后端计算的订单项金额
         BigDecimal b_ActualAmount = BigDecimal.ZERO;
         BigDecimal b_TotalAmount = BigDecimal.ZERO;
-        for (OrderItem item : items) {
+
+        // 卖出去的总计金额
+        for (OrderItem item : saleItems) {
             b_ActualAmount = b_ActualAmount.add(item.getActualPrice());
             b_TotalAmount = b_TotalAmount.add(item.getTotalPrice());
         }
+        // 退款的总计金额
+        for (OrderItem item : refundItems) {
+            b_ActualAmount = b_ActualAmount.subtract(item.getActualPrice());
+            b_TotalAmount = b_TotalAmount.subtract(item.getTotalPrice());
+        }
+
+
         // 校验金额是否一致
         if (f_ActualAmount.compareTo(b_ActualAmount) != 0 || f_TotalAmount.compareTo(b_TotalAmount) != 0) {
             throw new BusinessException("订单金额与商品项金额不一致");
         }
 
+        // 整合订单项
+        Set<OrderItem> items = new HashSet<>();
+        items.addAll(saleItems);
+        items.addAll(refundItems);
+
         // 4.保存订单
         order.setActualPrice(b_ActualAmount);
         order.setTotalPrice(b_TotalAmount);
-        order.setOrderItems(new HashSet<>(items));
+        order.setOrderItems(items);
         order.setEmployee(employee);
         order.setWareHouse(wareHouse);
-        order.setStatus(orderStatus);
-        orderRepository.save(order);
+    }
 
-        log.info("订单{}：{}，金额：{}，员工：{}，仓库：{}",
-                orderStatus == OrderStatusEnum.COMPLETED ? "完成" :
-                orderStatus == OrderStatusEnum.REFUND ? "退款" : "挂单",
-                order.getOrderNo(), b_ActualAmount,
-                employee.getEmployeeName(), wareHouse.getWareHouseName());
-        RequestUser.log();
-
-        // 5.更新库存
-        for (OrderItem item : items) {
-            if(orderStatus.equals(OrderStatusEnum.DRAFT)) {
-                continue;
+    // 库存管理
+    private void stockManage(List<OrderItem> orderItems, Long wareHouseId) {
+        for (OrderItem orderItem : orderItems) {
+            if(DirectionEnum.IN.equals(orderItem.getDirection())) {
+                // 出售商品（正向业务），更新库存状态
+                wareHouseStockService.decreaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity());
             }
 
-            if(orderStatus.equals(OrderStatusEnum.REFUND)) {
-                wareHouseStockService.increaseStock(wareHouse.getWareHouseId(), item.getSkuId(), item.getQuantity());
-            }
-
-            if(orderStatus.equals(OrderStatusEnum.COMPLETED)) {
-                wareHouseStockService.decreaseStock(wareHouse.getWareHouseId(), item.getSkuId(), item.getQuantity());
+            if(DirectionEnum.OUT.equals(orderItem.getDirection())) {
+                // 退货商品（反向业务），更新库存状态
+                wareHouseStockService.increaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity());
             }
         }
     }

@@ -22,6 +22,7 @@ public class OrderItemConverter {
                 .discount(orderItem.getDiscount())
                 .totalPrice(orderItem.getTotalPrice())
                 .actualPrice(orderItem.getActualPrice())
+                .direction(orderItem.getDirection())
                 .createTime(orderItem.getCreateTime())
                 .updateTime(orderItem.getUpdateTime())
                 .build();

@@ -1,5 +1,6 @@
 package com.superkl.backend.entity;
 
+import com.superkl.backend.enums.DirectionEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -42,6 +43,10 @@ public class OrderItem extends BaseEntity {
 
     @Column(nullable = false)
     private BigDecimal actualPrice;// 商品实际总价格
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DirectionEnum direction;// 业务方向(IN:售出商品/OUT:退货商品)
 
 
     // 强关联属性

@@ -58,4 +58,13 @@ public class Order extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "warehouse_id")
     private WareHouse wareHouse;// 关联仓库
+
+    // 辅助方法
+    public boolean isDraft() {
+        return OrderStatusEnum.DRAFT.equals(status);
+    }
+
+    public boolean isCompleted() {
+        return OrderStatusEnum.COMPLETED.equals(status);
+    }
 }

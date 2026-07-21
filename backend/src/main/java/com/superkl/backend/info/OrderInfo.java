@@ -1,5 +1,6 @@
 package com.superkl.backend.info;
 
+import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.OrderStatusEnum;
 import com.superkl.backend.enums.PayMethodEnum;
 import lombok.AllArgsConstructor;
@@ -24,4 +25,5 @@ public class OrderInfo extends BaseInfo {
     private String remark; // 订单备注
     private String employeeName; // 关联员工姓名
     private String warehouseName; // 关联仓库名称
+    private DirectionEnum direction;// 业务方向(IN:售出商品/OUT:退货商品)
 }

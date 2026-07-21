@@ -1,5 +1,6 @@
 package com.superkl.backend.dto;
 
+import com.superkl.backend.enums.DirectionEnum;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
@@ -33,6 +34,9 @@ public class ImportOrderDraftDto {
 
     @Size(max = 100, message = "备注不能超过100个字符")
     private String remark;
+
+    @NotNull(message = "方向不能为空")
+    private DirectionEnum direction;
 
     @NotEmpty(message = "进货订单项不能为空")
     private List<@Valid ImportOrderItemCreateDto> importItems;

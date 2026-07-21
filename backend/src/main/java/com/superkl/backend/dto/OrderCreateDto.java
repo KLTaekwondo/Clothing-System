@@ -14,6 +14,8 @@ import java.util.List;
 
 @Data
 public class OrderCreateDto {
+    private Long orderId;// 订单ID，用于判断是否是以及保存过的订单，还是新订单创建
+
     @NotNull(message = "支付方式不能为空")
     private PayMethodEnum payMethod;
 
@@ -23,15 +25,16 @@ public class OrderCreateDto {
     @NotNull(message = "关联仓库不能为空")
     private Long wareHouseId;
 
-    @NotEmpty(message = "订单商品不能为空")
-    private List<@Valid OrderItemCreateDto> orderItems;
+    @NotNull(message = "订单项不能为空")
+    private List<@Valid OrderItemCreateDto> saleItems;
+
+    @NotNull(message = "订单项不能为空")
+    private List<@Valid OrderItemCreateDto> refundItems;
 
     @NotNull(message = "传入的实际金额不能为空")
-    @DecimalMin(value = "0.00", message = "传入的实际金额不得小于0")
     private BigDecimal actualAmount;
 
     @NotNull(message  = "传入的总金额不能为空")
-    @DecimalMin(value = "0.00", message = "传入的总金额不得小于0")
     private BigDecimal totalAmount;
 
     @Size(max = 100, message = "备注长度不能超过100")

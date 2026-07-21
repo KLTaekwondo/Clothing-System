@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum OrderStatusEnum {
-    DRAFT("DRAFT","挂单"),
-    COMPLETED("COMPLETED","已完成");
-    // 订单状态枚举
+public enum DirectionEnum {
+    IN("IN", "正向"),
+    OUT("OUT", "反向");
+
     private final String code;
     private final String desc;
 }

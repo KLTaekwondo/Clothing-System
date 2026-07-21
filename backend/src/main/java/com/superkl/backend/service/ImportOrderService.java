@@ -7,6 +7,7 @@ import com.superkl.backend.entity.ImportOrder;
 import com.superkl.backend.entity.ImportOrderItem;
 import com.superkl.backend.entity.Supplier;
 import com.superkl.backend.entity.WareHouse;
+import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.ImportOrderEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.ImportOrderInfo;
@@ -82,7 +83,7 @@ public class ImportOrderService {
         log.info("进货订单审核中，订单编号：{}", importOrder.getImportOrderNo());
     }
 
-    // 将进货订单状态设置为已审核，同时将库存增加
+    // 将进货订单状态设置为已审核，同时将库存增加/减少，根据方向进行
     @Transactional
     public void approve(Long importOrderId){
         // 首先找订单是否存在
@@ -92,11 +93,20 @@ public class ImportOrderService {
         if(!importOrder.isChecking()){
             throw new BusinessException(405, "进货订单状态不是审核中，不能通过");
         }
-        // 增加库存
+        // 增加/减少库存
         Long wareHouseId = importOrder.getWareHouse().getWareHouseId();
         List<ImportOrderItem> items = importOrderItemRepository.findByImportOrderId(importOrderId);
+        DirectionEnum direction = importOrder.getDirection();
         for(ImportOrderItem item : items) {
-            wareHouseStockService.increaseStock(wareHouseId, item.getSkuId(), item.getQuantity());
+            // 增加库存
+            if(DirectionEnum.IN.equals(direction)){
+                wareHouseStockService.increaseStock(wareHouseId, item.getSkuId(), item.getQuantity());
+            }
+
+            // 减少库存
+            if(DirectionEnum.OUT.equals(direction)){
+                wareHouseStockService.decreaseStock(wareHouseId, item.getSkuId(), item.getQuantity());
+            }
         }
         // 审核通过
         importOrder.setStatus(ImportOrderEnum.APPROVED);

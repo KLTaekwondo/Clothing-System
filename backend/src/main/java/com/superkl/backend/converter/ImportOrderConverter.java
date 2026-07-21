@@ -23,6 +23,10 @@ public class ImportOrderConverter {
                 .remark(importOrder.getRemark())
                 .totalAmount(importOrder.getTotalAmount())
                 .status(importOrder.getStatus())
+                .direction(importOrder.getDirection())
+                .wareHouseName(importOrder.getWareHouse().getWareHouseName())
+                .createTime(importOrder.getCreateTime())
+                .updateTime(importOrder.getUpdateTime())
                 .build();
     }
 
@@ -43,6 +47,7 @@ public class ImportOrderConverter {
                 .wareHouseName(importOrder.getWareHouse().getWareHouseName())
                 .totalAmount(importOrder.getTotalAmount())
                 .status(importOrder.getStatus())
+                .direction(importOrder.getDirection())
                 .createTime(importOrder.getCreateTime())
                 .updateTime(importOrder.getUpdateTime())
                 .items(items)
@@ -54,6 +59,7 @@ public class ImportOrderConverter {
         return ImportOrder.builder()
                 .importOrderNo(generateImportOrderNo())
                 .remark(dto.getRemark())
+                .direction(dto.getDirection())
                 .build();
     }
 

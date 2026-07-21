@@ -1,5 +1,6 @@
 package com.superkl.backend.entity;
 
+import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.ImportOrderEnum;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,7 +37,11 @@ public class ImportOrder extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private ImportOrderEnum status = ImportOrderEnum.DRAFT;
+    private ImportOrderEnum status = ImportOrderEnum.DRAFT;// 进货订单状态
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DirectionEnum direction;// 进货订单方向
 
     // 关联属性
     @ManyToOne(fetch = FetchType.LAZY)

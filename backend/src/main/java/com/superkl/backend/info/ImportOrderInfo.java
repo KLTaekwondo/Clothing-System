@@ -1,5 +1,6 @@
 package com.superkl.backend.info;
 
+import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.ImportOrderEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,4 +22,5 @@ public class ImportOrderInfo extends BaseInfo {
     private BigDecimal totalAmount;// 总金额
     private ImportOrderEnum status;// 进货订单状态
     private String wareHouseName;// 仓库名称
+    private DirectionEnum direction;// 业务方向
 }
