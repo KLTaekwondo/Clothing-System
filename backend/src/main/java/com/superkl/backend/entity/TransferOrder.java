@@ -1,7 +1,6 @@
 package com.superkl.backend.entity;
 
 import com.superkl.backend.enums.AuditStatusEnum;
-import com.superkl.backend.enums.DirectionEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -11,50 +10,48 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "t_import_order")
+@Table(name = "t_transfer_order")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class ImportOrder extends BaseEntity {
+public class TransferOrder extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long importOrderId;// 进货订单Id
+    private Long transferOrderId; // 转移订单ID
 
-    @Column(nullable = false, unique = true)
-    private String importOrderNo;// 进货订单编号;
-
-    @Column(nullable = false)
-    private String supplierName;// 快照供应商名字
-
-    @Column(length = 100)
-    private String remark;// 备注
+    @Column(nullable = false,unique = true)
+    private String transferOrderNo; // 转移订单编号
 
     @Column(nullable = false)
-    private BigDecimal totalAmount;// 总金额
+    private String sourceWareHouseName; // 源仓库名称(快照，用于记录当时的仓库名称)
+    @Column(nullable = false)
+    private String targetWareHouseName; // 目标仓库名称(快照，用于记录当时的仓库名称)
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private AuditStatusEnum status = AuditStatusEnum.DRAFT;// 进货订单状态
+    private AuditStatusEnum status = AuditStatusEnum.DRAFT; // 转移订单状态
+
+    @Column(length = 100)
+    private String remark;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private DirectionEnum direction;// 进货订单方向
+    private BigDecimal totalPrice; // 商品总价
 
     // 关联属性
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "supplier_id")
-    private Supplier supplier;// 供应商(追溯供应商，强关联)
-
-    @OneToMany(mappedBy = "importOrder", cascade = CascadeType.ALL)
-    @Builder.Default
-    private Set<ImportOrderItem> importOrderItems = new HashSet<>();// 进货订单项(追溯进货订单项，强关联)
+    @JoinColumn(name = "source_warehouse_id")
+    private WareHouse sourceWareHouse;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ware_house_id")
-    private WareHouse wareHouse;// 仓库(追溯仓库，强关联)
+    @JoinColumn(name = "target_warehouse_id")
+    private WareHouse targetWareHouse;
+
+    @OneToMany(mappedBy = "transferOrder",fetch = FetchType.LAZY , cascade = CascadeType.ALL)
+    @Builder.Default
+    private Set<TransferOrderItem> transferOrderItems = new HashSet<>();// 转移订单项列表
 
     // 辅助方法
     public boolean isDraft() {

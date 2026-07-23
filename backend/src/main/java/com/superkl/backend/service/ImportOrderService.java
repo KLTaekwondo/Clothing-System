@@ -7,8 +7,8 @@ import com.superkl.backend.entity.ImportOrder;
 import com.superkl.backend.entity.ImportOrderItem;
 import com.superkl.backend.entity.Supplier;
 import com.superkl.backend.entity.WareHouse;
+import com.superkl.backend.enums.AuditStatusEnum;
 import com.superkl.backend.enums.DirectionEnum;
-import com.superkl.backend.enums.ImportOrderEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.ImportOrderInfo;
 import com.superkl.backend.info.ImportOrderItemInfo;
@@ -74,7 +74,7 @@ public class ImportOrderService {
             throw new BusinessException(405, "进货订单状态不是草稿，不能设置审核中");
         }
         // 设置审核中状态
-        importOrder.setStatus(ImportOrderEnum.CHECKING);
+        importOrder.setStatus(AuditStatusEnum.CHECKING);
         // 更新订单
         importOrderRepository.save(importOrder);
 
@@ -109,7 +109,7 @@ public class ImportOrderService {
             }
         }
         // 审核通过
-        importOrder.setStatus(ImportOrderEnum.APPROVED);
+        importOrder.setStatus(AuditStatusEnum.APPROVED);
 
         RequestUser.log();
         log.info("进货订单审核通过，订单编号：{}", importOrder.getImportOrderNo());
@@ -125,7 +125,7 @@ public class ImportOrderService {
             throw new BusinessException(405, "进货订单状态不是审核中，不能拒绝");
         }
         // 审核拒绝
-        importOrder.setStatus(ImportOrderEnum.REJECTED);
+        importOrder.setStatus(AuditStatusEnum.REJECTED);
         // 更新订单
         importOrderRepository.save(importOrder);
 

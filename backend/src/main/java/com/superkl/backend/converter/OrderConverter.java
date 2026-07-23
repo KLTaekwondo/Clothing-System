@@ -59,11 +59,9 @@ public class OrderConverter {
     }
 
     // dto转实体
-    public static Order toEntity(OrderCreateDto dto){
+    public static Order toEntity(){
         return Order.builder()
                 .orderNo(generateOrderNo())
-                .payMethod(dto.getPayMethod())
-                .remark(dto.getRemark())
                 .build();
 
     }

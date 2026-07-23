@@ -40,7 +40,7 @@ public class OrderService {
     // 1.挂单操作
     @Transactional
     public void draft(OrderCreateDto dto) {
-        Order order = OrderConverter.toEntity(dto);
+        Order order = OrderConverter.toEntity();
         applyOrder(dto,order);
         order.setStatus(OrderStatusEnum.DRAFT);
         orderRepository.save(order);
@@ -57,13 +57,13 @@ public class OrderService {
         // 情况一：新订单
         if(orderId == null) {
             // 1.创建新订单
-            order = OrderConverter.toEntity(dto);
+            order = OrderConverter.toEntity();
 
             // 2.创建新订单项
             applyOrder(dto,order);
 
             // 3.处理库存
-            Long wareHouseId = dto.getWareHouseId();
+            Long wareHouseId = order.getWareHouse().getWareHouseId();
             List<OrderItem> items = order.getOrderItems().stream().toList();
             stockManage(items,wareHouseId);
 
@@ -86,7 +86,7 @@ public class OrderService {
             applyOrder(dto,order);
 
             // 4.处理库存
-            Long wareHouseId = dto.getWareHouseId();
+            Long wareHouseId = order.getWareHouse().getWareHouseId();
             List<OrderItem> items = order.getOrderItems().stream().toList();
             stockManage(items,wareHouseId);
 
@@ -100,7 +100,11 @@ public class OrderService {
 
     // 3.更新草稿订单
     @Transactional
-    public void update(Long orderId , OrderCreateDto dto) {
+    public void update(OrderCreateDto dto) {
+        Long orderId = dto.getOrderId();
+        if(orderId == null){
+            throw new BusinessException(403, "订单ID为空！无法更新！");
+        }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(403, "订单不存在"));
         if(!order.isDraft()){
@@ -128,7 +132,7 @@ public class OrderService {
     }
 
 
-    // 6.库存管理
+    // 6.处理订单项
     private void applyOrder(OrderCreateDto dto ,Order order) {
         // 1.校验仓库和销售员是否存在
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
@@ -191,6 +195,8 @@ public class OrderService {
         items.addAll(refundItems);
 
         // 4.保存订单
+        order.setPayMethod(dto.getPayMethod());
+        order.setRemark(dto.getRemark());
         order.setActualPrice(b_ActualAmount);
         order.setTotalPrice(b_TotalAmount);
         order.setOrderItems(items);

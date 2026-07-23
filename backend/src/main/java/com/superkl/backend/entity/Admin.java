@@ -5,9 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Entity
 @Table(name = "t_admin")
 @Getter
@@ -33,12 +30,6 @@ public class Admin extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private StatusEnum status = StatusEnum.ENABLE;// 账号状态，默认启用
-
-
-    @OneToMany(mappedBy = "admin" , fetch = FetchType.LAZY)// 懒加载，避免查询所有仓库，同时防止嵌套查询
-    @Builder.Default
-    private Set<WareHouse> warehouses = new HashSet<>();
-
 
     // 辅助方法
     public boolean isEnabled() {

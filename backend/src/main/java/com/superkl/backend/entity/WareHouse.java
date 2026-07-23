@@ -5,9 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Entity
 @Table(name = "t_warehouse")
 @Getter
@@ -39,19 +36,6 @@ public class WareHouse extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     private Admin admin;
-
-    @OneToMany(mappedBy = "wareHouse",fetch = FetchType.LAZY)
-    @Builder.Default
-    private Set<Order> orders = new HashSet<>();// 订单列表
-
-    @OneToMany(mappedBy = "wareHouse",fetch = FetchType.LAZY)
-    @Builder.Default
-    private Set<ImportOrder> importOrders = new HashSet<>();// 进货订单列表
-
-    // 关联员工
-    @OneToMany(mappedBy = "wareHouse",fetch = FetchType.LAZY)
-    @Builder.Default
-    private Set<Employee> employees = new HashSet<>();
 
     // 辅助方法
     public boolean isEnabled() {

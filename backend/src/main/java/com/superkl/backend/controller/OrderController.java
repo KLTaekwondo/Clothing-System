@@ -38,10 +38,10 @@ public class OrderController {
     }
 
     // 3.创建订单
-    @PostMapping("/refund")
-    public Result<Void> refund(@Valid @RequestBody OrderCreateDto dto) {
-        orderService.refund(dto);
-        return Result.successMessage("订单已退款！");
+    @PostMapping("/draft/save")
+    public Result<Void> updateDraft(@Valid @RequestBody OrderCreateDto dto) {
+        orderService.update(dto);
+        return Result.successMessage("订单已更新！");
     }
 
     // 4.查询单个订单

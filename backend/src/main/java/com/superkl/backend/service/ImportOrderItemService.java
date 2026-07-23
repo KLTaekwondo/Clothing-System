@@ -42,9 +42,8 @@ public class ImportOrderItemService {
         ImportOrderItem importOrderItem = ImportOrderItemConverter.toEntity(dto,productSku);
         importOrderItem.setImportOrder(importOrder);
 
-        ImportOrderItem saved = importOrderItemRepository.save(importOrderItem);
-        log.info("创建进货订单项：SKU={}，数量={}，金额={}", dto.getSkuCode(), dto.getImportQuantity(), saved.getTotalPrice());
-        return saved;
+        log.info("创建进货订单项：SKU={}，数量={}，金额={}", dto.getSkuCode(), dto.getImportQuantity(), importOrderItem.getTotalPrice());
+        return importOrderItem;
     }
 
     // 2.创建订单项列表
