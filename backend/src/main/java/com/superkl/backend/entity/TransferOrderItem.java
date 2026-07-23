@@ -40,7 +40,7 @@ public class TransferOrderItem extends BaseEntity {
     private BigDecimal itemTotalPrice; // 商品总价
 
     // 关联属性
-    @ManyToOne(fetch = FetchType.LAZY )
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transfer_order_id")
     private TransferOrder transferOrder;
 

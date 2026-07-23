@@ -44,40 +44,6 @@ public class WareHouseStockService {
         return WareHouseStockConverter.toInfoList(wareHouseStockRepository.findByProductIdAndWareHouseId(productId, warehouseId));
     }
 
-    // 调货操作
-    @PreAuthorize("hasRole('ADMIN')")
-    @Transactional
-    public void transfer(StockTransferDto dto) {
-        // 1. 校验参数
-        Long skuId = dto.getSkuId();
-        Long targetWarehouseId = dto.getTargetWarehouseId();
-        Long sourceWarehouseId = dto.getSourceWarehouseId();
-        Integer stock = dto.getStock();
-
-        if (sourceWarehouseId.equals(targetWarehouseId)) {
-            throw new BusinessException("源仓库和目标仓库不能相同");
-        }
-
-        if (stock <= 0) {
-            throw new BusinessException("调货库存数量不得小于等于0");
-        }
-
-        WareHouseStock sourceWs = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, sourceWarehouseId)
-                .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
-        WareHouseStock targetWs = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, targetWarehouseId)
-                .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
-
-        if (sourceWs.getStock() < stock) {
-            throw new BusinessException("库存不足");
-        }
-        sourceWs.setStock(sourceWs.getStock() - stock);
-        targetWs.setStock(targetWs.getStock() + stock);
-        wareHouseStockRepository.save(sourceWs);
-        wareHouseStockRepository.save(targetWs);
-        log.info("调货：SKU={}，从仓库{}到仓库{}，数量={}", skuId, sourceWarehouseId, targetWarehouseId, stock);
-        RequestUser.log();
-    }
-
     // 减少库存
     @Transactional
     public void decreaseStock(Long wareHouseId, Long skuId, Integer stock) {

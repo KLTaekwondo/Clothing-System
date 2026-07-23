@@ -56,8 +56,6 @@ public class ImportOrderService {
         if(!importOrder.isDraft()){
             throw new BusinessException(405, "进货订单状态不是草稿，不能修改");
         }
-        // 先更新备注
-        importOrder.setRemark(dto.getRemark());
         // 清除已存在的商品项
         importOrderItemService.updateDelete(importOrderId);
         // 存储新的商品项
@@ -175,14 +173,14 @@ public class ImportOrderService {
             throw new BusinessException(405, "供应商已被禁用！请检查后重试");
         }
 
-        List<ImportOrderItem> importOrderItems = importOrderItemService.createList(dto.getImportItems(), importOrder);
+        List<ImportOrderItem> importItems = importOrderItemService.createList(dto.getImportItems(), importOrder);
 
         // 3. 校验金额是否正确
         BigDecimal f_totalPrice = dto.getTotalAmount();
         BigDecimal b_totalPrice = BigDecimal.ZERO;
 
         // 计算后端金额
-        for(ImportOrderItem importOrderItem : importOrderItems){
+        for(ImportOrderItem importOrderItem : importItems){
             b_totalPrice = b_totalPrice.add(importOrderItem.getTotalPrice());
         }
 
@@ -193,9 +191,10 @@ public class ImportOrderService {
         // 保存订单
         importOrder.setSupplierName(supplier.getSupplierName());
         importOrder.setTotalAmount(b_totalPrice);
-        importOrder.setImportOrderItems(new HashSet<>(importOrderItems));
+        importOrder.setImportOrderItems(new HashSet<>(importItems));
         importOrder.setWareHouse(warehouse);
         importOrder.setSupplier(supplier);
+        importOrder.setRemark(dto.getRemark());
         importOrderRepository.save(importOrder);
 
         RequestUser.log();

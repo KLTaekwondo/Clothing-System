@@ -29,10 +29,4 @@ public class WareHouseStockController {
         wareHouseStockService.batchUpdate(dtos);
         return Result.successMessage("更新成功");
     }
-
-    @PutMapping("/transfer")
-    public Result<Void> transfer(@RequestBody @Valid StockTransferDto dto) {
-        wareHouseStockService.transfer(dto);
-        return Result.successMessage("调货成功");
-    }
 }

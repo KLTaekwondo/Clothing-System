@@ -58,7 +58,6 @@ public class ImportOrderConverter {
     public static ImportOrder toEntity(ImportOrderDraftDto dto){
         return ImportOrder.builder()
                 .importOrderNo(generateImportOrderNo())
-                .remark(dto.getRemark())
                 .direction(dto.getDirection())
                 .build();
     }
