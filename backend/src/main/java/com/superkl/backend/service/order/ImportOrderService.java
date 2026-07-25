@@ -1,5 +1,6 @@
 package com.superkl.backend.service.order;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.order.ImportOrderConverter;
 import com.superkl.backend.dto.order.ImportOrderDraftDto;
@@ -23,6 +24,8 @@ import com.superkl.backend.repository.basic.WareHouseRepository;
 import com.superkl.backend.service.stock.WareHouseStockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -165,8 +168,9 @@ public class ImportOrderService {
     }
 
     // 查询进货订单列表
-    public List<ImportOrderInfo> searchList(){
-        return ImportOrderConverter.toInfoList(importOrderRepository.findAll());
+    public PageResult<ImportOrderInfo> searchPage(Pageable pageable){
+        Page<ImportOrder> importOrders = importOrderRepository.findPage(pageable);
+        return ImportOrderConverter.toInfoPage(importOrders);
     }
 
 

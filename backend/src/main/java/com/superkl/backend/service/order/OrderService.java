@@ -1,5 +1,6 @@
 package com.superkl.backend.service.order;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.converter.order.OrderConverter;
 import com.superkl.backend.dto.order.OrderCreateDto;
 import com.superkl.backend.dto.stock.StockContext;
@@ -21,6 +22,8 @@ import com.superkl.backend.repository.basic.WareHouseRepository;
 import com.superkl.backend.service.stock.WareHouseStockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,9 +137,8 @@ public class OrderService {
 
     // 5.查询订单订单列表
     @Transactional
-    public List<OrderInfo> searchList() {
-        List<Order> orders = orderRepository.findAll();
-        return OrderConverter.toInfoList(orders);
+    public PageResult<OrderInfo> searchPage(Pageable pageable) {
+        return OrderConverter.toInfoPage(orderRepository.findPage(pageable));
     }
 
     // 6.删除草稿订单

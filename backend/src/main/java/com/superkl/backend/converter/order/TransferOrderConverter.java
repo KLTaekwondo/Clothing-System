@@ -1,9 +1,11 @@
 package com.superkl.backend.converter.order;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.entity.order.TransferOrder;
 import com.superkl.backend.info.order.TransferOrderInfo;
 import com.superkl.backend.info.order.TransferOrderItemInfo;
 import com.superkl.backend.info.order.TransferOrderWithItemsInfo;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -50,6 +52,12 @@ public class TransferOrderConverter {
                 .createTime(transferOrder.getCreateTime())
                 .updateTime(transferOrder.getUpdateTime())
                 .build();
+    }
+
+    // 实体分页转Info分页
+    public static PageResult<TransferOrderInfo> toInfoPage(Page<TransferOrder> page) {
+        Page<TransferOrderInfo> infoPage = page.map(TransferOrderConverter::toInfo);
+        return new PageResult<>(infoPage);
     }
 
     // DTO转实体

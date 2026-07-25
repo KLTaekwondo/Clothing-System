@@ -1,5 +1,6 @@
 package com.superkl.backend.service.product;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.product.ProductConverter;
 import com.superkl.backend.dto.product.ProductCreateDto;
@@ -12,6 +13,8 @@ import com.superkl.backend.repository.product.ProductRepository;
 import com.superkl.backend.utils.SkuUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,8 +97,7 @@ public class ProductService {
     }
 
     // 查询所有商品
-    public List<ProductInfo> searchList(){
-        List<Product> products = productRepository.findAll();
-        return ProductConverter.toInfoList(products);
+    public PageResult<ProductInfo> searchPage(Pageable pageable){
+        return ProductConverter.toInfoPage(productRepository.findPage(pageable));
     }
 }

@@ -1,9 +1,11 @@
 package com.superkl.backend.converter.product;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.dto.product.ProductCreateDto;
 import com.superkl.backend.dto.product.ProductUpdateDto;
 import com.superkl.backend.entity.product.Product;
 import com.superkl.backend.info.poduct.ProductInfo;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -35,6 +37,12 @@ public class ProductConverter {
         return products.stream()
                 .map(ProductConverter::toInfo)
                 .toList();
+    }
+
+    // 分页实体转分页Info
+    public static PageResult<ProductInfo> toInfoPage(Page<Product> products) {
+        Page<ProductInfo> page = products.map(ProductConverter::toInfo);
+        return new PageResult<>(page);
     }
 
     // dto转实体

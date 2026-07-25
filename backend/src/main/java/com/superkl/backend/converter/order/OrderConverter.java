@@ -1,9 +1,11 @@
 package com.superkl.backend.converter.order;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.entity.order.Order;
 import com.superkl.backend.info.order.OrderInfo;
 import com.superkl.backend.info.order.OrderItemInfo;
 import com.superkl.backend.info.order.OrderWithItemsInfo;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -54,6 +56,12 @@ public class OrderConverter {
                 .updateTime(order.getUpdateTime())
                 .items(items)
                 .build();
+    }
+
+    // 实体分页转Info分页
+    public static PageResult<OrderInfo> toInfoPage(Page<Order> orders) {
+        Page<OrderInfo> page = orders.map(OrderConverter::toInfo);
+        return new PageResult<>(page);
     }
 
     // dto转实体

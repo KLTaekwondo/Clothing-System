@@ -1,5 +1,6 @@
 package com.superkl.backend.service.stock;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.converter.stock.StockRecordConverter;
 import com.superkl.backend.entity.stock.StockRecord;
 import com.superkl.backend.info.stock.StockRecordInfo;
@@ -17,8 +18,8 @@ public class StockRecordService {
 
     // 查询库存记录列表
     @Transactional(readOnly = true)
-    public Page<StockRecordInfo> searchPage(Pageable pageable){
-        Page<StockRecord> stockRecords = stockRecordRepository.findAllByOrderByCreateTimeDesc(pageable);
+    public PageResult<StockRecordInfo> searchPage(Pageable pageable){
+        Page<StockRecord> stockRecords = stockRecordRepository.findPage(pageable);
         return StockRecordConverter.toInfoPage(stockRecords);
     }
 }

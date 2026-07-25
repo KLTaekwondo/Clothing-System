@@ -1,5 +1,7 @@
 package com.superkl.backend.controller.order;
 
+import com.superkl.backend.common.PageParam;
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.order.OrderCreateDto;
 import com.superkl.backend.info.order.OrderInfo;
@@ -7,9 +9,8 @@ import com.superkl.backend.info.order.OrderWithItemsInfo;
 import com.superkl.backend.service.order.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/order")
@@ -45,9 +46,10 @@ public class OrderController {
     }
 
     // 5.查询订单订单列表
-    @GetMapping("/search/list")
-    public Result<List<OrderInfo>> searchList() {
-        return Result.success(orderService.searchList());
+    @GetMapping("/page")
+    public Result<PageResult<OrderInfo>> searchPage(@Valid PageParam pageParam) {
+        Pageable pageable = pageParam.toPageable();
+        return Result.success(orderService.searchPage(pageable));
     }
 
     // 6.删除草稿订单

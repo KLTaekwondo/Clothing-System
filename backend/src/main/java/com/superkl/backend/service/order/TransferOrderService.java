@@ -1,5 +1,6 @@
 package com.superkl.backend.service.order;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.order.TransferOrderConverter;
 import com.superkl.backend.dto.order.TransferOrderDraftDto;
@@ -19,6 +20,7 @@ import com.superkl.backend.repository.basic.WareHouseRepository;
 import com.superkl.backend.service.stock.WareHouseStockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -146,8 +148,8 @@ public class TransferOrderService {
 
     // 查找所有转移订单
     @Transactional(readOnly = true)
-    public List<TransferOrderInfo> searchList(){
-        return TransferOrderConverter.toInfoList(transferOrderRepository.findAll());
+    public PageResult<TransferOrderInfo> searchPage(Pageable pageable){
+        return TransferOrderConverter.toInfoPage(transferOrderRepository.findPage(pageable));
     }
 
 

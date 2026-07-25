@@ -19,28 +19,28 @@ public class SupplierController {
 
     // 创建供应商
     @PostMapping("/create")
-    public Result<Void> createSupplier(@Valid @RequestBody SupplierCreateDto dto) {
+    public Result<Void> create(@Valid @RequestBody SupplierCreateDto dto) {
         supplierService.create(dto);
         return Result.successMessage("创建供应商成功！");
     }
 
     // 更新供应商
     @PutMapping("/update/{id}")
-    public Result<Void> updateSupplier(@PathVariable Long id, @Valid @RequestBody SupplierUpdateDto dto) {
+    public Result<Void> update(@PathVariable Long id, @Valid @RequestBody SupplierUpdateDto dto) {
         supplierService.update(id, dto);
         return Result.successMessage("更新供应商成功！");
     }
 
     // 删除供应商
     @DeleteMapping("/delete/{id}")
-    public Result<Void> deleteSupplier(@PathVariable Long id) {
+    public Result<Void> delete(@PathVariable Long id) {
         supplierService.delete(id);
         return Result.successMessage("删除供应商成功！");
     }
 
     // 获取供应商列表
     @GetMapping("/search/{supplierCode}")
-    public Result<SupplierInfo> searchSupplier(@PathVariable String supplierCode) {
+    public Result<SupplierInfo> search(@PathVariable String supplierCode) {
         return Result.success(supplierService.search(supplierCode));
     }
 

@@ -1,5 +1,7 @@
 package com.superkl.backend.controller.order;
 
+import com.superkl.backend.common.PageParam;
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.order.TransferOrderDraftDto;
 import com.superkl.backend.info.order.TransferOrderInfo;
@@ -67,8 +69,8 @@ public class TransferOrderController {
     }
 
     // 获取订单列表
-    @GetMapping("/search/list")
-    public Result<List<TransferOrderInfo>> searchList() {
-        return Result.success(transferOrderService.searchList());
+    @GetMapping("/page")
+    public Result<PageResult<TransferOrderInfo>> searchPage(@Valid PageParam param) {
+        return Result.success(transferOrderService.searchPage(param.toPageable()));
     }
 }

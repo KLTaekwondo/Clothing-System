@@ -1,5 +1,6 @@
 package com.superkl.backend.converter.stock;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.dto.stock.StockContext;
 import com.superkl.backend.entity.stock.StockRecord;
 import com.superkl.backend.info.stock.StockRecordInfo;
@@ -34,10 +35,15 @@ public class StockRecordConverter {
                 .updateTime(stockRecord.getUpdateTime())
                 .build();
     }
+    // 实体列表转Info列表
+    public static List<StockRecordInfo> toInfoList(List<StockRecord> stockRecords) {
+        return stockRecords.stream().map(StockRecordConverter::toInfo).toList();
+    }
 
-    // 实体列表转Info页码（分页查询），以前的是InfoList方法，现在是InfoPage方法
-    public static Page<StockRecordInfo> toInfoPage(Page<StockRecord> stockRecords) {
-        return stockRecords.map(StockRecordConverter::toInfo);
+    // 实体分页转Info分页
+    public static PageResult<StockRecordInfo> toInfoPage(Page<StockRecord> stockRecords) {
+        Page<StockRecordInfo> page = stockRecords.map(StockRecordConverter::toInfo);
+        return new PageResult<>(page);
     }
 
     // dto转实体

@@ -1,5 +1,7 @@
 package com.superkl.backend.controller.order;
 
+import com.superkl.backend.common.PageParam;
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.order.ImportOrderDraftDto;
 import com.superkl.backend.info.order.ImportOrderInfo;
@@ -59,9 +61,9 @@ public class ImportOrderController {
     }
 
     //7. 获取订单列表
-    @GetMapping("/search/list")
-    public Result<List<ImportOrderInfo>> searchList() {
-        return Result.success(importOrderService.searchList());
+    @GetMapping("/page")
+    public Result<PageResult<ImportOrderInfo>> searchPage(PageParam param) {
+        return Result.success(importOrderService.searchPage(param.toPageable()));
     }
 
     //8. 删除订单

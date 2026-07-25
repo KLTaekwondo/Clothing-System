@@ -1,10 +1,12 @@
 package com.superkl.backend.converter.order;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.dto.order.ImportOrderDraftDto;
 import com.superkl.backend.entity.order.ImportOrder;
 import com.superkl.backend.info.order.ImportOrderInfo;
 import com.superkl.backend.info.order.ImportOrderItemInfo;
 import com.superkl.backend.info.order.ImportOrderWithItemsInfo;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +37,12 @@ public class ImportOrderConverter {
         return importOrders.stream()
                 .map(ImportOrderConverter::toInfo)
                 .toList();
+    }
+
+    // 实体分页转Info分页
+    public static PageResult<ImportOrderInfo> toInfoPage(Page<ImportOrder> importOrders) {
+        Page<ImportOrderInfo> page = importOrders.map(ImportOrderConverter::toInfo);
+        return new PageResult<>(page);
     }
 
     // 实体转换为包含商品信息的Info
