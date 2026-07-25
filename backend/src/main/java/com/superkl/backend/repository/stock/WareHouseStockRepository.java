@@ -20,8 +20,10 @@ public interface WareHouseStockRepository extends CrudRepository<WareHouseStock,
 
     // 根据skuId查询库存记录
     @Query("SELECT ws FROM WareHouseStock ws " +
-            "JOIN ws.productSku sku " +
-            "WHERE sku.skuId = :skuId AND ws.wareHouse.wareHouseId = :warehouseId")
+            "JOIN fetch ws.productSku sku " +
+            "JOIN fetch sku.product p " +
+            "JOIN fetch ws.wareHouse wh " +
+            "WHERE sku.skuId = :skuId AND wh.wareHouseId = :warehouseId")
     Optional<WareHouseStock> findBySkuIdAndWarehouseId(@Param("skuId") Long skuId,
                                                        @Param("warehouseId") Long warehouseId);
 }

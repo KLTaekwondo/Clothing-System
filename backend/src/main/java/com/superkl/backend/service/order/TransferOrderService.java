@@ -3,10 +3,13 @@ package com.superkl.backend.service.order;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.order.TransferOrderConverter;
 import com.superkl.backend.dto.order.TransferOrderDraftDto;
+import com.superkl.backend.dto.stock.StockContext;
 import com.superkl.backend.entity.order.TransferOrder;
 import com.superkl.backend.entity.order.TransferOrderItem;
 import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.enums.AuditStatusEnum;
+import com.superkl.backend.enums.StockChangeTypeEnum;
+import com.superkl.backend.enums.StockSourceTypeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.order.TransferOrderInfo;
 import com.superkl.backend.info.order.TransferOrderItemInfo;
@@ -81,12 +84,21 @@ public class TransferOrderService {
         Long sourceWareHouseId = transferOrder.getSourceWareHouse().getWareHouseId();
         Long targetWareHouseId = transferOrder.getTargetWareHouse().getWareHouseId();
         List<TransferOrderItem> items = transferOrder.getTransferOrderItems().stream().toList();
+
+        // 收集上下文本
+        StockContext context1 = StockContext.builder()
+                        .sourceNo(transferOrder.getTransferOrderNo())
+                        .sourceType(StockSourceTypeEnum.TRANSFER_ORDER)
+                        .build();
+
         RequestUser.log();
         for(TransferOrderItem item : items){
             // 先扣除源仓库库存
-            wareHouseStockService.decreaseStock(sourceWareHouseId, item.getSkuId(), item.getQuantity());
+            context1.setChangeType(StockChangeTypeEnum.TRANSFER_OUT);
+            wareHouseStockService.decreaseStock(sourceWareHouseId, item.getSkuId(), item.getQuantity(),context1);
             // 再增加目标仓库库存
-            wareHouseStockService.increaseStock(targetWareHouseId, item.getSkuId(), item.getQuantity());
+            context1.setChangeType(StockChangeTypeEnum.TRANSFER_IN);
+            wareHouseStockService.increaseStock(targetWareHouseId, item.getSkuId(), item.getQuantity(),context1);
             log.info("调货：SKU={}，从仓库{}到仓库{}，数量={}", item.getSkuId(), sourceWareHouseId, targetWareHouseId, item.getQuantity());
         }
         // 设置为通过状态

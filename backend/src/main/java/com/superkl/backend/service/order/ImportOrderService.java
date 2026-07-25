@@ -3,12 +3,15 @@ package com.superkl.backend.service.order;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.order.ImportOrderConverter;
 import com.superkl.backend.dto.order.ImportOrderDraftDto;
+import com.superkl.backend.dto.stock.StockContext;
 import com.superkl.backend.entity.order.ImportOrder;
 import com.superkl.backend.entity.order.ImportOrderItem;
 import com.superkl.backend.entity.basic.Supplier;
 import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.enums.AuditStatusEnum;
 import com.superkl.backend.enums.DirectionEnum;
+import com.superkl.backend.enums.StockChangeTypeEnum;
+import com.superkl.backend.enums.StockSourceTypeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.order.ImportOrderInfo;
 import com.superkl.backend.info.order.ImportOrderItemInfo;
@@ -96,15 +99,22 @@ public class ImportOrderService {
         Long wareHouseId = importOrder.getWareHouse().getWareHouseId();
         List<ImportOrderItem> items = importOrderItemRepository.findByImportOrderId(importOrderId);
         DirectionEnum direction = importOrder.getDirection();
+
+        StockContext context = StockContext.builder()
+                .sourceNo(importOrder.getImportOrderNo())
+                .sourceType(StockSourceTypeEnum.IMPORT_ORDER)
+                .build();
         for(ImportOrderItem item : items) {
             // 增加库存
             if(DirectionEnum.IN.equals(direction)){
-                wareHouseStockService.increaseStock(wareHouseId, item.getSkuId(), item.getQuantity());
+                context.setChangeType(StockChangeTypeEnum.IMPORT_IN);
+                wareHouseStockService.increaseStock(wareHouseId, item.getSkuId(), item.getQuantity(), context);
             }
 
             // 减少库存
             if(DirectionEnum.OUT.equals(direction)){
-                wareHouseStockService.decreaseStock(wareHouseId, item.getSkuId(), item.getQuantity());
+                context.setChangeType(StockChangeTypeEnum.IMPORT_RETURN);
+                wareHouseStockService.decreaseStock(wareHouseId, item.getSkuId(), item.getQuantity(), context);
             }
         }
         // 审核通过

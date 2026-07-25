@@ -2,12 +2,15 @@ package com.superkl.backend.service.order;
 
 import com.superkl.backend.converter.order.OrderConverter;
 import com.superkl.backend.dto.order.OrderCreateDto;
+import com.superkl.backend.dto.stock.StockContext;
 import com.superkl.backend.entity.basic.Employee;
 import com.superkl.backend.entity.order.Order;
 import com.superkl.backend.entity.order.OrderItem;
 import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.OrderStatusEnum;
+import com.superkl.backend.enums.StockChangeTypeEnum;
+import com.superkl.backend.enums.StockSourceTypeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.order.OrderInfo;
 import com.superkl.backend.info.order.OrderItemInfo;
@@ -64,7 +67,10 @@ public class OrderService {
             // 3.处理库存
             Long wareHouseId = order.getWareHouse().getWareHouseId();
             List<OrderItem> items = order.getOrderItems().stream().toList();
-            stockManage(items,wareHouseId);
+            StockContext context = StockContext.builder()
+                    .sourceNo(order.getOrderNo())
+                    .build();
+            stockManage(items,wareHouseId,context);
 
             // 4.设置为已完成状态
             order.setStatus(OrderStatusEnum.COMPLETED);
@@ -87,7 +93,10 @@ public class OrderService {
             // 4.处理库存
             Long wareHouseId = order.getWareHouse().getWareHouseId();
             List<OrderItem> items = order.getOrderItems().stream().toList();
-            stockManage(items,wareHouseId);
+            StockContext context = StockContext.builder()
+                    .sourceNo(order.getOrderNo())
+                    .build();
+            stockManage(items,wareHouseId,context);
 
             // 5.设置为已完成状态
             order.setStatus(OrderStatusEnum.COMPLETED);
@@ -130,8 +139,18 @@ public class OrderService {
         return OrderConverter.toInfoList(orders);
     }
 
+    // 6.删除草稿订单
+    @Transactional
+    public void deleteDraft(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+        if(!order.isDraft()){
+            throw new BusinessException(403, "订单不是草稿状态，不可删除！");
+        }
+        orderRepository.delete(order);
+    }
 
-    // 6.处理订单项
+    // 7.处理订单项
     private void applyOrder(OrderCreateDto dto ,Order order) {
         // 1.校验仓库和销售员是否存在
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
@@ -204,16 +223,20 @@ public class OrderService {
     }
 
     // 库存管理
-    private void stockManage(List<OrderItem> orderItems, Long wareHouseId) {
+    private void stockManage(List<OrderItem> orderItems, Long wareHouseId , StockContext context) {
         for (OrderItem orderItem : orderItems) {
             if(DirectionEnum.IN.equals(orderItem.getDirection())) {
                 // 出售商品（正向业务），更新库存状态
-                wareHouseStockService.decreaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity());
+                context.setChangeType(StockChangeTypeEnum.SALE_OUT);
+                context.setSourceType(StockSourceTypeEnum.ORDER);
+                wareHouseStockService.decreaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity(),context);
             }
 
             if(DirectionEnum.OUT.equals(orderItem.getDirection())) {
                 // 退货商品（反向业务），更新库存状态
-                wareHouseStockService.increaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity());
+                context.setChangeType(StockChangeTypeEnum.SALE_RETURN);
+                context.setSourceType(StockSourceTypeEnum.ORDER);
+                wareHouseStockService.increaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity(),context);
             }
         }
     }

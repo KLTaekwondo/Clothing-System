@@ -4,7 +4,6 @@ import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.order.OrderCreateDto;
 import com.superkl.backend.info.order.OrderInfo;
 import com.superkl.backend.info.order.OrderWithItemsInfo;
-import com.superkl.backend.service.order.OrderItemService;
 import com.superkl.backend.service.order.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +15,7 @@ import java.util.List;
 @RequestMapping("/api/order")
 @RequiredArgsConstructor
 public class OrderController {
-
     private final OrderService orderService;
-    private final OrderItemService orderItemService;
 
     // 1.完成订单
     @PostMapping("/complete")
@@ -35,7 +32,7 @@ public class OrderController {
     }
 
     // 3.创建订单
-    @PostMapping("/draft/save")
+    @PostMapping("/draft/update")
     public Result<Void> updateDraft(@Valid @RequestBody OrderCreateDto dto) {
         orderService.update(dto);
         return Result.successMessage("订单已更新！");
@@ -53,4 +50,10 @@ public class OrderController {
         return Result.success(orderService.searchList());
     }
 
+    // 6.删除草稿订单
+    @DeleteMapping("/delete/{orderId}")
+    public Result<Void> deleteDraft(@PathVariable Long orderId) {
+        orderService.deleteDraft(orderId);
+        return Result.successMessage("订单已删除！");
+    }
 }
