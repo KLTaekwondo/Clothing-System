@@ -13,9 +13,15 @@ function orderInterface() {
         return true;
     }
 
-    // 退款订单
-    const refund = async (data) => {
-        await orderAPI.refundOrder(data);
+    // 更新订单
+    const update = async (data) => {
+        await orderAPI.updateOrder(data);
+        return true;
+    }
+
+    // 删除订单
+    const hardDelete = async (id) => {
+        await orderAPI.deleteOrder(id);
         return true;
     }
 
@@ -35,7 +41,8 @@ function orderInterface() {
     return {
         complete,
         draft,
-        refund,
+        update,
+        hardDelete,
         search,
         searchList,
     }

@@ -6,7 +6,7 @@
                 <div><h2 class="page-title">库存管理</h2>
                     <p class="page-desc">{{ warehouse?.name || '仓库' }} 的 SKU 库存</p></div>
             </div>
-            <button class="btn-outline" @click="showTransfer=true">库存转移</button>
+            <button class="btn-outline" @click="goTransfer">库存转移</button>
         </div>
         <div class="card search-card">
             <div class="stock-search"><input v-model="productId" min="1" placeholder="输入商品 ID 查询库存"
@@ -37,33 +37,6 @@
                 </tbody>
             </table>
         </div>
-        <div v-if="showTransfer" class="modal-overlay" @click.self="showTransfer=false">
-            <div class="modal-content">
-                <div class="modal-header"><span class="modal-title">库存转移</span>
-                    <button class="modal-close" @click="showTransfer=false">&times;</button>
-                </div>
-                <form class="modal-body" @submit.prevent="handleTransfer">
-                    <div class="form-group"><label>源仓库</label><select v-model="transferForm.sourceWarehouseId"
-                                                                         required>
-                        <option disabled value="">请选择源仓库</option>
-                        <option v-for="item in warehouseList" :key="item.id" :value="item.id">{{ item.name }}</option>
-                    </select></div>
-                    <div class="form-group"><label>目标仓库</label><select v-model="transferForm.targetWarehouseId"
-                                                                           required>
-                        <option disabled value="">请选择目标仓库</option>
-                        <option v-for="item in warehouseList" :key="item.id" :value="item.id">{{ item.name }}</option>
-                    </select></div>
-                    <div class="form-group"><label>SKU ID</label><input v-model.number="transferForm.skuId"
-                                                                        min="1" required type="number"/></div>
-                    <div class="form-group"><label>转移数量</label><input v-model.number="transferForm.stock"
-                                                                          min="1" required type="number"/></div>
-                </form>
-                <div class="modal-footer">
-                    <button class="btn-outline" @click="showTransfer=false">取消</button>
-                    <button class="btn-primary" @click="handleTransfer">确认转移</button>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 <script setup>
@@ -77,17 +50,12 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToastStore();
 const warehouse = ref(null);
-const warehouseList = ref([]);
 const stockList = ref([]);
 const productId = ref('');
 const loading = ref(false);
-const showTransfer = ref(false);
-const transferForm = ref({sourceWarehouseId: '', targetWarehouseId: '', skuId: '', stock: ''});
 onMounted(async () => {
     try {
-        const [current, list] = await Promise.all([wareHouseInterface.search(route.params.id), wareHouseInterface.searchList()]);
-        warehouse.value = current;
-        warehouseList.value = list
+        warehouse.value = await wareHouseInterface.search(route.params.id)
     } catch {
     }
 });
@@ -112,26 +80,8 @@ function formatSpec(spec) {
     return Object.entries(spec).map(([key, value]) => `${key}:${value}`).join(' / ')
 }
 
-async function handleTransfer() {
-    const form = transferForm.value;
-    if (!form.sourceWarehouseId || !form.targetWarehouseId || !form.skuId || !form.stock) {
-        toast.warning('请填写完整的转移信息');
-        return
-    }
-    if (Number(form.sourceWarehouseId) === Number(form.targetWarehouseId)) {
-        toast.warning('源仓库和目标仓库不能相同');
-        return
-    }
-    try {
-        await wareHouseStockInterface.transferStock({
-            sourceWarehouseId: Number(form.sourceWarehouseId),
-            targetWarehouseId: Number(form.targetWarehouseId),
-            skuId: Number(form.skuId),
-            stock: Number(form.stock)
-        })
-        showTransfer.value = false
-    } catch {
-    }
+function goTransfer() {
+    router.push('/manage/stock/transfer')
 }
 
 function goBack() {

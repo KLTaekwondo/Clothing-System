@@ -12,17 +12,10 @@ function wareHouseStockInterface() {
         await wareHouseStockAPI.batchUpdateStock(data);
         return true;
     }
-
-    // 转移库存
-    const transferStock = async (data) => {
-        await wareHouseStockAPI.transferStock(data);
-        return true;
-    }
-
+    
     return {
         searchStock,
         batchUpdateStock,
-        transferStock
     }
 }
 

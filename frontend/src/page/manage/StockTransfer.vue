@@ -108,6 +108,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useToastStore} from '../../stores/toastStore.js'
 import wareHouseInterface from '../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../axios/interface/WareHouseStockInterface.js'
+import transferOrderInterface from '../../axios/interface/TransferOrderInterface.js'
 import productInterface from '../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../axios/interface/ProductSkuInterface.js'
 
@@ -204,7 +205,7 @@ function buildBlock(product, skuList) {
             } else {
                 sku = specs.find(s => s.parsedSpec[allKeys[0]] === rv && s.parsedSpec[allKeys[1]] === cv)
             }
-            return {qty: 0, available: 0, skuId: sku?.id || null, skuSpec: sku?.parsedSpec}
+            return {qty: 0, available: 0, skuId: sku?.id || null, skuCode: sku?.code || '', skuSpec: sku?.parsedSpec}
         })
     )
 
@@ -253,53 +254,52 @@ function markTransfer(item) {
 }
 
 async function transferAll() {
-    const allItems = []
+    const transferOrderItems = []
+    let totalPrice = 0
     formList.value.forEach(item => {
         item.cells.forEach(row => row.forEach(cell => {
-            if (cell.qty > 0 && cell.skuId != null) {
-                allItems.push({
-                    sourceWarehouseId: Number(sourceId.value),
-                    targetWarehouseId: Number(targetId.value),
-                    skuId: cell.skuId,
-                    stock: cell.qty
+            if (cell.qty > 0 && cell.skuCode) {
+                transferOrderItems.push({
+                    skuCode: cell.skuCode,
+                    quantity: cell.qty
                 })
+                totalPrice += Number(item.product.importPrice || 0) * Number(cell.qty)
             }
         }))
     })
-    if (!allItems.length) {
+    if (!transferOrderItems.length) {
         toast.info('没有需要转移的数量');
         return
     }
     transferring.value = true
-    const failed = []
-    let count = 0
-    for (const item of allItems) {
-        try {
-            await wareHouseStockInterface.transferStock(item);
-            count++
-        } catch {
-            failed.push(item)
-        }
-    }
-    if (count > 0) {
-        toast.success(`转移完成：成功 ${count} 个，失败 ${failed.length} 个`)
-        if (failed.length === 0) {
+    try {
+        const beforeList = await transferOrderInterface.searchList()
+        const beforeIds = beforeList.map(item => item.id)
+        await transferOrderInterface.create({
+            sourceWareHouseId: Number(sourceId.value),
+            targetWareHouseId: Number(targetId.value),
+            transferOrderItems,
+            totalPrice: totalPrice.toFixed(2),
+            remark: '库存转移页创建'
+        })
+        const afterList = await transferOrderInterface.searchList()
+        const draftOrder = afterList
+            .filter(item => item.status === 'DRAFT' && !beforeIds.includes(item.id))
+            .sort((a, b) => Number(b.id) - Number(a.id))[0]
+        if (!draftOrder) {
+            toast.warning('调拨订单已创建，请到调拨订单列表继续审核');
             formList.value = []
-        } else {
-            // 标记失败的单元格不清除，只清除成功项
-            formList.value.forEach(item => {
-                item.cells.forEach(row => row.forEach(cell => {
-                    if (cell.qty > 0 && cell.skuId != null && !failed.some(f => f.skuId === cell.skuId && f.stock === cell.qty)) {
-                        cell.qty = 0
-                    }
-                }))
-                item.hasTransfer = item.cells.some(row => row.some(c => c.qty > 0))
-            })
+            return
         }
-    } else {
-        toast.error('转移全部失败，请检查库存是否充足')
+        await transferOrderInterface.check(draftOrder.id)
+        await transferOrderInterface.approve(draftOrder.id)
+        toast.success(`转移完成：共 ${transferOrderItems.length} 个 SKU`)
+        formList.value = []
+    } catch {
+        toast.error('转移失败，请检查库存是否充足')
+    } finally {
+        transferring.value = false
     }
-    transferring.value = false
 }
 
 function removeItem(index) {
