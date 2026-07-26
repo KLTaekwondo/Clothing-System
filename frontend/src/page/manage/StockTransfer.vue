@@ -147,7 +147,8 @@ async function searchProduct() {
     if (!searchCode.value) return
     searching.value = true
     try {
-        const all = await productInterface.searchList()
+        const data = await productInterface.searchPage()
+        const all = data.content || []
         const matched = all.find(p => p.code === searchCode.value)
         if (!matched) {
             toast.info('未找到该编码的商品');
@@ -273,8 +274,6 @@ async function transferAll() {
     }
     transferring.value = true
     try {
-        const beforeList = await transferOrderInterface.searchList()
-        const beforeIds = beforeList.map(item => item.id)
         await transferOrderInterface.create({
             sourceWareHouseId: Number(sourceId.value),
             targetWareHouseId: Number(targetId.value),
@@ -282,21 +281,10 @@ async function transferAll() {
             totalPrice: totalPrice.toFixed(2),
             remark: '库存转移页创建'
         })
-        const afterList = await transferOrderInterface.searchList()
-        const draftOrder = afterList
-            .filter(item => item.status === 'DRAFT' && !beforeIds.includes(item.id))
-            .sort((a, b) => Number(b.id) - Number(a.id))[0]
-        if (!draftOrder) {
-            toast.warning('调拨订单已创建，请到调拨订单列表继续审核');
-            formList.value = []
-            return
-        }
-        await transferOrderInterface.check(draftOrder.id)
-        await transferOrderInterface.approve(draftOrder.id)
-        toast.success(`转移完成：共 ${transferOrderItems.length} 个 SKU`)
+        toast.success(`调拨单已保存草稿，共 ${transferOrderItems.length} 个 SKU，请到调拨订单列表提交审核`)
         formList.value = []
     } catch {
-        toast.error('转移失败，请检查库存是否充足')
+        toast.error('创建调拨单失败，请检查库存是否充足')
     } finally {
         transferring.value = false
     }

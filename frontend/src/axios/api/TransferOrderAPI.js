@@ -8,7 +8,7 @@ const TransferOrderAPI = {
     rejectTransferOrder:(id) => backendService.put(`/transfer-order/reject/${id}`),
     deleteTransferOrder:(id) => backendService.delete(`/transfer-order/delete/${id}`),
     searchTransferOrder:(id) => backendService.get(`/transfer-order/search/${id}`),
-    searchTransferOrderList:() => backendService.get("/transfer-order/search/list"),
+    searchTransferOrderPage:(page,size) => backendService.get("/transfer-order/page", {params:{page,size}}),
 }
 
 export default TransferOrderAPI;

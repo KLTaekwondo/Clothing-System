@@ -129,7 +129,8 @@ onMounted(fetchOrders)
 async function fetchOrders() {
     loading.value = true
     try {
-        orderList.value = await orderInterface.searchList()
+        const data = await orderInterface.searchPage()
+        orderList.value = data.content || []
     } catch {
         orderList.value = []
     } finally {

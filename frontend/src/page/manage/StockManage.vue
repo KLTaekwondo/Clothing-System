@@ -125,7 +125,8 @@ async function searchProduct() {
     }
     loading.value = true
     try {
-        const all = await productInterface.searchList()
+        const data = await productInterface.searchPage()
+        const all = data.content || []
         const matched = all.find(p => p.code === searchCode.value)
         if (!matched) {
             toast.info('未找到该编码的商品');

@@ -171,10 +171,10 @@ const salesDays = ['07-09', '07-10', '07-11', '07-12', '07-13', '07-14', '07-15'
 onMounted(async () => {
     try {
         const [products, employees, warehouses, orders] = await Promise.all([
-            productInterface.searchList().catch(() => []),
+            productInterface.searchPage().then(d => d.content || []).catch(() => []),
             employeeInterface.searchList().catch(() => []),
             wareHouseInterface.searchList().catch(() => []),
-            orderInterface.searchList().catch(() => [])
+            orderInterface.searchPage().then(data => data.content || []).catch(() => [])
         ])
         const enabledProducts = products.filter(item => item.status === STATUS.ENABLE)
         const skuLists = await Promise.all(

@@ -7,7 +7,7 @@ const importOrderAPI = {
     approveImportOrder: (id) => backendService.put(`/import-order/approve/${id}`),
     rejectImportOrder: (id) => backendService.put(`/import-order/reject/${id}`),
     searchImportOrder: (id) => backendService.get(`/import-order/search/${id}`),
-    searchImportOrderList: () => backendService.get("/import-order/search/list"),
+    searchImportOrderPage: (page,size) => backendService.get("/import-order/page", {params:{page,size}}),
     deleteImportOrder: (id) => backendService.delete(`/import-order/delete/${id}`),
 }
 

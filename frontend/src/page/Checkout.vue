@@ -246,7 +246,7 @@ onMounted(async () => {
 async function searchProducts() {
     productLoading.value = true
     try {
-        const list = (await productInterface.searchList()).filter(item => item.status === STATUS.ENABLE)
+        const list = (await productInterface.searchPage()).content?.filter(item => item.status === STATUS.ENABLE) || []
         const q = (productQuery.value || '').toLowerCase()
         productList.value = q
             ? list.filter(p => p.name?.toLowerCase().includes(q) || p.code?.toLowerCase().includes(q))
@@ -346,7 +346,8 @@ async function submitOrder(type) {
 async function fetchOrders() {
     orderLoading.value = true
     try {
-        orderList.value = await orderInterface.searchList()
+        const data = await orderInterface.searchPage()
+        orderList.value = data.content || []
     } catch {
         orderList.value = []
     } finally {

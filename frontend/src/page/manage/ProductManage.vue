@@ -13,7 +13,7 @@
                 <div class="search-bar">
                     <input v-model="searchQuery" placeholder="搜索商品名称或编码" type="text"/>
                 </div>
-                <span class="result-count">共 {{ filteredList.length }} 件商品</span>
+                <span class="result-count">共 {{ pageInfo.totalElements }} 件商品</span>
             </div>
 
             <div v-if="loading" class="loading-overlay">
@@ -62,6 +62,28 @@
                 </tr>
                 </tbody>
             </table>
+
+            <div class="pagination-bar">
+                <span class="page-info">
+                    第 {{ pageInfo.page + 1 }} / {{ totalPages }} 页
+                </span>
+                <div class="page-actions">
+                    <button
+                        :disabled="loading || pageInfo.page <= 0"
+                        class="btn-outline btn-sm"
+                        @click="changePage(pageInfo.page - 1)"
+                    >
+                        上一页
+                    </button>
+                    <button
+                        :disabled="loading || pageInfo.page >= totalPages - 1"
+                        class="btn-outline btn-sm"
+                        @click="changePage(pageInfo.page + 1)"
+                    >
+                        下一页
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div v-if="showDelete" class="modal-overlay" @click.self="showDelete = false">
@@ -104,6 +126,15 @@ const showDelete = ref(false)
 const deleteTarget = ref(null)
 const deleting = ref(false)
 
+const pageInfo = ref({
+    totalElements: 0,
+    totalPages: 0,
+    page: 0,
+    size: 10
+})
+
+const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
+
 const filteredList = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()
     if (!query) return productList.value
@@ -119,12 +150,24 @@ onMounted(fetchList)
 async function fetchList() {
     loading.value = true
     try {
-        productList.value = await productInterface.searchList()
+        const data = await productInterface.searchPage(pageInfo.value.page, pageInfo.value.size)
+        productList.value = data.content || []
+        pageInfo.value = {
+            totalElements: data.totalElements || 0,
+            totalPages: data.totalPages || 0,
+            page: data.page || 0,
+            size: data.size || pageInfo.value.size
+        }
     } catch {
         productList.value = []
     } finally {
         loading.value = false
     }
+}
+
+function changePage(page) {
+    pageInfo.value.page = page
+    fetchList()
 }
 
 function goDetail(item) {
@@ -234,6 +277,27 @@ tr:hover .actions {
 
 .confirm-modal {
     min-width: 380px;
+}
+
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+    margin-top: 4px;
+}
+
+.page-info {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.page-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 @media (max-width: 900px) {

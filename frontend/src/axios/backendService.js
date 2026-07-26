@@ -45,7 +45,7 @@ backendService.interceptors.response.use(
 
         const toast = useToastStore();
         if (status === 403) {
-            toast.error("登录已过期，请重新登录");
+            toast.error("权限不足，请联系管理员");
         } else if (status === 500) {
             toast.error("网络异常，请稍后重试");
         } else if (msg) {

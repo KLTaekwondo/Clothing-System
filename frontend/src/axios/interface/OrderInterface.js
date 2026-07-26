@@ -1,41 +1,40 @@
 import orderAPI from "../api/OrderAPI.js";
 
 function orderInterface() {
-    // 完成订单
     const complete = async (data) => {
         await orderAPI.completeOrder(data);
         return true;
     }
 
-    // 草稿订单
     const draft = async (data) => {
         await orderAPI.draftOrder(data);
         return true;
     }
 
-    // 更新订单
     const update = async (data) => {
         await orderAPI.updateOrder(data);
         return true;
     }
 
-    // 删除订单
     const hardDelete = async (id) => {
         await orderAPI.deleteOrder(id);
         return true;
     }
 
-    // 搜索订单
     const search = async (id) => {
         const data = await orderAPI.searchOrder(id);
         return data || {};
     }
 
-
-    // 搜索订单列表
-    const searchList = async () => {
-        const data = await orderAPI.searchOrderList();
-        return Array.isArray(data) ? data : [];
+    const searchPage = async (page = 0, size = 10) => {
+        const data = await orderAPI.searchOrderPage(page, size);
+        return data || {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            page: page,
+            size,
+        };
     }
 
     return {
@@ -44,7 +43,7 @@ function orderInterface() {
         update,
         hardDelete,
         search,
-        searchList,
+        searchPage,
     }
 }
 

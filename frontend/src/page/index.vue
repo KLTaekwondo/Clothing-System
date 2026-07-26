@@ -82,22 +82,29 @@ const form = reactive({
 async function handleLogin() {
     if (!form.account || !form.password) return
     loading.value = true
-    await userStore.login({
-        account: form.account,
-        password: form.password
-    }, role.value)
+    try {
+        await userStore.login({
+            account: form.account,
+            password: form.password
+        }, role.value)
 
-    if (userStore.isLoggedIn && role.value === 'admin') {
-        await router.push('/manage')
-        useToastStore().success('后端管理登录成功')
+        if (!userStore.isLoggedIn) {
+            useToastStore().warning('账号或密码错误')
+            return
+        }
+
+        if (role.value === 'admin') {
+            await router.push('/manage')
+            useToastStore().success('后端管理登录成功')
+        } else {
+            await router.push('/checkout')
+            useToastStore().success('仓库员工登录成功')
+        }
+    } catch {
+        useToastStore().error('登录失败，请检查网络或账号密码')
+    } finally {
+        loading.value = false
     }
-
-    if (userStore.isLoggedIn && role.value === 'warehouse') {
-        await router.push('/checkout')
-        useToastStore().success('仓库员工登录成功')
-    }
-
-    loading.value = false
 }
 </script>
 

@@ -102,10 +102,46 @@ const ManageChildren = [
         meta: {title: '库存转移', icon: 'stock'}
     },
     {
+        path: 'stock/record',
+        name: 'StockRecordManage',
+        component: () => import('../page/manage/StockRecordManage.vue'),
+        meta: {title: '库存记录', icon: 'stock'}
+    },
+    {
         path: 'stock',
         name: 'StockManage',
         component: () => import('../page/manage/StockManage.vue'),
         meta: {title: '库存管理', icon: 'stock'}
+    },
+    {
+        path: 'import-order',
+        name: 'ImportOrderManage',
+        component: () => import('../page/manage/ImportOrderManage.vue'),
+        meta: {title: '采购订单', icon: 'order'}
+    },
+    {
+        path: 'import-order/add',
+        name: 'ImportOrderAdd',
+        component: () => import('../page/manage/ImportOrderAdd.vue'),
+        meta: {title: '新建采购单', icon: 'order'}
+    },
+    {
+        path: 'import-order/:id',
+        name: 'ImportOrderDetail',
+        component: () => import('../page/manage/ImportOrderDetail.vue'),
+        meta: {title: '采购订单详情', icon: 'order'}
+    },
+    {
+        path: 'transfer-order',
+        name: 'TransferOrderManage',
+        component: () => import('../page/manage/TransferOrderManage.vue'),
+        meta: {title: '调拨订单', icon: 'stock'}
+    },
+    {
+        path: 'transfer-order/:id',
+        name: 'TransferOrderDetail',
+        component: () => import('../page/manage/TransferOrderDetail.vue'),
+        meta: {title: '调拨订单详情', icon: 'stock'}
     },
     {
         path: 'order/:id',

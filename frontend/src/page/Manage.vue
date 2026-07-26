@@ -61,7 +61,10 @@ const navItems = [
     {path: '/manage/warehouse', label: '仓库管理', icon: '🏭'},
     {path: '/manage/stock', label: '库存管理', icon: '📊'},
     {path: '/manage/stock/transfer', label: '库存转移', icon: '🔄'},
+    {path: '/manage/stock/record', label: '库存记录', icon: '📄'},
     {path: '/manage/order', label: '订单管理', icon: '📋'},
+    {path: '/manage/import-order', label: '采购订单', icon: '📥'},
+    {path: '/manage/transfer-order', label: '调拨订单', icon: '🔄'},
     {path: '/manage/option', label: '选项管理', icon: '🏷️'}
 ]
 

@@ -450,6 +450,11 @@ button {
     color: #d97706;
 }
 
+.status-warn {
+    background: #e8f0fe;
+    color: #3b82f6;
+}
+
 .status-error {
     background: var(--error-light);
     color: #dc2626;
