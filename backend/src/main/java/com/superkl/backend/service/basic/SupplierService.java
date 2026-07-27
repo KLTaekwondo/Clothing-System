@@ -27,6 +27,10 @@ public class SupplierService {
     public void create (SupplierCreateDto dto){
         Admin admin = adminRepository.findById(dto.getAdminId())
                 .orElseThrow(() -> new BusinessException("管理员不存在"));
+        // 检查是否已经存在一样的供应商编号
+        if(supplierRepository.existsByCode(dto.getSupplierCode())){
+            throw new BusinessException(403, "供应商编号已存在！");
+        }
 
         Supplier supplier = SupplierConverter.toEntity(dto , admin);
         supplierRepository.save(supplier);
@@ -37,6 +41,11 @@ public class SupplierService {
     public void update (Long supplierId , SupplierUpdateDto dto){
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(() -> new BusinessException("供应商不存在"));
+        // 检查是否和其他的供应商编号重复
+        String code = dto.getSupplierCode();
+        if(supplierRepository.existsByCode(code) && !code.equals(supplier.getSupplierCode())){
+            throw new BusinessException(403, "供应商编号已存在！");
+        }
         SupplierConverter.updateEntity(supplier , dto);
         supplierRepository.save(supplier);
     }

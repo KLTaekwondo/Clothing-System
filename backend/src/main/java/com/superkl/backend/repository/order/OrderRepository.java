@@ -14,13 +14,19 @@ import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order,Long> {
-    @Query("SELECT o FROM Order o WHERE o.wareHouse.wareHouseId = :warehouseId")
-    List<Order> findByWareHouseId(@Param("warehouseId") Long warehouseId);
+    @Query("SELECT o FROM Order o " +
+            "WHERE o.wareHouse.wareHouseId = :warehouseId AND o.status = :status")
+    Page<Order> findStatusByWareHouseId(@Param("warehouseId") Long warehouseId ,
+                                        @Param("status") OrderStatusEnum status ,
+                                        Pageable pageable);
 
     List<Order> findByStatus(OrderStatusEnum status);
 
     Optional<Order> findByOrderNo(String orderNo);
 
-    @Query("SELECT o FROM Order o ORDER BY o.createTime DESC")
+    @Query("SELECT o FROM Order o " +
+            "JOIN FETCH o.employee " +
+            "JOIN FETCH o.wareHouse " +
+            "ORDER BY o.createTime DESC")
     Page<Order> findPage(Pageable pageable);
 }

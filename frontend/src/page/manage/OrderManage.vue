@@ -11,23 +11,23 @@
         <div class="order-stats">
             <div class="order-stat-card">
                 <span class="order-stat-icon">📋</span>
-                <span class="order-stat-value">{{ orderList.length }}</span>
+                <span class="order-stat-value">{{ pageInfo.totalElements }}</span>
                 <span class="order-stat-label">全部订单</span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon completed-icon">✓</span>
                 <span class="order-stat-value">{{ completedCount }}</span>
-                <span class="order-stat-label">已完成</span>
+                <span class="order-stat-label">当前页已完成</span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon draft-icon">◷</span>
                 <span class="order-stat-value">{{ draftCount }}</span>
-                <span class="order-stat-label">挂单</span>
+                <span class="order-stat-label">当前页挂单</span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon amount-icon">¥</span>
                 <span class="order-stat-value">¥{{ totalAmount.toFixed(2) }}</span>
-                <span class="order-stat-label">订单金额</span>
+                <span class="order-stat-label">当前页金额</span>
             </div>
         </div>
 
@@ -91,6 +91,28 @@
                 </tr>
                 </tbody>
             </table>
+
+            <div class="pagination-bar">
+                <span class="page-info">
+                    第 {{ pageInfo.page + 1 }} / {{ totalPages }} 页，共 {{ pageInfo.totalElements }} 条
+                </span>
+                <div class="page-actions">
+                    <button
+                        :disabled="loading || pageInfo.page <= 0"
+                        class="btn-outline btn-sm"
+                        @click="changePage(pageInfo.page - 1)"
+                    >
+                        上一页
+                    </button>
+                    <button
+                        :disabled="loading || pageInfo.page >= totalPages - 1"
+                        class="btn-outline btn-sm"
+                        @click="changePage(pageInfo.page + 1)"
+                    >
+                        下一页
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -109,6 +131,14 @@ const statusFilter = ref('')
 const searchQuery = ref('')
 const orderStatusLabels = ORDER_STATUS_LABELS
 const payMethodLabels = PAY_METHOD_LABELS
+const pageInfo = ref({
+    totalElements: 0,
+    totalPages: 0,
+    page: 0,
+    size: 10
+})
+
+const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
 
 const filteredOrders = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()
@@ -129,13 +159,24 @@ onMounted(fetchOrders)
 async function fetchOrders() {
     loading.value = true
     try {
-        const data = await orderInterface.searchPage()
+        const data = await orderInterface.searchPage(pageInfo.value.page, pageInfo.value.size)
         orderList.value = data.content || []
+        pageInfo.value = {
+            totalElements: data.totalElements || 0,
+            totalPages: data.totalPages || 0,
+            page: data.page || 0,
+            size: data.size || pageInfo.value.size
+        }
     } catch {
         orderList.value = []
     } finally {
         loading.value = false
     }
+}
+
+function changePage(page) {
+    pageInfo.value.page = page
+    fetchOrders()
 }
 
 function goDetail(item) {
@@ -302,8 +343,30 @@ function statusClass(status) {
     color: var(--text-secondary);
 }
 
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+}
+
+.page-info {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.page-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 @media (max-width: 900px) {
-    .page-heading, .table-toolbar {
+    .page-heading,
+    .table-toolbar,
+    .pagination-bar {
         align-items: flex-start;
         flex-direction: column;
     }

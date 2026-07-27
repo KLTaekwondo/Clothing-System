@@ -20,6 +20,8 @@ public class ImportOrderItemConverter {
                 .importPrice(importOrderItem.getImportPrice())
                 .quantity(importOrderItem.getQuantity())
                 .totalPrice(importOrderItem.getTotalPrice())
+                .createTime(importOrderItem.getCreateTime())
+                .updateTime(importOrderItem.getUpdateTime())
                 .build();
     }
 

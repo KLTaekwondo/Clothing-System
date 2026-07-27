@@ -32,6 +32,10 @@ public class ProductService {
     // 创建商品（重中之重）
     @Transactional
     public void create(ProductCreateDto productCreateDto) {
+        // 检查商品编码是否已经存在
+        if(productRepository.existsByCode(productCreateDto.getCode())){
+            throw new BusinessException(403, "商品编码已存在！");
+        }
         // 1.开始处理规格信息（只取颜色和尺码）
         Map<String, List<String>> selectedOptions =
                 productCreateDto.getSelectedOptions();
@@ -69,6 +73,11 @@ public class ProductService {
         // 1.先查一下，看是否存在商品
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(403, "商品不存在"));
+        // 检查商品编码是否已经存在
+        String code = dto.getCode();
+        if(productRepository.existsByCode(code) && !code.equals(product.getProductCode())){
+            throw new BusinessException(403, "商品编码已存在！");
+        }
         // 2.更新商品信息
         ProductConverter.updateEntity(product, dto);
         productRepository.save(product);

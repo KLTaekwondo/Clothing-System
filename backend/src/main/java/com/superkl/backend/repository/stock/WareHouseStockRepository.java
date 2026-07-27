@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface WareHouseStockRepository extends CrudRepository<WareHouseStock, Long> {
     // 根据仓库id和skuId查询库存记录
     @Query("SELECT ws FROM WareHouseStock ws " +
-            "JOIN ws.productSku sku " +
+            "JOIN fetch ws.productSku sku " +
             "WHERE sku.product.productId = :productId AND ws.wareHouse.wareHouseId = :warehouseId")
     List<WareHouseStock> findByProductIdAndWareHouseId(@Param("productId") Long productId,
                                                        @Param("warehouseId") Long warehouseId);

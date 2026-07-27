@@ -62,7 +62,7 @@ public class ImportOrderController {
 
     //7. 获取订单列表
     @GetMapping("/page")
-    public Result<PageResult<ImportOrderInfo>> searchPage(PageParam param) {
+    public Result<PageResult<ImportOrderInfo>> searchPage(@Valid PageParam param) {
         return Result.success(importOrderService.searchPage(param.toPageable()));
     }
 

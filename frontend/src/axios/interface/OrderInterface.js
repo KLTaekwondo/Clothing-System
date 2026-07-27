@@ -37,6 +37,17 @@ function orderInterface() {
         };
     }
 
+    const searchCurrentWareHousePage = async (page = 0, size = 10) => {
+        const data = await orderAPI.searchCurrentWareHouseOrderPage(page, size);
+        return data || {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            page,
+            size,
+        };
+    }
+
     return {
         complete,
         draft,
@@ -44,6 +55,7 @@ function orderInterface() {
         hardDelete,
         search,
         searchPage,
+        searchCurrentWareHousePage,
     }
 }
 

@@ -7,7 +7,7 @@
                 <button class="collapse-btn" @click="collapsed = !collapsed">{{ collapsed ? '▶' : '◀' }}</button>
             </div>
             <nav class="sidebar-nav">
-                <router-link v-for="item in navItems" :key="item.path" :to="item.path" active-class="nav-item-active"
+                <router-link v-for="item in navItems" :key="item.path" :title="collapsed ? item.label : ''" :to="item.path" active-class="nav-item-active"
                              class="nav-item"
                              @click.prevent="openTab(item.path, item.label, item.icon)">
                     <span class="nav-icon">{{ item.icon }}</span>
@@ -15,7 +15,7 @@
                 </router-link>
             </nav>
             <div class="sidebar-footer">
-                <button class="nav-item nav-logout" @click="handleLogout">
+                <button :title="collapsed ? '退出登录' : ''" class="nav-item nav-logout" @click="handleLogout">
                     <span class="nav-icon">🚪</span>
                     <span class="nav-label">退出登录</span>
                 </button>
@@ -46,13 +46,15 @@
 <script setup>
 import {ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
+import {useUserStore} from '../stores/userStore.js'
 import adminInterface from '../axios/interface/AdminInterface.js'
 
 const router = useRouter()
 const route = useRoute()
+const userStore = useUserStore()
 const collapsed = ref(false)
 const currentPath = ref('')
-const tabs = ref([])
+const tabs = ref(loadSavedTabs())
 
 const navItems = [
     {path: '/manage/dashboard', label: '仪表盘', icon: '📊'},
@@ -68,13 +70,28 @@ const navItems = [
     {path: '/manage/option', label: '选项管理', icon: '🏷️'}
 ]
 
+function loadSavedTabs() {
+    try {
+        const saved = JSON.parse(sessionStorage.getItem('clothing_manage_tabs') || '[]')
+        return Array.isArray(saved) ? saved : []
+    } catch {
+        sessionStorage.removeItem('clothing_manage_tabs')
+        return []
+    }
+}
+
 // 监听路由变化，自动加 tab
 watch(() => route.path, (path) => {
     currentPath.value = path
     const meta = route.meta
     const label = meta?.title || path.split('/').pop() || '未知'
+    sessionStorage.setItem('clothing_current_route', JSON.stringify({name: route.name}))
     addTab(path, label)
 }, {immediate: true})
+
+watch(tabs, (value) => {
+    sessionStorage.setItem('clothing_manage_tabs', JSON.stringify(value))
+}, {deep: true})
 
 function addTab(path, label) {
     if (!tabs.value.some(t => t.path === path)) {
@@ -111,8 +128,14 @@ async function handleLogout() {
     try {
         await adminInterface.logout()
     } catch {
+        // 无论后端会话是否已失效，都要清理本地登录状态
+    } finally {
+        userStore.logout()
+        tabs.value = []
+        sessionStorage.removeItem('clothing_manage_tabs')
+        sessionStorage.removeItem('clothing_current_route')
+        await router.push('/')
     }
-    router.push('/')
 }
 </script>
 

@@ -45,7 +45,12 @@ public class WareHouseService {
     public void create(WareHouseCreateDto wareHouseCreateDto) {
         // 先查找管理员是否存在
         Admin admin = adminRepository.findById(wareHouseCreateDto.getAdminId())
-                .orElseThrow(() -> new BusinessException(403, "管理员不存在"));
+                .orElseThrow(() -> new BusinessException(403, "管理员不存在！"));
+
+        // 检查仓库编号是否已经存在
+        if(wareHouseRepository.existsByCode(wareHouseCreateDto.getCode())){
+            throw new BusinessException(403, "仓库编号已存在！");
+        }
 
         // 转换为仓库实体
         WareHouse wareHouse = WareHouseConverter.toEntity(wareHouseCreateDto, admin);
@@ -80,11 +85,18 @@ public class WareHouseService {
         WareHouse wareHouse = wareHouseRepository.findById(wareHouseId)
                 .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
 
+        // 检查是否和其他的仓库编号重复
+        String code = wareHouseUpdateDto.getCode();
+        if(wareHouseRepository.existsByCode(code) && !code.equals(wareHouse.getWareHouseCode())){
+            throw new BusinessException(403, "仓库编号已存在！");
+        }
         // 更新仓库实体
         WareHouseConverter.updateEntity(wareHouse, wareHouseUpdateDto);
         // 加密密码
-        String encryptedPassword = passwordEncoder.encode(wareHouseUpdateDto.getPassword());
-        wareHouse.setWareHousePassword(encryptedPassword);
+        if(wareHouseUpdateDto.getPassword() != null){
+            String encryptedPassword = passwordEncoder.encode(wareHouseUpdateDto.getPassword());
+            wareHouse.setWareHousePassword(encryptedPassword);
+        }
         // 保存更新后的仓库实体
         wareHouseRepository.save(wareHouse);
         log.info("更新仓库：{}", wareHouse.getWareHouseName());

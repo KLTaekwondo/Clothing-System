@@ -92,7 +92,8 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
+import {onBeforeRouteLeave} from 'vue-router'
 import {useToastStore} from '../../stores/toastStore.js'
 import wareHouseInterface from '../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../axios/interface/WareHouseStockInterface.js'
@@ -111,11 +112,21 @@ let keyCounter = 0
 const hasAnyChanges = computed(() => formList.value.some(item => item.hasChanges))
 
 onMounted(async () => {
+    window.addEventListener('beforeunload', handleBeforeUnload)
     try {
         warehouses.value = await wareHouseInterface.searchList()
     } catch {
         warehouses.value = []
     }
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+})
+
+onBeforeRouteLeave(() => {
+    if (!hasAnyChanges.value) return true
+    return window.confirm('当前有未保存的库存修改，确定要离开吗？')
 })
 
 async function searchProduct() {
@@ -284,11 +295,20 @@ async function saveAll() {
 }
 
 function clearAll() {
+    if (hasAnyChanges.value && !window.confirm('当前有未保存的修改，确定要清空全部吗？')) return
     formList.value = []
 }
 
 function removeItem(index) {
+    const item = formList.value[index]
+    if (item?.hasChanges && !window.confirm(`「${item.product.name}」有未保存的修改，确定要移除吗？`)) return
     formList.value.splice(index, 1)
+}
+
+function handleBeforeUnload(event) {
+    if (!hasAnyChanges.value) return
+    event.preventDefault()
+    event.returnValue = ''
 }
 </script>
 

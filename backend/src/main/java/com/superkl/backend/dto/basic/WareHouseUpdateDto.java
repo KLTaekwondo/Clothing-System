@@ -13,7 +13,6 @@ public class WareHouseUpdateDto {
     @Size(min = 2, max = 10, message = "仓库名称长度必须在2到10之间")
     private String name;// 仓库名称
 
-    @NotBlank(message = "仓库密码不能为空")
     @Pattern(regexp = "^[a-zA-Z0-9_]{6,12}$", message = "仓库密码长度必须在6到12之间")
     private String password;// 仓库密码
 

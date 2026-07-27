@@ -30,7 +30,12 @@ public class EmployeeService {
     public void create(EmployeeCreateDto employeeCreateDto) {
         // 从仓库仓库ID查询仓库
         WareHouse wareHouse = wareHouseRepository.findById(employeeCreateDto.getWareHouseId())
-                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
+                .orElseThrow(() -> new BusinessException(403, "仓库不存在！"));
+
+        // 检查员工编号是否已经存在
+        if(employeeRepository.existsByCode(employeeCreateDto.getCode())){
+            throw new BusinessException(403, "员工编号已存在！");
+        }
 
         // 转换实体
         Employee employee = EmployeeConverter.toEntity(employeeCreateDto , wareHouse);
@@ -45,6 +50,12 @@ public class EmployeeService {
         // 从员工ID查询员工
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new BusinessException(403, "员工不存在"));
+
+        // 检查是否和其他的员工编号重复
+        String code = employeeUpdateDto.getCode();
+        if(employeeRepository.existsByCode(code) && !code.equals(employee.getEmployeeCode())){
+            throw new BusinessException(403, "员工编号已存在！");
+        }
 
         // 判断一下是否更新了仓库
         Long newId = employeeUpdateDto.getWareHouseId();
@@ -104,4 +115,15 @@ public class EmployeeService {
         // 转换信息
         return EmployeeConverter.toInfo(employee);
     }
+
+    // 收银前端查询所有属于该仓库的员工
+    public List<EmployeeInfo> verifyList() {
+        // 查询所有员工
+        // 从RequestUser中获取当前仓库ID
+        Long wareHouseId = RequestUser.notNull().getRequestId();
+        List<Employee> employees = employeeRepository.findByWareHouseId(wareHouseId, StatusEnum.ENABLE);
+        // 转换信息
+        return EmployeeConverter.toInfoList(employees);
+    }
+
 }

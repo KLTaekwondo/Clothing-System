@@ -17,17 +17,17 @@
             <div class="order-stat-card">
                 <span class="order-stat-icon draft-icon">◷</span>
                 <span class="order-stat-value">{{ draftCount }}</span>
-                <span class="order-stat-label">草稿</span>
+                <span class="order-stat-label">当前页草稿</span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon checking-icon">⏳</span>
                 <span class="order-stat-value">{{ checkingCount }}</span>
-                <span class="order-stat-label">审核中</span>
+                <span class="order-stat-label">当前页审核中</span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon amount-icon">¥</span>
                 <span class="order-stat-value">¥{{ totalAmount.toFixed(2) }}</span>
-                <span class="order-stat-label">总金额</span>
+                <span class="order-stat-label">当前页金额</span>
             </div>
         </div>
 
@@ -216,6 +216,7 @@ async function handleCheck(item) {
 }
 
 async function handleApprove(item) {
+    if (!window.confirm(`确定通过采购单“${item.importOrderNo}”吗？通过后将变更库存。`)) return
     try {
         await importOrderInterface.approve(item.id)
         toast.success('采购单已审核通过')

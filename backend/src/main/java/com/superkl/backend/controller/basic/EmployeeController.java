@@ -68,4 +68,11 @@ public class EmployeeController {
         return Result.success(employeeService.verify(id));
     }
 
+    // 7.收银前端查询所有属于该仓库的员工
+    // 纯RESTful风格
+    // @GetMapping("/verify/list")
+    @GetMapping("/verify/list")
+    public Result<List<EmployeeInfo>> verifyList() {
+        return Result.success(employeeService.verifyList());
+    }
 }

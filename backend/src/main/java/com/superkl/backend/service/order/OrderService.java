@@ -1,6 +1,7 @@
 package com.superkl.backend.service.order;
 
 import com.superkl.backend.common.PageResult;
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.order.OrderConverter;
 import com.superkl.backend.dto.order.OrderCreateDto;
 import com.superkl.backend.dto.stock.StockContext;
@@ -45,16 +46,21 @@ public class OrderService {
     // 1.挂单操作
     @Transactional
     public void draft(OrderCreateDto dto) {
+        // 检查权限
+        checkPermission(dto.getWareHouseId());
+
+        // 挂单
         Order order = OrderConverter.toEntity();
         applyOrder(dto,order);
         order.setStatus(OrderStatusEnum.DRAFT);
         orderRepository.save(order);
-
     }
 
     // 2.完成订单
     @Transactional
     public void complete(OrderCreateDto dto) {
+        // 第一步权限校验
+        checkPermission(dto.getWareHouseId());
         // 先获取订单是否存在
         Long orderId = dto.getOrderId();
         Order order;
@@ -83,7 +89,7 @@ public class OrderService {
             // 1.校验订单是否存在
             order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new BusinessException(403, "订单不存在"));
-
+            checkBelongs(order.getWareHouse().getWareHouseId());
             // 2.校验订单状态是否为草稿
             if(!order.isDraft()){
                 throw new BusinessException(403, "订单不是草稿状态，不可完成！");
@@ -112,12 +118,18 @@ public class OrderService {
     // 3.更新草稿订单
     @Transactional
     public void update(OrderCreateDto dto) {
+        // 第一步权限校验
+        checkPermission(dto.getWareHouseId());
+
         Long orderId = dto.getOrderId();
         if(orderId == null){
             throw new BusinessException(403, "订单ID为空！无法更新！");
         }
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+
+        checkBelongs(order.getWareHouse().getWareHouseId());
+
         if(!order.isDraft()){
             throw new BusinessException(403, "订单不是草稿状态，不可更新！");
         }
@@ -127,7 +139,7 @@ public class OrderService {
     }
 
     // 4.查询单个订单
-    @Transactional
+    @Transactional(readOnly = true)
     public OrderWithItemsInfo search(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(403, "订单不存在"));
@@ -146,13 +158,30 @@ public class OrderService {
     public void deleteDraft(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+        checkBelongs(order.getWareHouse().getWareHouseId());
         if(!order.isDraft()){
             throw new BusinessException(403, "订单不是草稿状态，不可删除！");
         }
         orderRepository.delete(order);
     }
 
-    // 7.处理订单项
+    // 7.查询当前仓库的挂单列表
+    @Transactional(readOnly = true)
+    public PageResult<OrderInfo> searchDraftByWareHouseId(Pageable pageable) {
+        Long wareHouseId = RequestUser.notNull().getRequestId();
+        Page<Order> orders = orderRepository.findStatusByWareHouseId(wareHouseId,OrderStatusEnum.DRAFT,pageable);
+        return OrderConverter.toInfoPage(orders);
+    }
+
+    // 8.查询当前仓库的完成订单列表
+    @Transactional(readOnly = true)
+    public PageResult<OrderInfo> searchCompletePageByWareHouseId(Pageable pageable) {
+        Long wareHouseId = RequestUser.notNull().getRequestId();
+        Page<Order> orders = orderRepository.findStatusByWareHouseId(wareHouseId,OrderStatusEnum.COMPLETED,pageable);
+        return OrderConverter.toInfoPage(orders);
+    }
+
+    // 8.处理订单项
     private void applyOrder(OrderCreateDto dto ,Order order) {
         // 1.校验仓库和销售员是否存在
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
@@ -240,6 +269,20 @@ public class OrderService {
                 context.setSourceType(StockSourceTypeEnum.ORDER);
                 wareHouseStockService.increaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity(),context);
             }
+        }
+    }
+
+    // 权限管理
+    private void checkPermission(Long wareHouseId) {
+        if(!RequestUser.isAdmin() && !RequestUser.isCurrentWareHouse(wareHouseId)) {
+            throw new BusinessException(403, "您没有权限操作该订单！");
+        }
+    }
+
+    // 检查所属权
+    private void checkBelongs(Long wareHouseId) {
+        if(!RequestUser.isAdmin() && !RequestUser.isCurrentWareHouse(wareHouseId)) {
+            throw new BusinessException(403, "订单所属仓库与当前用户不一致！");
         }
     }
 }

@@ -58,4 +58,18 @@ public class OrderController {
         orderService.deleteDraft(orderId);
         return Result.successMessage("订单已删除！");
     }
+
+    // 7.收银前端查询当前登录仓库账户的挂单列表
+    @GetMapping("/search/wareHouse/draft")
+    public Result<PageResult<OrderInfo>> searchDraftPage(@Valid PageParam pageParam) {
+        Pageable pageable = pageParam.toPageable();
+        return Result.success(orderService.searchDraftByWareHouseId(pageable));
+    }
+
+    // 8.收银前段查询当前登录仓库的完成订单列表
+    @GetMapping("/search/wareHouse/complete")
+    public Result<PageResult<OrderInfo>> searchCompletePage(@Valid PageParam pageParam) {
+        Pageable pageable = pageParam.toPageable();
+        return Result.success(orderService.searchCompletePageByWareHouseId(pageable));
+    }
 }

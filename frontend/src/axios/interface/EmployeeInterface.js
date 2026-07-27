@@ -37,6 +37,12 @@ function employeeInterface() {
         return data || {};
     }
 
+    // 查找当前仓库可用的所有员工
+    const verifyList = async () => {
+        const data = await employeeAPI.verifyEmployeeList();
+        return Array.isArray(data) ? data : [];
+    }
+
     return {
         create,
         update,
@@ -44,6 +50,7 @@ function employeeInterface() {
         search,
         searchList,
         verify,
+        verifyList,
     }
 }
 

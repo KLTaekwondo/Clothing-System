@@ -128,10 +128,7 @@ public class WareHouseStockService {
     private void saveRecord(WareHouseStock ws , Integer beforeQuantity,
                             Integer afterQuantity ,Integer changeQuantity, StockContext stockContext) {
         // 获取当前操作人信息
-        RequestUser user = RequestUser.current();
-        if(user == null){
-            throw new BusinessException(405, "未获取到操作人信息");
-        }
+        RequestUser user = RequestUser.notNull();
 
         if(stockContext == null){
             throw new BusinessException(405, "未获取到库存上下文");

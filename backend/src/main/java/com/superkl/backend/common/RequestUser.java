@@ -1,5 +1,6 @@
 package com.superkl.backend.common;
 
+import com.superkl.backend.exception.BusinessException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -17,7 +18,7 @@ public class RequestUser {
     private String requestName;
     private String requestCode;
 
-    public static RequestUser current() {
+    private static RequestUser current() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             return null;
@@ -49,6 +50,14 @@ public class RequestUser {
             return false;
         }
         return user.getRequestRole().equals("ROLE_ADMIN");
+    }
+
+    public static RequestUser notNull() {
+        RequestUser user = current();
+        if (user == null) {
+            throw new BusinessException("未获取到当前用户信息！");
+        }
+        return user;
     }
 
     // 检查是否是当前仓库
