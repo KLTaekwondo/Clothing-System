@@ -9,6 +9,7 @@ import com.superkl.backend.entity.product.ProductSku;
 import com.superkl.backend.entity.stock.WareHouseStock;
 import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
+import com.superkl.backend.info.poduct.ProductSkuCheckInfo;
 import com.superkl.backend.info.poduct.ProductSkuInfo;
 import com.superkl.backend.repository.product.ProductRepository;
 import com.superkl.backend.repository.product.ProductSkuRepository;
@@ -125,7 +126,7 @@ public class ProductSkuService {
     }
 
     // 7. 验证商品SKU是否启用
-    public List<ProductSkuInfo> verify(String code) {
+    public List<ProductSkuCheckInfo> verify(String code) {
         // 1. 先当 SKU 条码查
         ProductSku productSku = productSkuRepository.findBySkuCode(code).orElse(null);
         if (productSku != null) {
@@ -135,7 +136,7 @@ public class ProductSkuService {
             if (!productSku.isEnabled()) {
                 throw new BusinessException(405, "商品SKU已禁用");
             }
-            return List.of(ProductSkuConverter.toInfo(productSku));
+            return List.of(ProductSkuConverter.toCheckInfo(productSku));
         }
 
         // 2. 没查到，当商品编码查
@@ -152,6 +153,6 @@ public class ProductSkuService {
             throw new BusinessException("该商品下没有可用SKU");
         }
 
-        return ProductSkuConverter.toInfoList(productSkus);
+        return ProductSkuConverter.toCheckInfoList(productSkus);
     }
 }

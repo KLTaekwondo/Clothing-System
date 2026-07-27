@@ -3,6 +3,7 @@ package com.superkl.backend.controller.product;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.product.ProductSkuCreateDto;
 import com.superkl.backend.dto.product.ProductSkuUpdateDto;
+import com.superkl.backend.info.poduct.ProductSkuCheckInfo;
 import com.superkl.backend.info.poduct.ProductSkuInfo;
 import com.superkl.backend.service.product.ProductSkuService;
 import jakarta.validation.Valid;
@@ -52,7 +53,7 @@ public class ProductSkuController {
 
     // 6.扫描编码获取商品SKU列表
     @GetMapping("/scan/{code}")
-    public Result<List<ProductSkuInfo>> scanByCode(@PathVariable String code) {
+    public Result<List<ProductSkuCheckInfo>> scanByCode(@PathVariable String code) {
         return Result.success(productSkuService.verify(code));
     }
 }

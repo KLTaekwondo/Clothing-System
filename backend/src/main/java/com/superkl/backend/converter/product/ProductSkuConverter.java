@@ -4,6 +4,7 @@ import com.superkl.backend.dto.product.ProductSkuCreateDto;
 import com.superkl.backend.dto.product.ProductSkuUpdateDto;
 import com.superkl.backend.entity.product.Product;
 import com.superkl.backend.entity.product.ProductSku;
+import com.superkl.backend.info.poduct.ProductSkuCheckInfo;
 import com.superkl.backend.info.poduct.ProductSkuInfo;
 import com.superkl.backend.utils.BarCodeUtil;
 
@@ -29,6 +30,29 @@ public class ProductSkuConverter {
     public static List<ProductSkuInfo> toInfoList(List<ProductSku> productSkus) {
         return productSkus.stream()
                 .map(ProductSkuConverter::toInfo)
+                .toList();
+    }
+
+    // 实体转收银Info
+    public static ProductSkuCheckInfo toCheckInfo(ProductSku productSku) {
+        return ProductSkuCheckInfo.builder()
+                .id(productSku.getSkuId())
+                .code(productSku.getSkuCode())
+                .name(productSku.getSkuName())
+                .spec(productSku.getSpecAttributes())
+                .status(productSku.getStatus())
+                .salePrice(productSku.getProduct().getSalePrice())
+                .productCode(productSku.getProduct().getProductCode())
+                .productName(productSku.getProduct().getProductName())
+                .createTime(productSku.getCreateTime())
+                .updateTime(productSku.getUpdateTime())
+                .build();
+    }
+
+    // 实体列表转收银Info列表
+    public static List<ProductSkuCheckInfo> toCheckInfoList(List<ProductSku> productSkus) {
+        return productSkus.stream()
+                .map(ProductSkuConverter::toCheckInfo)
                 .toList();
     }
 

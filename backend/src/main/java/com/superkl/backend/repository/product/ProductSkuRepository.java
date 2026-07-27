@@ -12,12 +12,18 @@ import java.util.Optional;
 
 @Repository
 public interface ProductSkuRepository extends JpaRepository<ProductSku, Long> {
-    @Query("SELECT p FROM ProductSku p WHERE p.product.productId = :id")
+    @Query("SELECT p FROM ProductSku p " +
+            "JOIN FETCH p.product " +
+            "WHERE p.product.productId = :id")
     List<ProductSku> findByProductId(@Param("id") Long id);
 
-    @Query("SELECT p FROM ProductSku p WHERE p.skuCode = :skuCode")
+    @Query("SELECT p FROM ProductSku p " +
+            "JOIN FETCH p.product " +
+            "WHERE p.skuCode = :skuCode")
     Optional<ProductSku> findBySkuCode(@Param("skuCode") String skuCode);
 
-    @Query("SELECT p FROM ProductSku p WHERE p.product.productCode = :productCode AND p.status = :status")
+    @Query("SELECT p FROM ProductSku p " +
+            "JOIN FETCH p.product " +
+            "WHERE p.product.productCode = :productCode AND p.status = :status")
     List<ProductSku> findByProductCodeAndStatus(@Param("productCode") String productCode, @Param("status") StatusEnum status);
 }
