@@ -45,9 +45,9 @@
                             </select></div>
                         </div>
                         <div class="form-row">
-                            <div class="form-group"><label>面料组合</label><select v-model="form.composition" required>
+                            <div class="form-group"><label>年份</label><select v-model="form.year" required>
                                 <option disabled value="">请选择</option>
-                                <option v-for="opt in compositionOptions" :key="opt.id" :value="opt.optionValue">
+                                <option v-for="opt in yearOptions" :key="opt.id" :value="opt.optionValue">
                                     {{ opt.optionValue }}
                                 </option>
                             </select></div>
@@ -60,6 +60,12 @@
                             </div>
                         </div>
                         <div class="form-row">
+                            <div class="form-group"><label>面料组合</label><select v-model="form.composition" required>
+                                <option disabled value="">请选择</option>
+                                <option v-for="opt in compositionOptions" :key="opt.id" :value="opt.optionValue">
+                                    {{ opt.optionValue }}
+                                </option>
+                            </select></div>
                             <div class="form-group"><label>进货价格</label><input v-model.number="form.importPrice"
                                                                                   min="0" required step="0.01"
                                                                                   type="number"/></div>
@@ -103,7 +109,7 @@
                     <div class="card-header"><span class="card-title">SKU 预览</span><span
                         class="card-hint">{{ skuPreview.length }} 项</span></div>
                     <div v-if="skuPreview.length === 0" class="empty-state" style="padding:24px">
-                        <div class="empty-icon">🏷️</div>
+                        <div class="empty-icon"><IconGraphic name="tag"/></div>
                         <div class="empty-text">选择颜色/尺码后预览</div>
                     </div>
                     <div v-else class="sku-list">
@@ -144,6 +150,7 @@ const form = ref({
     category: '',
     unit: '',
     composition: '',
+    year: '',
     importPrice: '',
     salePrice: '',
     special: false
@@ -154,6 +161,7 @@ const typeOptions = ref([])
 const categoryOptions = ref([])
 const unitOptions = ref([])
 const compositionOptions = ref([])
+const yearOptions = ref([])
 
 // SKU 多选 tags（仅颜色+尺码）
 const skuOptionGroups = ref([])
@@ -166,13 +174,14 @@ onMounted(async () => {
 async function loadOptions() {
     optionLoading.value = true
     try {
-        const [colorRes, sizeRes, typeRes, catRes, unitRes, compRes] = await Promise.all([
+        const [colorRes, sizeRes, typeRes, catRes, unitRes, compRes, yearRes] = await Promise.all([
             optionValueInterface.searchListByType(OPTION_TYPE.COLOR).catch(() => []),
             optionValueInterface.searchListByType(OPTION_TYPE.SIZE).catch(() => []),
             optionValueInterface.searchListByType(OPTION_TYPE.TYPE).catch(() => []),
             optionValueInterface.searchListByType(OPTION_TYPE.CATEGORY).catch(() => []),
             optionValueInterface.searchListByType(OPTION_TYPE.UNIT).catch(() => []),
-            optionValueInterface.searchListByType(OPTION_TYPE.COMPOSITION).catch(() => [])
+            optionValueInterface.searchListByType(OPTION_TYPE.COMPOSITION).catch(() => []),
+            optionValueInterface.searchListByType(OPTION_TYPE.YEAR).catch(() => [])
         ])
 
         // SKU 规格（多选 tags）
@@ -189,6 +198,7 @@ async function loadOptions() {
         categoryOptions.value = Array.isArray(catRes) ? catRes : []
         unitOptions.value = Array.isArray(unitRes) ? unitRes : []
         compositionOptions.value = Array.isArray(compRes) ? compRes : []
+        yearOptions.value = Array.isArray(yearRes) ? yearRes : []
     } catch {
         skuOptionGroups.value = []
     } finally {
@@ -230,7 +240,7 @@ const skuPreview = computed(() => {
 })
 
 async function handleSubmit() {
-    if (!form.value.code || !form.value.name || !form.value.season || !form.value.type || !form.value.category || !form.value.unit || !form.value.composition || form.value.importPrice === '' || form.value.salePrice === '') {
+    if (!form.value.code || !form.value.name || !form.value.season || !form.value.type || !form.value.category || !form.value.unit || !form.value.composition || !form.value.year || form.value.importPrice === '' || form.value.salePrice === '') {
         toast.warning('请填写完整的商品信息');
         return
     }
@@ -248,6 +258,7 @@ async function handleSubmit() {
             category: form.value.category,
             unit: form.value.unit,
             composition: form.value.composition,
+            year: form.value.year,
             importPrice: form.value.importPrice,
             salePrice: form.value.salePrice,
             special: form.value.special,

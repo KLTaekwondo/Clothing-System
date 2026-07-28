@@ -22,7 +22,7 @@
             <div class="loading-spinner"></div>
         </div>
         <div v-else-if="!product" class="empty-state">
-            <div class="empty-icon">📦</div>
+            <div class="empty-icon"><IconGraphic name="product"/></div>
             <div class="empty-text">商品不存在</div>
         </div>
 
@@ -86,6 +86,15 @@
                     <strong v-else>{{ product.composition || '-' }}</strong>
                 </div>
                 <div class="info-card">
+                    <span class="info-label">年份</span>
+                    <select v-if="editing" v-model="form.year" class="card-select">
+                        <option v-for="opt in yearOptions" :key="opt.id" :value="opt.optionValue">
+                            {{ opt.optionValue }}
+                        </option>
+                    </select>
+                    <strong v-else>{{ product.year || '-' }}</strong>
+                </div>
+                <div class="info-card">
                     <span class="info-label">状态</span>
                     <select v-if="editing" v-model="form.status" class="card-select">
                         <option v-for="s in statusOptions" :key="s.value" :value="s.value">{{ s.label }}</option>
@@ -141,7 +150,7 @@
                     <div class="loading-spinner"></div>
                 </div>
                 <div v-else-if="skuList.length === 0" class="empty-state">
-                    <div class="empty-icon">🏷️</div>
+                    <div class="empty-icon"><IconGraphic name="tag"/></div>
                     <div class="empty-text">暂无 SKU</div>
                 </div>
                 <table v-else class="data-table">
@@ -211,18 +220,20 @@ const typeOptions = ref([])
 const categoryOptions = ref([])
 const unitOptions = ref([])
 const compositionOptions = ref([])
+const yearOptions = ref([])
 
 onMounted(fetchDetail)
 
 async function fetchDetail() {
     try {
-        const [productResult, skus, t, cat, u, comp] = await Promise.all([
+        const [productResult, skus, t, cat, u, comp, year] = await Promise.all([
             productInterface.search(route.params.id),
             productSkuInterface.searchListByProductId(route.params.id).catch(() => []),
             optionValueInterface.searchListByType(OPTION_TYPE.TYPE).catch(() => []),
             optionValueInterface.searchListByType(OPTION_TYPE.CATEGORY).catch(() => []),
             optionValueInterface.searchListByType(OPTION_TYPE.UNIT).catch(() => []),
-            optionValueInterface.searchListByType(OPTION_TYPE.COMPOSITION).catch(() => [])
+            optionValueInterface.searchListByType(OPTION_TYPE.COMPOSITION).catch(() => []),
+            optionValueInterface.searchListByType(OPTION_TYPE.YEAR).catch(() => [])
         ])
         product.value = productResult
         skuList.value = skus
@@ -230,6 +241,7 @@ async function fetchDetail() {
         categoryOptions.value = Array.isArray(cat) ? cat : []
         unitOptions.value = Array.isArray(u) ? u : []
         compositionOptions.value = Array.isArray(comp) ? comp : []
+        yearOptions.value = Array.isArray(year) ? year : []
     } catch {
         product.value = null
     } finally {
@@ -248,6 +260,7 @@ function startEdit() {
         category: p.category || '',
         unit: p.unit || '',
         composition: p.composition || '',
+        year: p.year || '',
         importPrice: p.importPrice ?? 0,
         salePrice: p.salePrice ?? 0,
         special: Boolean(p.special),
@@ -274,6 +287,7 @@ async function saveEdit() {
             category: form.value.category,
             unit: form.value.unit,
             composition: form.value.composition,
+            year: form.value.year,
             importPrice: form.value.importPrice,
             salePrice: form.value.salePrice,
             special: form.value.special,

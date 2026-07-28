@@ -18,6 +18,7 @@ public class SupplierConverter {
                 .supplierName(supplier.getSupplierName())
                 .supplierCode(supplier.getSupplierCode())
                 .contactPhone(supplier.getContactPhone())
+                .status(supplier.getStatus())
                 .remark(supplier.getRemark())
                 .createTime(supplier.getCreateTime())
                 .updateTime(supplier.getUpdateTime())
@@ -47,6 +48,7 @@ public class SupplierConverter {
         supplier.setSupplierName(dto.getSupplierName());
         supplier.setSupplierCode(dto.getSupplierCode());
         supplier.setContactPhone(dto.getContactPhone());
+        supplier.setStatus(dto.getStatus());
         supplier.setRemark(dto.getRemark());
         supplier.setStatus(dto.getStatus());
     }

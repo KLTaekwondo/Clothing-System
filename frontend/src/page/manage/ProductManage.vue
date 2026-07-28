@@ -20,7 +20,7 @@
                 <div class="loading-spinner"></div>
             </div>
             <div v-else-if="filteredList.length === 0" class="empty-state">
-                <div class="empty-icon">📦</div>
+                <div class="empty-icon"><IconGraphic name="product"/></div>
                 <div class="empty-text">暂无商品数据</div>
             </div>
             <table v-else class="data-table">
@@ -31,6 +31,7 @@
                     <th>类型</th>
                     <th>种类</th>
                     <th>季节</th>
+                    <th>年份</th>
                     <th>销售价</th>
                     <th>状态</th>
                     <th>操作</th>
@@ -43,6 +44,7 @@
                     <td>{{ item.type || '-' }}</td>
                     <td>{{ item.category || '-' }}</td>
                     <td>{{ seasonLabels[item.season] || item.season || '-' }}</td>
+                    <td>{{ item.year || '-' }}</td>
                     <td>¥{{ item.salePrice ?? '-' }}</td>
                     <td>
                             <span :class="item.status === STATUS.ENABLE ? 'status-ok' : 'status-error'"
@@ -90,7 +92,7 @@
             <div class="modal-content confirm-modal">
                 <div class="modal-body">
                     <div class="confirm-box">
-                        <div class="confirm-icon">⚠️</div>
+                        <div class="confirm-icon"><IconGraphic name="warning"/></div>
                         <div class="confirm-msg">确定要删除“{{ deleteTarget?.name }}”吗？</div>
                         <div class="confirm-hint">商品会被禁用，已有数据不会被物理删除</div>
                     </div>

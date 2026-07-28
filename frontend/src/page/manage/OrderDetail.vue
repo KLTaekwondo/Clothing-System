@@ -14,7 +14,7 @@
             <div class="loading-spinner"></div>
         </div>
         <div v-else-if="!order" class="empty-state">
-            <div class="empty-icon">📋</div>
+            <div class="empty-icon"><IconGraphic name="order"/></div>
             <div class="empty-text">订单不存在</div>
         </div>
         <template v-else>
@@ -71,7 +71,7 @@
                     </tbody>
                 </table>
                 <div v-else class="empty-state" style="padding:20px">
-                    <div class="empty-icon">📦</div>
+                    <div class="empty-icon"><IconGraphic name="product"/></div>
                     <div class="empty-text">无商品明细</div>
                 </div>
             </div>

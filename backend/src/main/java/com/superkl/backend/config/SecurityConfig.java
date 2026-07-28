@@ -64,7 +64,7 @@ public class SecurityConfig {
                                 "/api/order/complete","/api/order/delete/**","/api/order/search/wareHouse/**").hasRole("WAREHOUSE")
                         .requestMatchers( "/api/stock/**",
                                 "/api/product/search/**", "/api/productSku/search/**",
-                                "/api/productSku/scan/**", "/api/warehouse/logout")
+                                "/api/productSku/scan/**", "/api/warehouse/logout","/api/order/search/**")
                         .hasAnyRole("ADMIN", "WAREHOUSE")
                         // 管理员可以访问所有接口
                         .requestMatchers("/api/**").hasRole("ADMIN")
@@ -85,7 +85,7 @@ public class SecurityConfig {
         // 配置 CORS 允许所有来源的请求
         CorsConfiguration configuration = new CorsConfiguration();
         // 允许所有来源的请求
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));  // 前端地址
+        configuration.setAllowedOrigins(List.of("https://kl-koole.com","http://localhost:5173"));  // 前端地址
         // 允许所有请求方法
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // 允许 Content-Type 请求头

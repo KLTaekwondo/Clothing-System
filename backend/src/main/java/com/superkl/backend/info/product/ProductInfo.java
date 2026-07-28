@@ -1,4 +1,4 @@
-package com.superkl.backend.info.poduct;
+package com.superkl.backend.info.product;
 
 import com.superkl.backend.enums.SeasonEnum;
 import com.superkl.backend.enums.StatusEnum;
@@ -24,6 +24,7 @@ public class ProductInfo extends BaseInfo {
     private String category; // 商品种类
     private String unit; // 商品单位
     private String composition; // 商品面料组合
+    private String year; // 商品年份
     private BigDecimal importPrice; // 商品进口价格
     private BigDecimal salePrice; // 商品销售价格
     private boolean special; // 是否特价

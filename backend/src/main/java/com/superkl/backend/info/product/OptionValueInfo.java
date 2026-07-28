@@ -1,4 +1,4 @@
-package com.superkl.backend.info.poduct;
+package com.superkl.backend.info.product;
 
 import com.superkl.backend.enums.OptionTypeEnum;
 import com.superkl.backend.info.BaseInfo;

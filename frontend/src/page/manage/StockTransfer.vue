@@ -34,7 +34,7 @@
 
         <div v-if="formList.length === 0" class="card empty-form-card">
             <div class="empty-state">
-                <div class="empty-icon">🔄</div>
+                <div class="empty-icon"><IconGraphic name="transfer"/></div>
                 <div class="empty-text">选择仓库并查询商品，SKU 会显示在这里</div>
             </div>
         </div>
@@ -52,7 +52,7 @@
             <div v-for="(item, index) in formList" :key="item.key" class="stock-product-card card">
                 <div class="product-form-header" @click="item.expanded = !item.expanded">
                     <div class="product-summary">
-                        <span class="product-mark">📦</span>
+                        <span class="product-mark"><IconGraphic name="product"/></span>
                         <div><strong class="product-name">{{ item.product.name }}</strong><span
                             class="product-code">{{ item.product.code }}</span></div>
                     </div>

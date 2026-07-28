@@ -143,6 +143,7 @@ public class OrderService {
     public OrderWithItemsInfo search(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+        checkBelongs(order.getWareHouse().getWareHouseId());
         List<OrderItemInfo> items = orderItemService.findByOrderId(orderId);
         return OrderConverter.toInfoWithItems(order,items);
     }

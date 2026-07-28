@@ -55,7 +55,7 @@
 
         <div v-if="items.length === 0" class="card empty-card">
             <div class="empty-state">
-                <div class="empty-icon">📦</div>
+                <div class="empty-icon"><IconGraphic name="product"/></div>
                 <div class="empty-text">查询商品后添加 SKU 到这里</div>
             </div>
         </div>
@@ -72,7 +72,7 @@
         <div v-if="items.length > 0" class="items-list">
             <div v-for="(group, gi) in groupedItems" :key="gi" class="card product-group-card">
                 <div class="product-header">
-                    <span class="product-mark">📦</span>
+                    <span class="product-mark"><IconGraphic name="product"/></span>
                     <div>
                         <strong class="product-name">{{ group.productName }}</strong>
                         <span class="product-code">{{ group.productCode }}</span>

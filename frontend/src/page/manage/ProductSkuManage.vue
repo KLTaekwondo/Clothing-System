@@ -23,7 +23,7 @@
                 <div class="loading-spinner"></div>
             </div>
             <div v-else-if="skuList.length === 0" class="empty-state">
-                <div class="empty-icon">🏷️</div>
+                <div class="empty-icon"><IconGraphic name="tag"/></div>
                 <div class="empty-text">暂无 SKU，先添加一个吧</div>
             </div>
             <table v-else class="data-table">

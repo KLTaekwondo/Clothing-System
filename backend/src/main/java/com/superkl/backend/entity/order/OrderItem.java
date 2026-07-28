@@ -31,6 +31,9 @@ public class OrderItem extends BaseEntity {
     private String skuName;// 商品名称快照
 
     @Column(nullable = false)
+    private String skuCode;// 商品SKU快照
+
+    @Column(nullable = false)
     private BigDecimal unitPrice;// 商品单价
 
     @Column(nullable = false)

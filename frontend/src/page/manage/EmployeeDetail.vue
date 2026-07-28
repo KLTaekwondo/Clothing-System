@@ -27,7 +27,7 @@
             <div class="loading-spinner"></div>
         </div>
         <div v-else-if="!employee" class="empty-state">
-            <div class="empty-icon">👤</div>
+            <div class="empty-icon"><IconGraphic name="user"/></div>
             <div class="empty-text">员工不存在</div>
         </div>
         <div v-else class="detail-grid">

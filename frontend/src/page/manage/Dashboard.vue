@@ -16,28 +16,28 @@
                 </div>
                 <div class="stat-grid">
                     <div class="stat-card">
-                        <div class="stat-icon stat-teal">📦</div>
+                        <div class="stat-icon stat-teal"><IconGraphic name="product"/></div>
                         <div class="stat-body">
                             <span class="stat-value">{{ stats.products }}</span>
                             <span class="stat-label">商品总数</span>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon stat-green">👤</div>
+                        <div class="stat-icon stat-green"><IconGraphic name="user"/></div>
                         <div class="stat-body">
                             <span class="stat-value">{{ stats.employees }}</span>
                             <span class="stat-label">员工总数</span>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon stat-orange">🏭</div>
+                        <div class="stat-icon stat-orange"><IconGraphic name="warehouse"/></div>
                         <div class="stat-body">
                             <span class="stat-value">{{ stats.warehouses }}</span>
                             <span class="stat-label">仓库总数</span>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon stat-purple">📋</div>
+                        <div class="stat-icon stat-purple"><IconGraphic name="order"/></div>
                         <div class="stat-body">
                             <span class="stat-value">{{ stats.orders }}</span>
                             <span class="stat-label">订单总数</span>
@@ -53,22 +53,22 @@
                 </div>
                 <div class="quick-grid">
                     <router-link class="quick-card" to="/manage/product">
-                        <span class="quick-icon-box" style="background:#dcfce7">📦</span>
+                        <span class="quick-icon-box" style="background:#dcfce7"><IconGraphic name="product"/></span>
                         <span class="quick-name">商品管理</span>
                         <span class="quick-desc">添加、编辑和管理商品</span>
                     </router-link>
                     <router-link class="quick-card" to="/manage/employee">
-                        <span class="quick-icon-box" style="background:#e8f0fe">👤</span>
+                        <span class="quick-icon-box" style="background:#e8f0fe"><IconGraphic name="user"/></span>
                         <span class="quick-name">员工管理</span>
                         <span class="quick-desc">管理员工信息与核验</span>
                     </router-link>
                     <router-link class="quick-card" to="/manage/warehouse">
-                        <span class="quick-icon-box" style="background:#fef3c7">🏭</span>
+                        <span class="quick-icon-box" style="background:#fef3c7"><IconGraphic name="warehouse"/></span>
                         <span class="quick-name">仓库管理</span>
                         <span class="quick-desc">仓库与库存调拨</span>
                     </router-link>
                     <router-link class="quick-card" to="/manage/order">
-                        <span class="quick-icon-box" style="background:#fce7f3">📋</span>
+                        <span class="quick-icon-box" style="background:#fce7f3"><IconGraphic name="order"/></span>
                         <span class="quick-name">查看订单</span>
                         <span class="quick-desc">查看订单状态与金额</span>
                     </router-link>
@@ -79,42 +79,42 @@
         <div class="section-title">财务概览</div>
         <div class="stat-grid">
             <div class="stat-card">
-                <div class="stat-icon stat-teal">💰</div>
+                <div class="stat-icon stat-teal"><IconGraphic name="money"/></div>
                 <div class="stat-body">
                     <span class="stat-value stat-amount">{{ finance.todaySales }}</span>
                     <span class="stat-label">今日销售额</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon stat-blue">📈</div>
+                <div class="stat-icon stat-blue"><IconGraphic name="trend"/></div>
                 <div class="stat-body">
                     <span class="stat-value stat-amount">{{ finance.monthlySales }}</span>
                     <span class="stat-label">本月销售额</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon stat-green">💵</div>
+                <div class="stat-icon stat-green"><IconGraphic name="money"/></div>
                 <div class="stat-body">
                     <span class="stat-value stat-amount">{{ finance.todayProfit }}</span>
                     <span class="stat-label">今日毛利</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon stat-purple">📊</div>
+                <div class="stat-icon stat-purple"><IconGraphic name="trend"/></div>
                 <div class="stat-body">
                     <span class="stat-value">{{ finance.grossMargin }}</span>
                     <span class="stat-label">毛利率</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon stat-orange">🧾</div>
+                <div class="stat-icon stat-orange"><IconGraphic name="receipt"/></div>
                 <div class="stat-body">
                     <span class="stat-value stat-amount">{{ finance.todayCost }}</span>
                     <span class="stat-label">今日成本</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon stat-red">🛒</div>
+                <div class="stat-icon stat-red"><IconGraphic name="cart"/></div>
                 <div class="stat-body">
                     <span class="stat-value stat-amount">{{ finance.avgOrder }}</span>
                     <span class="stat-label">客单价</span>
@@ -150,6 +150,7 @@ import employeeInterface from '../../axios/interface/EmployeeInterface.js'
 import wareHouseInterface from '../../axios/interface/WareHouseInterface.js'
 import orderInterface from '../../axios/interface/OrderInterface.js'
 import {STATUS} from '../../constants/status.js'
+import IconGraphic from '../../component/IconGraphic.vue'
 
 const loading = ref(true)
 const salesChartRef = ref(null)

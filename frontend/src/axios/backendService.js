@@ -2,7 +2,7 @@ import axios from "axios";
 import {useToastStore} from "../stores/toastStore.js";
 
 const backendService = axios.create({
-    baseURL: "http://localhost:8080/api",
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     timeout: 10000,
     withCredentials: true,
     headers: {

@@ -4,7 +4,8 @@ export const OPTION_TYPE = Object.freeze({
     TYPE: 'TYPE',
     CATEGORY: 'CATEGORY',
     UNIT: 'UNIT',
-    COMPOSITION: 'COMPOSITION'
+    COMPOSITION: 'COMPOSITION',
+    YEAR: 'YEAR'
 })
 
 export const OPTION_TYPE_OPTIONS = [
@@ -13,7 +14,8 @@ export const OPTION_TYPE_OPTIONS = [
     {value: OPTION_TYPE.TYPE, label: '类型'},
     {value: OPTION_TYPE.CATEGORY, label: '种类'},
     {value: OPTION_TYPE.UNIT, label: '单位'},
-    {value: OPTION_TYPE.COMPOSITION, label: '面料组合'}
+    {value: OPTION_TYPE.COMPOSITION, label: '面料组合'},
+    {value: OPTION_TYPE.YEAR, label: '年份'}
 ]
 
 export const OPTION_TYPE_LABELS = Object.freeze(

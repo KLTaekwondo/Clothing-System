@@ -6,8 +6,8 @@ function supplierInterface() {
         return true;
     }
 
-    const update = async (id,data) => {
-        await supplierAPI.updateSupplier(id,data);
+    const update = async (id, data) => {
+        await supplierAPI.updateSupplier(id, data);
         return true;
     }
 

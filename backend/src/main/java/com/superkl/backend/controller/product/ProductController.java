@@ -5,13 +5,11 @@ import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.product.ProductCreateDto;
 import com.superkl.backend.dto.product.ProductUpdateDto;
-import com.superkl.backend.info.poduct.ProductInfo;
+import com.superkl.backend.info.product.ProductInfo;
 import com.superkl.backend.service.product.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/product")

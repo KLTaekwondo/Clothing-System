@@ -9,7 +9,8 @@ public enum SeasonEnum {
     SPRING("spring", "春款"),
     SUMMER("summer", "夏款"),
     AUTUMN("autumn", "秋款"),
-    WINTER("winter", "冬款");
+    WINTER("winter", "冬款"),
+    ALL_SEASONS("all-seasons","全季");
 
     private final String code;
     private final String desc;

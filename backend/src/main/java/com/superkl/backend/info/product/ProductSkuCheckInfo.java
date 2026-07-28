@@ -1,4 +1,4 @@
-package com.superkl.backend.info.poduct;
+package com.superkl.backend.info.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

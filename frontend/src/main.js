@@ -4,9 +4,12 @@ import App from './App.vue'
 import router from './router/router.js'
 import {createPinia} from 'pinia'
 import {restoreCurrentTab, setupTabGuard} from './stores/tabGuard.js'
+import IconGraphic from './component/IconGraphic.vue'
 
 const app = createApp(App)
 const pinia = createPinia()
+
+app.component('IconGraphic', IconGraphic)
 
 // 使用插件
 app.use(pinia)

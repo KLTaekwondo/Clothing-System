@@ -45,6 +45,9 @@ public class Product extends BaseEntity {
     @Column(nullable = false ,length = 50)
     private String composition;// 面料组合
 
+    @Column(nullable = false,length = 4)
+    private String year;// 商品年份
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default

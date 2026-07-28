@@ -1,5 +1,6 @@
 package com.superkl.backend.info.basic;
 
+import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.info.BaseInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,5 +17,6 @@ public class SupplierInfo extends BaseInfo {
     private String supplierCode;
     private String supplierName;
     private String contactPhone;
+    private StatusEnum status;
     private String remark;
 }

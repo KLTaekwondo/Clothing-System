@@ -21,7 +21,7 @@
             <div class="loading-spinner"></div>
         </div>
         <div v-else-if="!warehouse" class="empty-state">
-            <div class="empty-icon">🏭</div>
+            <div class="empty-icon"><IconGraphic name="warehouse"/></div>
             <div class="empty-text">仓库不存在</div>
         </div>
 
@@ -66,15 +66,13 @@
             <div class="stock-search-bar">
                 <input v-model="productId" min="1" placeholder="输入商品 ID 查询库存" type="number"/>
                 <button class="btn-primary btn-sm" @click="fetchStock">查询</button>
-                <router-link class="btn-outline btn-sm" style="margin-left:auto" to="/manage/stock/transfer">库存转移
-                </router-link>
             </div>
             <div class="card stock-table-card">
                 <div v-if="stockLoading" class="loading-overlay">
                     <div class="loading-spinner"></div>
                 </div>
                 <div v-else-if="stockList.length === 0" class="empty-state">
-                    <div class="empty-icon">📊</div>
+                    <div class="empty-icon"><IconGraphic name="stock"/></div>
                     <div class="empty-text">输入商品 ID 查询该仓库的库存</div>
                 </div>
                 <table v-else class="data-table">

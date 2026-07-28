@@ -4,7 +4,7 @@ import com.superkl.backend.common.PageResult;
 import com.superkl.backend.dto.product.ProductCreateDto;
 import com.superkl.backend.dto.product.ProductUpdateDto;
 import com.superkl.backend.entity.product.Product;
-import com.superkl.backend.info.poduct.ProductInfo;
+import com.superkl.backend.info.product.ProductInfo;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -23,6 +23,7 @@ public class ProductConverter {
                 .category(product.getCategory())
                 .unit(product.getUnit())
                 .composition(product.getComposition())
+                .year(product.getYear())
                 .importPrice(product.getImportPrice())
                 .salePrice(product.getSalePrice())
                 .special(product.isSpecial())
@@ -56,6 +57,7 @@ public class ProductConverter {
                 .category(productCreateDto.getCategory())
                 .unit(productCreateDto.getUnit())
                 .composition(productCreateDto.getComposition())
+                .year(productCreateDto.getYear())
                 .importPrice(productCreateDto.getImportPrice())
                 .salePrice(productCreateDto.getSalePrice())
                 .special(productCreateDto.isSpecial())
@@ -70,6 +72,7 @@ public class ProductConverter {
         product.setCategory(productUpdateDto.getCategory());
         product.setUnit(productUpdateDto.getUnit());
         product.setComposition(productUpdateDto.getComposition());
+        product.setYear(productUpdateDto.getYear());
         product.setImportPrice(productUpdateDto.getImportPrice());
         product.setSalePrice(productUpdateDto.getSalePrice());
         product.setSpecial(productUpdateDto.isSpecial());

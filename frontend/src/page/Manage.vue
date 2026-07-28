@@ -10,13 +10,21 @@
                 <router-link v-for="item in navItems" :key="item.path" :title="collapsed ? item.label : ''" :to="item.path" active-class="nav-item-active"
                              class="nav-item"
                              @click.prevent="openTab(item.path, item.label, item.icon)">
-                    <span class="nav-icon">{{ item.icon }}</span>
+                    <img
+                        :src="item.icon"
+                        alt=""
+                        class="nav-icon"
+                    />
                     <span class="nav-label">{{ item.label }}</span>
                 </router-link>
             </nav>
             <div class="sidebar-footer">
                 <button :title="collapsed ? '退出登录' : ''" class="nav-item nav-logout" @click="handleLogout">
-                    <span class="nav-icon">🚪</span>
+                    <img
+                        :src="logoutIcon"
+                        alt=""
+                        class="nav-icon"
+                    />
                     <span class="nav-label">退出登录</span>
                 </button>
             </div>
@@ -48,6 +56,18 @@ import {ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useUserStore} from '../stores/userStore.js'
 import adminInterface from '../axios/interface/AdminInterface.js'
+import dashboardIcon from '../assets/icons/navigation/dashboard.svg'
+import productIcon from '../assets/icons/navigation/product.svg'
+import employeeIcon from '../assets/icons/navigation/employee.svg'
+import supplierIcon from '../assets/icons/navigation/supplier.svg'
+import warehouseIcon from '../assets/icons/navigation/warehouse.svg'
+import stockIcon from '../assets/icons/navigation/stock.svg'
+import stockRecordIcon from '../assets/icons/navigation/stock-record.svg'
+import orderIcon from '../assets/icons/navigation/order.svg'
+import importOrderIcon from '../assets/icons/navigation/import-order.svg'
+import transferOrderIcon from '../assets/icons/navigation/transfer-order.svg'
+import optionIcon from '../assets/icons/navigation/option.svg'
+import logoutIcon from '../assets/icons/navigation/logout.svg'
 
 const router = useRouter()
 const route = useRoute()
@@ -57,17 +77,17 @@ const currentPath = ref('')
 const tabs = ref(loadSavedTabs())
 
 const navItems = [
-    {path: '/manage/dashboard', label: '仪表盘', icon: '📊'},
-    {path: '/manage/product', label: '商品管理', icon: '📦'},
-    {path: '/manage/employee', label: '员工管理', icon: '👤'},
-    {path: '/manage/warehouse', label: '仓库管理', icon: '🏭'},
-    {path: '/manage/stock', label: '库存管理', icon: '📊'},
-    {path: '/manage/stock/transfer', label: '库存转移', icon: '🔄'},
-    {path: '/manage/stock/record', label: '库存记录', icon: '📄'},
-    {path: '/manage/order', label: '订单管理', icon: '📋'},
-    {path: '/manage/import-order', label: '采购订单', icon: '📥'},
-    {path: '/manage/transfer-order', label: '调拨订单', icon: '🔄'},
-    {path: '/manage/option', label: '选项管理', icon: '🏷️'}
+    {path: '/manage/dashboard', label: '仪表盘', icon: dashboardIcon},
+    {path: '/manage/product', label: '商品管理', icon: productIcon},
+    {path: '/manage/employee', label: '员工管理', icon: employeeIcon},
+    {path: '/manage/supplier', label: '供应商管理', icon: supplierIcon},
+    {path: '/manage/warehouse', label: '仓库管理', icon: warehouseIcon},
+    {path: '/manage/stock', label: '库存管理', icon: stockIcon},
+    {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon},
+    {path: '/manage/order', label: '订单管理', icon: orderIcon},
+    {path: '/manage/import-order', label: '采购订单', icon: importOrderIcon},
+    {path: '/manage/transfer-order', label: '调拨订单', icon: transferOrderIcon},
+    {path: '/manage/option', label: '选项管理', icon: optionIcon}
 ]
 
 function loadSavedTabs() {
@@ -221,6 +241,9 @@ async function handleLogout() {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    box-shadow: 0 2px 7px rgba(22, 83, 78, 0.06) inset;
+    border-top: 2px solid #dfece9;
+    border-bottom: 2px solid #dfece9;
 }
 
 .nav-item {
@@ -234,8 +257,6 @@ async function handleLogout() {
     cursor: pointer;
     transition: all .2s;
     text-decoration: none;
-    border: none;
-    background: none;
     width: 100%;
     text-align: left;
     white-space: nowrap;
@@ -247,22 +268,45 @@ async function handleLogout() {
 }
 
 .nav-item:hover {
-    background: #f5f5f0;
+    background: #fff;
+    border-color: #cce4df;
     color: #2c3e50;
+    box-shadow: 0 5px 12px rgba(22, 83, 78, 0.1);
+    transform: translateY(-1px);
 }
 
 .nav-item-active {
     background: linear-gradient(90deg, #d9f6f1, #effbf9) !important;
+    border-color: #b9ded7 !important;
     color: #0f766e !important;
     font-weight: 700;
-    box-shadow: inset 3px 0 0 #0d9488;
+    box-shadow: inset 3px 0 0 #0d9488, 0 4px 12px rgba(13, 148, 136, 0.12);
 }
 
 .nav-icon {
-    font-size: 17px;
-    width: 22px;
-    text-align: center;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
+    object-fit: contain;
+    opacity: 0.72;
+    filter: invert(45%) sepia(18%) saturate(765%) hue-rotate(125deg) brightness(89%) contrast(86%);
+    transition: opacity 0.2s, filter 0.2s, transform 0.2s;
+}
+
+.nav-item:hover .nav-icon {
+    opacity: 1;
+    filter: invert(43%) sepia(76%) saturate(689%) hue-rotate(127deg) brightness(91%) contrast(92%);
+    transform: scale(1.06);
+}
+
+.nav-item-active .nav-icon {
+    opacity: 1;
+    filter: invert(36%) sepia(64%) saturate(879%) hue-rotate(129deg) brightness(87%) contrast(91%);
+}
+
+.nav-logout:hover .nav-icon {
+    opacity: 1;
+    filter: invert(31%) sepia(91%) saturate(2210%) hue-rotate(344deg) brightness(91%) contrast(91%);
 }
 
 .nav-label {

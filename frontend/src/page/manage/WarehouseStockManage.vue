@@ -6,7 +6,6 @@
                 <div><h2 class="page-title">库存管理</h2>
                     <p class="page-desc">{{ warehouse?.name || '仓库' }} 的 SKU 库存</p></div>
             </div>
-            <button class="btn-outline" @click="goTransfer">库存转移</button>
         </div>
         <div class="card search-card">
             <div class="stock-search"><input v-model="productId" min="1" placeholder="输入商品 ID 查询库存"
@@ -19,7 +18,7 @@
                 <div class="loading-spinner"></div>
             </div>
             <div v-else-if="stockList.length===0" class="empty-state">
-                <div class="empty-icon">📊</div>
+                <div class="empty-icon"><IconGraphic name="stock"/></div>
                 <div class="empty-text">暂无库存数据</div>
             </div>
             <table v-else class="data-table">
@@ -78,10 +77,6 @@ async function fetchStock() {
 function formatSpec(spec) {
     if (!spec) return '-';
     return Object.entries(spec).map(([key, value]) => `${key}:${value}`).join(' / ')
-}
-
-function goTransfer() {
-    router.push('/manage/stock/transfer')
 }
 
 function goBack() {

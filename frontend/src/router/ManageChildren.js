@@ -66,6 +66,24 @@ const ManageChildren = [
         meta: {title: '员工管理', icon: 'employee'}
     },
     {
+        path: 'supplier/add',
+        name: 'SupplierAdd',
+        component: () => import('../page/manage/SupplierAdd.vue'),
+        meta: {title: '添加供应商', icon: 'supplier'}
+    },
+    {
+        path: 'supplier/:code',
+        name: 'SupplierDetail',
+        component: () => import('../page/manage/SupplierDetail.vue'),
+        meta: {title: '供应商详情', icon: 'supplier'}
+    },
+    {
+        path: 'supplier',
+        name: 'SupplierManage',
+        component: () => import('../page/manage/SupplierManage.vue'),
+        meta: {title: '供应商管理', icon: 'supplier'}
+    },
+    {
         path: 'warehouse/add',
         name: 'WarehouseAdd',
         component: () => import('../page/manage/WarehouseAdd.vue'),

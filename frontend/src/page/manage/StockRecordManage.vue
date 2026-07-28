@@ -10,7 +10,7 @@
 
         <div class="record-stats">
             <div class="record-stat-card">
-                <span class="record-stat-icon">📄</span>
+                <span class="record-stat-icon"><IconGraphic name="document"/></span>
                 <span class="record-stat-value">{{ pageInfo.totalElements }}</span>
                 <span class="record-stat-label">全部记录</span>
             </div>
@@ -75,7 +75,7 @@
                 <div class="loading-spinner"></div>
             </div>
             <div v-else-if="filteredRecords.length === 0" class="empty-state">
-                <div class="empty-icon">📄</div>
+                <div class="empty-icon"><IconGraphic name="document"/></div>
                 <div class="empty-text">暂无库存记录</div>
             </div>
             <table v-else class="data-table">

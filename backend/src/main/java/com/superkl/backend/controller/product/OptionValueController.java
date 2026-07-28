@@ -4,7 +4,7 @@ import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.product.OptionValueCreateDto;
 import com.superkl.backend.dto.product.OptionValueUpdateDto;
 import com.superkl.backend.enums.OptionTypeEnum;
-import com.superkl.backend.info.poduct.OptionValueInfo;
+import com.superkl.backend.info.product.OptionValueInfo;
 import com.superkl.backend.service.product.OptionValueService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

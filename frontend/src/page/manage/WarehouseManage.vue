@@ -19,7 +19,7 @@
             </div>
 
             <div v-else-if="warehouseList.length === 0" class="empty-state">
-                <div class="empty-icon">🏭</div>
+                <div class="empty-icon"><IconGraphic name="warehouse"/></div>
                 <div class="empty-text">暂无仓库数据</div>
             </div>
 
@@ -61,7 +61,7 @@
             <div class="modal-content" style="min-width: 360px;">
                 <div class="modal-body">
                     <div class="confirm-box">
-                        <div class="confirm-icon">⚠️</div>
+                        <div class="confirm-icon"><IconGraphic name="warning"/></div>
                         <div class="confirm-msg">确定要删除"{{ deleteTarget?.name }}"吗？</div>
                         <div class="confirm-hint">此操作不可恢复</div>
                     </div>

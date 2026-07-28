@@ -17,7 +17,7 @@
             <div class="loading-spinner"></div>
         </div>
         <div v-else-if="!sku" class="empty-state">
-            <div class="empty-icon">🏷️</div>
+            <div class="empty-icon"><IconGraphic name="tag"/></div>
             <div class="empty-text">SKU 不存在</div>
         </div>
         <div v-else class="info-grid">

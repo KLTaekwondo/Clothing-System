@@ -10,17 +10,17 @@
 
         <div class="order-stats">
             <div class="order-stat-card">
-                <span class="order-stat-icon">📋</span>
+                <span class="order-stat-icon"><IconGraphic name="order"/></span>
                 <span class="order-stat-value">{{ pageInfo.totalElements }}</span>
                 <span class="order-stat-label">全部订单</span>
             </div>
             <div class="order-stat-card">
-                <span class="order-stat-icon completed-icon">✓</span>
+                <span class="order-stat-icon completed-icon"><IconGraphic name="check"/></span>
                 <span class="order-stat-value">{{ completedCount }}</span>
                 <span class="order-stat-label">当前页已完成</span>
             </div>
             <div class="order-stat-card">
-                <span class="order-stat-icon draft-icon">◷</span>
+                <span class="order-stat-icon draft-icon"><IconGraphic name="clock"/></span>
                 <span class="order-stat-value">{{ draftCount }}</span>
                 <span class="order-stat-label">当前页挂单</span>
             </div>
@@ -54,7 +54,7 @@
                 <div class="loading-spinner"></div>
             </div>
             <div v-else-if="filteredOrders.length === 0" class="empty-state">
-                <div class="empty-icon">📋</div>
+                <div class="empty-icon"><IconGraphic name="order"/></div>
                 <div class="empty-text">暂无订单数据</div>
             </div>
             <table v-else class="data-table">

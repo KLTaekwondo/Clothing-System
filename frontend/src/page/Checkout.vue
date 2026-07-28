@@ -1,5 +1,8 @@
 <template>
-    <div class="checkout-page">
+    <div
+        class="checkout-page"
+        @keydown.esc="closeActiveModal"
+    >
         <div class="left-container">
             <div class="order-item-list">
                 <div
@@ -20,6 +23,10 @@
                     class="cart-row"
                 >
                     <div class="cart-row-info">
+                        <span
+                            :class="item.direction === 'OUT' ? 'direction-refund' : 'direction-sale'"
+                            class="direction-badge"
+                        >{{ item.direction === 'OUT' ? '退货' : '销售' }}</span>
                         <strong class="cart-row-name">{{ item.name }}</strong>
                         <span class="cart-row-code">{{ item.skuCode }}</span>
                     </div>
@@ -70,20 +77,25 @@
                     v-if="cart.length === 0"
                     class="cart-empty"
                 >
-                    <div class="empty-icon">🧾</div>
+                    <div class="empty-icon"><IconGraphic name="receipt"/></div>
                     <div class="empty-text">扫描或搜索商品开始结账</div>
                 </div>
             </div>
 
             <div class="product-search-input">
-                <div class="search-icon">🔍货号</div>
+                <button
+                    :class="inputDirection === 'OUT' ? 'mode-refund' : 'mode-sale'"
+                    class="search-mode"
+                    @click="toggleInputDirection"
+                >{{ inputDirection === 'OUT' ? '− 退货' : '+ 销售' }}</button>
                 <div class="search-input">
                     <input
+                        ref="searchField"
                         v-model="query"
                         class="search-field"
-                        placeholder="扫描条码 / 输入商品编码或名称，回车搜索"
+                        :placeholder="inputDirection === 'OUT' ? '退货模式：输入货号后回车，按 + 切换销售' : '销售模式：输入货号后回车，按 - 切换退货'"
                         type="text"
-                        @keydown.enter="onSearchEnter"
+                        @keydown="handleSearchKeydown"
                     />
                 </div>
                 <div class="employee-name">
@@ -100,7 +112,7 @@
                     >尚未添加</span>
                     <button
                         class="employee-add-button"
-                        @click="showEmployeeModal = true"
+                        @click="openEmployeeModal"
                     >
                         {{ selectedEmployee ? '更换员工' : '+ 添加员工' }}
                     </button>
@@ -143,15 +155,17 @@
                     >&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div
+                    <button
                         v-for="sku in skuModalResults"
                         :key="sku.id"
+                        ref="skuOptionFields"
                         class="sku-modal-item"
+                        type="button"
                         @click="addToCart(sku)"
                     >
-                        <div class="sku-modal-name">{{ sku.name || sku.code }}</div>
-                        <div class="sku-modal-code">{{ sku.code }}</div>
-                    </div>
+                        <span class="sku-modal-name">{{ sku.name || sku.code }}</span>
+                        <span class="sku-modal-code">{{ sku.code }}</span>
+                    </button>
                     <div
                         v-if="skuModalResults.length === 0"
                         class="modal-empty"
@@ -177,6 +191,7 @@
                 </div>
                 <div class="modal-body employee-list">
                     <input
+                        ref="employeeSearchField"
                         v-model="employeeQuery"
                         class="employee-search"
                         placeholder="输入员工姓名或编码"
@@ -223,7 +238,7 @@
                         v-for="order in draftOrders"
                         :key="order.id"
                         class="draft-order-item"
-                        @click="restoreDraft(order)"
+                        @click="requestRestoreDraft(order)"
                     >
                         <span class="draft-order-main">
                             <strong>{{ order.orderNo }}</strong>
@@ -231,6 +246,39 @@
                         </span>
                         <span class="draft-order-price">¥{{ order.actualPrice ?? '0.00' }}</span>
                     </button>
+                    <div
+                        v-if="draftOrders.length === 0"
+                        class="modal-empty"
+                    >
+                        <div class="empty-text">暂无挂单</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            v-if="showConfirmModal"
+            class="modal-overlay"
+            @click.self="closeConfirmModal"
+        >
+            <div class="modal-content confirm-modal">
+                <div class="modal-header">
+                    <span class="modal-title">{{ confirmTitle }}</span>
+                    <button
+                        class="modal-close"
+                        @click="closeConfirmModal"
+                    >&times;</button>
+                </div>
+                <div class="confirm-body">{{ confirmMessage }}</div>
+                <div class="confirm-actions">
+                    <button
+                        class="confirm-cancel"
+                        @click="closeConfirmModal"
+                    >取消</button>
+                    <button
+                        class="confirm-submit"
+                        @click="confirmPendingAction"
+                    >确定</button>
                 </div>
             </div>
         </div>
@@ -238,31 +286,33 @@
         <div class="right-container">
             <div class="tool-bar">
                 <button
+                    :disabled="submitting"
                     class="tool-bar-item"
                     @click="draftOrder"
                 >
-                    <span class="tool-icon">💾</span>
+                    <span class="tool-icon"><IconGraphic name="save"/></span>
                     <span class="tool-label">挂单</span>
                 </button>
                 <button
+                    :disabled="submitting || draftLoading"
                     class="tool-bar-item"
                     @click="recallOrders"
                 >
-                    <span class="tool-icon">📋</span>
+                    <span class="tool-icon"><IconGraphic name="order"/></span>
                     <span class="tool-label">挂单查询</span>
                 </button>
                 <button
-                    class="tool-bar-item"
-                    @click="handleRefund"
+                    :class="inputDirection === 'OUT' ? 'tool-bar-item-active' : 'tool-bar-item'"
+                    @click="setInputDirection(inputDirection === 'OUT' ? 'IN' : 'OUT')"
                 >
-                    <span class="tool-icon">↩️</span>
-                    <span class="tool-label">退款</span>
+                    <span class="tool-icon"><IconGraphic name="refund"/></span>
+                    <span class="tool-label">{{ inputDirection === 'OUT' ? '返回销售' : '退货模式' }}</span>
                 </button>
                 <button
                     class="tool-bar-item tool-bar-item-danger"
                     @click="clearCart"
                 >
-                    <span class="tool-icon">🗑️</span>
+                    <span class="tool-icon"><IconGraphic name="trash"/></span>
                     <span class="tool-label">清空</span>
                 </button>
             </div>
@@ -291,13 +341,15 @@
 </template>
 
 <script setup>
-import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
+import {computed, nextTick, onBeforeUnmount, onMounted, ref} from 'vue'
+import {onBeforeRouteLeave} from 'vue-router'
 import {useToastStore} from '../stores/toastStore.js'
 import {useUserStore} from '../stores/userStore.js'
 import productSkuInterface from '../axios/interface/ProductSkuInterface.js'
 import employeeInterface from '../axios/interface/EmployeeInterface.js'
 import orderInterface from '../axios/interface/OrderInterface.js'
 import {PAY_METHOD_OPTIONS} from '../constants/payMethod.js'
+import IconGraphic from '../component/IconGraphic.vue'
 
 const toast = useToastStore()
 const userStore = useUserStore()
@@ -306,17 +358,21 @@ const payMethodOptions = PAY_METHOD_OPTIONS
 
 // 搜索
 const query = ref('')
+const searchField = ref(null)
+const inputDirection = ref('IN')
 
 // SKU 选择弹窗
 const showSkuModal = ref(false)
 const skuModalResults = ref([])
 const skuModalProductName = ref('')
+const skuOptionFields = ref([])
 
 // 当前仓库的员工
 const employees = ref([])
 const selectedEmployeeId = ref('')
 const showEmployeeModal = ref(false)
 const employeeQuery = ref('')
+const employeeSearchField = ref(null)
 const selectedEmployee = computed(() => {
     return employees.value.find(employee => employee.id === selectedEmployeeId.value) || null
 })
@@ -335,9 +391,21 @@ const payMethod = ref(payMethodOptions[0].value)
 // 提交状态
 const submitting = ref(false)
 
+// 当前恢复的挂单
+const currentDraftOrderId = ref(null)
+
 // 挂单列表（用于取单）
 const draftOrders = ref([])
 const showDraftModal = ref(false)
+const draftLoading = ref(false)
+
+// 页面确认弹窗
+const showConfirmModal = ref(false)
+const confirmTitle = ref('')
+const confirmMessage = ref('')
+let pendingConfirmAction = null
+let pendingConfirmCancel = null
+let allowRouteLeave = false
 
 onMounted(async () => {
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -347,6 +415,7 @@ onMounted(async () => {
         if (list.length === 1) {
             selectedEmployeeId.value = list[0].id
         }
+        focusSearchField()
     } catch {
         employees.value = []
     }
@@ -359,7 +428,7 @@ onBeforeUnmount(() => {
 // 计算属性
 const totalAmount = computed(() => {
     return cart.value
-        .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+        .reduce((sum, item) => sum + getDirectionMultiplier(item) * item.unitPrice * item.quantity, 0)
         .toFixed(2)
 })
 
@@ -368,16 +437,34 @@ const totalQty = computed(() => {
 })
 
 const discountAmount = computed(() => {
-    const raw = cart.value.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
-    const actual = cart.value.reduce((sum, item) => sum + item.unitPrice * item.quantity * item.discount, 0)
+    const raw = cart.value.reduce((sum, item) => {
+        return sum + getDirectionMultiplier(item) * item.unitPrice * item.quantity
+    }, 0)
+    const actual = cart.value.reduce((sum, item) => {
+        return sum + getDirectionMultiplier(item) * item.unitPrice * item.quantity * item.discount
+    }, 0)
     return (raw - actual).toFixed(2)
 })
 
 const actualTotalAmount = computed(() => {
     return cart.value
-        .reduce((sum, item) => sum + item.unitPrice * item.quantity * item.discount, 0)
+        .reduce((sum, item) => {
+            return sum + getDirectionMultiplier(item) * item.unitPrice * item.quantity * item.discount
+        }, 0)
         .toFixed(2)
 })
+
+function getDirectionMultiplier(item) {
+    return item.direction === 'OUT' ? -1 : 1
+}
+
+function openEmployeeModal() {
+    employeeQuery.value = ''
+    showEmployeeModal.value = true
+    nextTick(() => {
+        employeeSearchField.value?.focus()
+    })
+}
 
 function selectEmployee(employee) {
     selectedEmployeeId.value = employee.id
@@ -392,6 +479,34 @@ function selectOnlyEmployee() {
 }
 
 // 搜索
+function handleSearchKeydown(event) {
+    if (!query.value && (event.key === '+' || event.key === '-')) {
+        event.preventDefault()
+        setInputDirection(event.key === '-' ? 'OUT' : 'IN')
+        return
+    }
+    if (event.key === 'Enter') {
+        event.preventDefault()
+        onSearchEnter()
+    }
+}
+
+function setInputDirection(direction) {
+    inputDirection.value = direction
+    query.value = ''
+    focusSearchField()
+}
+
+function toggleInputDirection() {
+    setInputDirection(inputDirection.value === 'OUT' ? 'IN' : 'OUT')
+}
+
+function focusSearchField() {
+    nextTick(() => {
+        searchField.value?.focus()
+    })
+}
+
 async function onSearchEnter() {
     const q = query.value.trim()
     if (!q) return
@@ -406,13 +521,18 @@ async function onSearchEnter() {
         if (results.length <= 1) {
             if (results.length === 1) {
                 addToCart(results[0])
+            } else {
+                query.value = ''
+                focusSearchField()
             }
-            // 没命中时后端已返回提示
             return
         }
         skuModalResults.value = results
-        skuModalProductName.value = results[0].name || q
+        skuModalProductName.value = results[0].productName || q
         showSkuModal.value = true
+        nextTick(() => {
+            skuOptionFields.value[0]?.focus()
+        })
     } catch {
         // 拦截器已处理
     }
@@ -420,7 +540,10 @@ async function onSearchEnter() {
 
 // 加入购物车
 function addToCart(sku) {
-    const existing = cart.value.find(c => c.skuCode === sku.code)
+    const direction = inputDirection.value
+    const existing = cart.value.find(c => {
+        return c.skuCode === sku.code && c.direction === direction
+    })
     if (existing) {
         existing.quantity++
     } else {
@@ -429,12 +552,14 @@ function addToCart(sku) {
             name: sku.productName || sku.name || sku.code,
             unitPrice: Number(sku.salePrice || 0),
             quantity: 1,
-            discount: 1
+            discount: 1,
+            direction
         })
     }
     showSkuModal.value = false
     query.value = ''
-    toast.success(`已添加「${sku.name || sku.code}」`)
+    toast.success(`已添加${direction === 'OUT' ? '退货' : '销售'}商品「${sku.name || sku.code}」`)
+    focusSearchField()
 }
 
 function increaseQty(index) {
@@ -456,9 +581,44 @@ function removeFromCart(index) {
 
 function clearCart() {
     if (cart.value.length === 0) return
-    if (!window.confirm('确定要清空当前购物车吗？')) return
+    openConfirmModal(
+        '清空购物车',
+        '确定要清空当前购物车吗？此操作不会保存当前内容。',
+        resetCurrentOrder
+    )
+}
+
+function resetCurrentOrder() {
     cart.value = []
-    toast.info('购物车已清空')
+    currentDraftOrderId.value = null
+    query.value = ''
+    inputDirection.value = 'IN'
+    focusSearchField()
+}
+
+function openConfirmModal(title, message, action, cancelAction = null) {
+    confirmTitle.value = title
+    confirmMessage.value = message
+    pendingConfirmAction = action
+    pendingConfirmCancel = cancelAction
+    showConfirmModal.value = true
+}
+
+function closeConfirmModal() {
+    const cancelAction = pendingConfirmCancel
+    showConfirmModal.value = false
+    pendingConfirmAction = null
+    pendingConfirmCancel = null
+    cancelAction?.()
+    focusSearchField()
+}
+
+function confirmPendingAction() {
+    const action = pendingConfirmAction
+    showConfirmModal.value = false
+    pendingConfirmAction = null
+    pendingConfirmCancel = null
+    action?.()
 }
 
 function normalizeQuantity(index) {
@@ -475,34 +635,43 @@ function normalizeDiscount(index) {
     cart.value[index].discount = Math.min(Number(discount.toFixed(2)), 1)
 }
 
+function buildOrderData() {
+    const toOrderItem = item => ({
+        skuCode: item.skuCode,
+        discount: item.discount,
+        quantity: item.quantity
+    })
+    const saleItems = cart.value
+        .filter(item => item.direction !== 'OUT')
+        .map(toOrderItem)
+    const refundItems = cart.value
+        .filter(item => item.direction === 'OUT')
+        .map(toOrderItem)
+
+    return {
+        orderId: currentDraftOrderId.value,
+        payMethod: payMethod.value,
+        employeeId: Number(selectedEmployeeId.value),
+        wareHouseId: Number(userStore.userInfo?.id || 0),
+        saleItems,
+        refundItems,
+        actualAmount: Number(actualTotalAmount.value),
+        totalAmount: Number(totalAmount.value),
+        remark: ''
+    }
+}
+
 // 提交订单
 async function completeOrder() {
-    if (cart.value.length === 0) return
+    if (submitting.value || cart.value.length === 0) return
     if (!selectedEmployeeId.value) {
         toast.warning('请选择本次收银员工')
         return
     }
     submitting.value = true
     try {
-        const saleItems = cart.value.map(c => ({
-            skuCode: c.skuCode,
-            discount: c.discount,
-            quantity: c.quantity
-        }))
-        const rawTotal = cart.value.reduce((s, c) => s + c.unitPrice * c.quantity, 0)
-        const orderData = {
-            payMethod: payMethod.value,
-            employeeId: Number(selectedEmployeeId.value),
-            wareHouseId: Number(userStore.userInfo?.id || 0),
-            saleItems,
-            refundItems: [],
-            actualAmount: Number(actualTotalAmount.value),
-            totalAmount: Number(rawTotal.toFixed(2)),
-            remark: ''
-        }
-        await orderInterface.complete(orderData)
-        cart.value = []
-        toast.success('订单已完成')
+        await orderInterface.complete(buildOrderData())
+        resetCurrentOrder()
     } catch {
         // 拦截器已处理
     } finally {
@@ -512,32 +681,19 @@ async function completeOrder() {
 
 // 挂单
 async function draftOrder() {
-    if (cart.value.length === 0) return
+    if (submitting.value || cart.value.length === 0) return
     if (!selectedEmployeeId.value) {
         toast.warning('请选择本次收银员工')
         return
     }
     submitting.value = true
     try {
-        const saleItems = cart.value.map(c => ({
-            skuCode: c.skuCode,
-            discount: c.discount,
-            quantity: c.quantity
-        }))
-        const rawTotal = cart.value.reduce((s, c) => s + c.unitPrice * c.quantity, 0)
-        const orderData = {
-            payMethod: payMethod.value,
-            employeeId: Number(selectedEmployeeId.value),
-            wareHouseId: Number(userStore.userInfo?.id || 0),
-            saleItems,
-            refundItems: [],
-            actualAmount: Number(actualTotalAmount.value),
-            totalAmount: Number(rawTotal.toFixed(2)),
-            remark: ''
+        if (currentDraftOrderId.value) {
+            await orderInterface.update(buildOrderData())
+        } else {
+            await orderInterface.draft(buildOrderData())
         }
-        await orderInterface.draft(orderData)
-        cart.value = []
-        toast.success('已挂单')
+        resetCurrentOrder()
     } catch {
         // 拦截器已处理
     } finally {
@@ -547,8 +703,10 @@ async function draftOrder() {
 
 // 取单
 async function recallOrders() {
+    if (draftLoading.value || submitting.value) return
+    draftLoading.value = true
     try {
-        const data = await orderInterface.searchCurrentWareHousePage()
+        const data = await orderInterface.searchCurrentWareHousePage(0, 50)
         draftOrders.value = data.content || []
         if (draftOrders.value.length === 0) {
             toast.info('暂无挂单')
@@ -557,22 +715,83 @@ async function recallOrders() {
         showDraftModal.value = true
     } catch {
         // 拦截器已处理
+    } finally {
+        draftLoading.value = false
     }
 }
 
+function requestRestoreDraft(order) {
+    if (cart.value.length === 0) {
+        restoreDraft(order)
+        return
+    }
+    openConfirmModal(
+        '恢复挂单',
+        '恢复挂单会覆盖当前购物车，确定继续吗？',
+        () => restoreDraft(order)
+    )
+}
+
 async function restoreDraft(order) {
-    toast.info(`挂单「${order.orderNo}」暂不支持恢复商品明细`)
+    try {
+        const detail = await orderInterface.search(order.id)
+        cart.value = (detail.items || []).map(item => ({
+            skuCode: item.skuCode,
+            name: item.productName || item.skuName || item.skuCode,
+            unitPrice: Number(item.unitPrice || 0),
+            quantity: Number(item.quantity || 1),
+            discount: Number(item.discount ?? 1),
+            direction: item.direction === 'OUT' ? 'OUT' : 'IN'
+        }))
+        currentDraftOrderId.value = detail.id
+        payMethod.value = detail.payMethod || payMethodOptions[0].value
+        const draftEmployee = employees.value.find(employee => {
+            return employee.name === detail.employeeName
+        })
+        selectedEmployeeId.value = draftEmployee?.id || ''
+        showDraftModal.value = false
+        inputDirection.value = 'IN'
+        focusSearchField()
+        if (!draftEmployee) {
+            toast.warning('原挂单员工不可用，请重新选择收银员工')
+        }
+    } catch {
+        // 拦截器已处理
+    }
+}
+
+onBeforeRouteLeave((to, from, next) => {
+    if (cart.value.length === 0 || allowRouteLeave) {
+        allowRouteLeave = false
+        next()
+        return
+    }
+    openConfirmModal(
+        '离开收银页面',
+        '当前购物车尚未保存，确定离开收银页面吗？',
+        () => {
+            allowRouteLeave = true
+            next()
+        },
+        () => next(false)
+    )
+})
+
+function closeActiveModal() {
+    if (showConfirmModal.value) {
+        closeConfirmModal()
+        return
+    }
+    showSkuModal.value = false
+    showEmployeeModal.value = false
+    showDraftModal.value = false
+    focusSearchField()
 }
 
 function handleBeforeUnload(event) {
     if (cart.value.length === 0) return
     event.preventDefault()
     event.returnValue = ''
-}
-
-// 退款
-async function handleRefund() {
-    toast.info('请在订单详情中发起退款')
 }
 </script>
 
@@ -681,6 +900,26 @@ async function handleRefund() {
     width: 220px;
     min-width: 0;
     text-align: center;
+    position: relative;
+}
+
+.direction-badge {
+    display: inline-block;
+    margin-bottom: 3px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.direction-sale {
+    background: #ccfbf1;
+    color: #0f766e;
+}
+
+.direction-refund {
+    background: #fee2e2;
+    color: #dc2626;
 }
 
 .cart-row-name {
@@ -838,11 +1077,25 @@ async function handleRefund() {
     background: rgba(13, 148, 136, 0.08);
 }
 
-.search-icon {
+.search-mode {
     flex-shrink: 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #475569;
+    min-width: 78px;
+    height: 36px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 18px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.mode-sale {
+    background: #0d9488;
+}
+
+.mode-refund {
+    background: #dc2626;
 }
 
 .search-input {
@@ -866,48 +1119,6 @@ async function handleRefund() {
     box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
 
-.search-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    margin-top: 4px;
-    background: #fff;
-    border: 1px solid #e3efed;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.1);
-    max-height: 260px;
-    overflow-y: auto;
-}
-
-.search-result-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 14px;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f6f4;
-}
-
-.search-result-item:last-child {
-    border-bottom: none;
-}
-
-.search-result-item:hover {
-    background: #f0fdfb;
-}
-
-.result-name {
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.result-code {
-    font-size: 12px;
-    color: #94a3b8;
-    font-family: monospace;
-}
 
 .employee-name {
     flex-shrink: 0;
@@ -1113,6 +1324,24 @@ async function handleRefund() {
     transition: all 0.2s;
 }
 
+.tool-bar-item-active {
+    width: calc(50% - 4px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 8px;
+    border: 1px solid #ef4444;
+    border-radius: 12px;
+    background: #fee2e2;
+    cursor: pointer;
+}
+
+.tool-bar-item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .tool-bar-item:hover {
     background: #f0fdfb;
     border-color: #14b8a6;
@@ -1131,6 +1360,10 @@ async function handleRefund() {
     font-size: 13px;
     font-weight: 600;
     color: #475569;
+}
+
+.tool-bar-item-active .tool-label {
+    color: #b91c1c;
 }
 
 /* 支付方式 */
@@ -1201,6 +1434,51 @@ async function handleRefund() {
     transform: none;
 }
 
+.confirm-modal {
+    width: 380px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+}
+
+.confirm-body {
+    padding: 24px 20px;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 12px 20px 18px;
+}
+
+.confirm-cancel,
+.confirm-submit {
+    min-width: 82px;
+    height: 36px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.confirm-cancel {
+    border: 1px solid #dceae7;
+    background: #fff;
+    color: #475569;
+}
+
+.confirm-submit {
+    border: none;
+    background: #dc2626;
+    color: #fff;
+}
+
 /* ── SKU 选择弹窗 ── */
 .modal-overlay {
     position: fixed;
@@ -1261,16 +1539,21 @@ async function handleRefund() {
 }
 
 .sku-modal-item {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 14px;
+    border: none;
     border-radius: 10px;
+    background: #fff;
     cursor: pointer;
     transition: background 0.15s;
+    text-align: left;
 }
 
-.sku-modal-item:hover {
+.sku-modal-item:hover,
+.sku-modal-item:focus {
     background: #f0fdfb;
 }
 

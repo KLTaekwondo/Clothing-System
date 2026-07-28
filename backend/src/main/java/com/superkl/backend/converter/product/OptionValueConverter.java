@@ -3,7 +3,7 @@ package com.superkl.backend.converter.product;
 import com.superkl.backend.dto.product.OptionValueCreateDto;
 import com.superkl.backend.dto.product.OptionValueUpdateDto;
 import com.superkl.backend.entity.product.OptionValue;
-import com.superkl.backend.info.poduct.OptionValueInfo;
+import com.superkl.backend.info.product.OptionValueInfo;
 
 import java.util.List;
 

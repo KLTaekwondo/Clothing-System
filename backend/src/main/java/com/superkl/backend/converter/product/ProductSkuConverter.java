@@ -4,8 +4,8 @@ import com.superkl.backend.dto.product.ProductSkuCreateDto;
 import com.superkl.backend.dto.product.ProductSkuUpdateDto;
 import com.superkl.backend.entity.product.Product;
 import com.superkl.backend.entity.product.ProductSku;
-import com.superkl.backend.info.poduct.ProductSkuCheckInfo;
-import com.superkl.backend.info.poduct.ProductSkuInfo;
+import com.superkl.backend.info.product.ProductSkuCheckInfo;
+import com.superkl.backend.info.product.ProductSkuInfo;
 import com.superkl.backend.utils.BarCodeUtil;
 
 import java.util.List;

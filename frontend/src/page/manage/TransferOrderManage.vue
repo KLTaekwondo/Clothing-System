@@ -10,17 +10,17 @@
 
         <div class="order-stats">
             <div class="order-stat-card">
-                <span class="order-stat-icon">📋</span>
+                <span class="order-stat-icon"><IconGraphic name="order"/></span>
                 <span class="order-stat-value">{{ pageInfo.totalElements }}</span>
                 <span class="order-stat-label">全部订单</span>
             </div>
             <div class="order-stat-card">
-                <span class="order-stat-icon draft-icon">◷</span>
+                <span class="order-stat-icon draft-icon"><IconGraphic name="clock"/></span>
                 <span class="order-stat-value">{{ draftCount }}</span>
                 <span class="order-stat-label">当前页草稿</span>
             </div>
             <div class="order-stat-card">
-                <span class="order-stat-icon checking-icon">⏳</span>
+                <span class="order-stat-icon checking-icon"><IconGraphic name="hourglass"/></span>
                 <span class="order-stat-value">{{ checkingCount }}</span>
                 <span class="order-stat-label">当前页审核中</span>
             </div>
@@ -47,7 +47,7 @@
                 <div class="loading-spinner"></div>
             </div>
             <div v-else-if="filteredOrders.length === 0" class="empty-state">
-                <div class="empty-icon">🔄</div>
+                <div class="empty-icon"><IconGraphic name="transfer"/></div>
                 <div class="empty-text">暂无调拨订单</div>
             </div>
             <table v-else class="data-table">
@@ -114,7 +114,7 @@
             <div class="modal-content confirm-modal">
                 <div class="modal-body">
                     <div class="confirm-box">
-                        <div class="confirm-icon">⚠️</div>
+                        <div class="confirm-icon"><IconGraphic name="warning"/></div>
                         <div class="confirm-msg">确定要删除调拨单“{{ deleteTarget?.transferOrderNo }}”吗？</div>
                         <div class="confirm-hint">仅草稿状态的订单可以删除</div>
                     </div>

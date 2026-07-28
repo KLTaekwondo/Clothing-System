@@ -7,7 +7,7 @@ import com.superkl.backend.dto.product.OptionValueUpdateDto;
 import com.superkl.backend.entity.product.OptionValue;
 import com.superkl.backend.enums.OptionTypeEnum;
 import com.superkl.backend.exception.BusinessException;
-import com.superkl.backend.info.poduct.OptionValueInfo;
+import com.superkl.backend.info.product.OptionValueInfo;
 import com.superkl.backend.repository.product.OptionValueRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
