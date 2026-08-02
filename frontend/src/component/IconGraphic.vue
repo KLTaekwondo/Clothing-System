@@ -1,5 +1,6 @@
 <template>
     <img
+        :class="'graphic-icon-' + name"
         :src="icons[name]"
         alt=""
         aria-hidden="true"
@@ -28,6 +29,7 @@ import hourglassIcon from '../assets/icons/hourglass.svg'
 import checkIcon from '../assets/icons/check.svg'
 import receiptIcon from '../assets/icons/receipt.svg'
 import supplierIcon from '../assets/icons/supplier.svg'
+import clothingIcon from '../assets/icons/clothing.svg'
 
 const icons = {
     product: productIcon,
@@ -50,7 +52,8 @@ const icons = {
     hourglass: hourglassIcon,
     check: checkIcon,
     receipt: receiptIcon,
-    supplier: supplierIcon
+    supplier: supplierIcon,
+    clothing: clothingIcon
 }
 
 defineProps({

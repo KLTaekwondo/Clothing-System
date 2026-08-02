@@ -3,7 +3,7 @@
         <div class="auth-card">
             <div class="brand-panel">
                 <div class="brand-content">
-                    <div class="brand-icon">👕</div>
+                    <div class="brand-icon"><IconGraphic name="clothing"/></div>
                     <h1 class="brand-title">服装管理系统</h1>
                     <p class="brand-slogan">Clothing Management System</p>
                     <p class="brand-desc">高效管理商品、订单、库存和员工，让服装生意更简单。</p>
@@ -185,6 +185,12 @@ async function handleLogin() {
     backdrop-filter: blur(4px);
 }
 
+.brand-icon img {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+}
+
 .brand-title {
     font-size: 30px;
     font-weight: 800;
@@ -358,6 +364,12 @@ async function handleLogin() {
         height: 58px;
         margin-bottom: 14px;
         font-size: 36px;
+    }
+
+    .brand-icon img {
+        width: 52px;
+        height: 52px;
+        object-fit: contain;
     }
 
     .brand-title {

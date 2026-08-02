@@ -2,9 +2,14 @@
     <div class="manage-container">
         <aside :class="{ collapsed }" class="sidebar">
             <div class="sidebar-logo">
-                <span class="logo-icon">👕</span>
+                <button
+                    :title="collapsed ? '展开导航栏' : '收起导航栏'"
+                    class="logo-toggle"
+                    @click="collapsed = !collapsed"
+                >
+                    <IconGraphic name="clothing"/>
+                </button>
                 <span class="logo-text">服装管理</span>
-                <button class="collapse-btn" @click="collapsed = !collapsed">{{ collapsed ? '▶' : '◀' }}</button>
             </div>
             <nav class="sidebar-nav">
                 <router-link v-for="item in navItems" :key="item.path" :title="collapsed ? item.label : ''" :to="item.path" active-class="nav-item-active"
@@ -168,6 +173,7 @@ async function handleLogout() {
 
 /* ── 侧栏 ── */
 .sidebar {
+    position: relative;
     width: 236px;
     background: rgba(255, 255, 255, .88);
     backdrop-filter: blur(18px);
@@ -194,9 +200,24 @@ async function handleLogout() {
     min-height: 64px;
 }
 
-.logo-icon {
-    font-size: 26px;
+.logo-toggle {
+    width: 30px;
+    height: 30px;
+    padding: 3px;
+    border-radius: 9px;
+    background: transparent;
     flex-shrink: 0;
+}
+
+.logo-toggle img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.logo-toggle:hover {
+    background: #effbf9;
+    transform: scale(1.06);
 }
 
 .logo-text {
@@ -207,32 +228,43 @@ async function handleLogout() {
     transition: opacity .2s;
 }
 
+.sidebar.collapsed .sidebar-logo {
+    justify-content: center;
+    padding: 20px 8px 18px;
+}
+
 .sidebar.collapsed .logo-text {
     opacity: 0;
 }
 
 .collapse-btn {
     position: absolute;
-    right: 6px;
-    top: 22px;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #fff;
+    left: 100%;
+    top: 50%;
+    width: 24px;
+    height: 42px;
+    border-radius: 0 10px 10px 0;
+    background: #ffffff;
     border: 1px solid #dceae7;
+    border-left: none;
     color: #64807e;
-    font-size: 10px;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2;
+    transform: translateY(-50%);
+    box-shadow: 4px 2px 10px rgba(22, 83, 78, 0.08);
+    z-index: 3;
 }
 
 .collapse-btn:hover {
-    background: #eef9f7;
-    border-color: #0d9488;
+    background: #effbf9;
+    border-color: #9fd8cf;
     color: #0d9488;
+    box-shadow: 4px 2px 12px rgba(13, 148, 136, 0.16);
 }
 
 .sidebar-nav {
@@ -263,6 +295,9 @@ async function handleLogout() {
 }
 
 .sidebar.collapsed .nav-item {
+    width: 44px;
+    align-self: center;
+    gap: 0;
     padding: 11px 10px;
     justify-content: center;
 }
@@ -276,6 +311,7 @@ async function handleLogout() {
 }
 
 .nav-item-active {
+    position: relative;
     background: linear-gradient(90deg, #d9f6f1, #effbf9) !important;
     border-color: #b9ded7 !important;
     color: #0f766e !important;
@@ -283,30 +319,92 @@ async function handleLogout() {
     box-shadow: inset 3px 0 0 #0d9488, 0 4px 12px rgba(13, 148, 136, 0.12);
 }
 
+.sidebar.collapsed .nav-item-active {
+    background: #effbf9 !important;
+    border-color: transparent !important;
+    box-shadow: none;
+}
+
+.sidebar.collapsed .nav-item-active::after {
+    content: '';
+    position: absolute;
+    left: 9px;
+    right: 9px;
+    bottom: 3px;
+    height: 3px;
+    border-radius: 3px;
+    background: #0d9488;
+    box-shadow: 0 1px 5px rgba(13, 148, 136, 0.35);
+}
+
 .nav-icon {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
     object-fit: contain;
-    opacity: 0.72;
-    filter: invert(45%) sepia(18%) saturate(765%) hue-rotate(125deg) brightness(89%) contrast(86%);
-    transition: opacity 0.2s, filter 0.2s, transform 0.2s;
+    opacity: 0.95;
+    transition: opacity 0.2s, transform 0.2s;
 }
 
 .nav-item:hover .nav-icon {
     opacity: 1;
-    filter: invert(43%) sepia(76%) saturate(689%) hue-rotate(127deg) brightness(91%) contrast(92%);
     transform: scale(1.06);
+}
+
+.sidebar-nav .nav-item:nth-child(1) .nav-icon {
+    filter: invert(45%) sepia(91%) saturate(1774%) hue-rotate(202deg) brightness(98%) contrast(94%);
+}
+
+.sidebar-nav .nav-item:nth-child(2) .nav-icon {
+    filter: invert(57%) sepia(93%) saturate(1277%) hue-rotate(346deg) brightness(101%) contrast(96%);
+}
+
+.sidebar-nav .nav-item:nth-child(3) .nav-icon {
+    filter: invert(49%) sepia(61%) saturate(769%) hue-rotate(123deg) brightness(91%) contrast(93%);
+}
+
+.sidebar-nav .nav-item:nth-child(4) .nav-icon {
+    filter: invert(45%) sepia(68%) saturate(1230%) hue-rotate(234deg) brightness(90%) contrast(91%);
+}
+
+.sidebar-nav .nav-item:nth-child(5) .nav-icon {
+    filter: invert(49%) sepia(61%) saturate(769%) hue-rotate(123deg) brightness(91%) contrast(93%);
+}
+
+.sidebar-nav .nav-item:nth-child(6) .nav-icon {
+    filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
+}
+
+.sidebar-nav .nav-item:nth-child(7) .nav-icon {
+    filter: invert(54%) sepia(11%) saturate(578%) hue-rotate(124deg) brightness(91%) contrast(88%);
+}
+
+.sidebar-nav .nav-item:nth-child(8) .nav-icon {
+    filter: invert(45%) sepia(91%) saturate(1774%) hue-rotate(202deg) brightness(98%) contrast(94%);
+}
+
+.sidebar-nav .nav-item:nth-child(9) .nav-icon {
+    filter: invert(57%) sepia(93%) saturate(1277%) hue-rotate(346deg) brightness(101%) contrast(96%);
+}
+
+.sidebar-nav .nav-item:nth-child(10) .nav-icon {
+    filter: invert(45%) sepia(68%) saturate(1230%) hue-rotate(234deg) brightness(90%) contrast(91%);
+}
+
+.sidebar-nav .nav-item:nth-child(11) .nav-icon {
+    filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
 }
 
 .nav-item-active .nav-icon {
     opacity: 1;
-    filter: invert(36%) sepia(64%) saturate(879%) hue-rotate(129deg) brightness(87%) contrast(91%);
+}
+
+.nav-logout .nav-icon {
+    filter: invert(31%) sepia(91%) saturate(2210%) hue-rotate(344deg) brightness(91%) contrast(91%);
 }
 
 .nav-logout:hover .nav-icon {
     opacity: 1;
-    filter: invert(31%) sepia(91%) saturate(2210%) hue-rotate(344deg) brightness(91%) contrast(91%);
 }
 
 .nav-label {
@@ -316,7 +414,7 @@ async function handleLogout() {
 .sidebar.collapsed .nav-label {
     opacity: 0;
     width: 0;
-    display: inline-block;
+    display: none;
     overflow: hidden;
 }
 

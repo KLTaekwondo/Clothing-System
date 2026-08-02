@@ -503,18 +503,54 @@ button {
     object-fit: contain;
 }
 
-.empty-icon img,
-.product-mark img,
-.stat-icon img,
-.quick-icon-box img,
-.order-stat-icon img,
-.record-stat-icon img {
-    filter: invert(43%) sepia(76%) saturate(689%) hue-rotate(127deg) brightness(91%) contrast(92%);
+.graphic-icon-product,
+.graphic-icon-tag {
+    filter: invert(57%) sepia(93%) saturate(1277%) hue-rotate(346deg) brightness(101%) contrast(96%);
 }
 
-.confirm-icon img,
+.graphic-icon-user,
+.graphic-icon-order,
+.graphic-icon-document,
+.graphic-icon-receipt {
+    filter: invert(45%) sepia(91%) saturate(1774%) hue-rotate(202deg) brightness(98%) contrast(94%);
+}
+
+.graphic-icon-warehouse,
+.graphic-icon-stock,
+.graphic-icon-transfer,
+.graphic-icon-cart,
+.graphic-icon-save {
+    filter: invert(49%) sepia(61%) saturate(769%) hue-rotate(123deg) brightness(91%) contrast(93%);
+}
+
+.graphic-icon-supplier,
+.graphic-icon-refund {
+    filter: invert(45%) sepia(68%) saturate(1230%) hue-rotate(234deg) brightness(90%) contrast(91%);
+}
+
+.graphic-icon-money,
+.graphic-icon-trend,
+.graphic-icon-clock,
+.graphic-icon-hourglass {
+    filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
+}
+
+.graphic-icon-check {
+    filter: invert(56%) sepia(88%) saturate(450%) hue-rotate(84deg) brightness(91%) contrast(91%);
+}
+
+.graphic-icon-warning,
+.graphic-icon-trash,
 .tool-bar-item-danger .tool-icon img {
     filter: invert(31%) sepia(91%) saturate(2210%) hue-rotate(344deg) brightness(91%) contrast(91%);
+}
+
+.graphic-icon-search {
+    filter: invert(54%) sepia(11%) saturate(578%) hue-rotate(124deg) brightness(91%) contrast(88%);
+}
+
+.graphic-icon-clothing {
+    filter: none;
 }
 
 /* ── 现代化视觉层 ── */
