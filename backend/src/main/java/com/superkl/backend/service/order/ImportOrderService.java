@@ -70,6 +70,7 @@ public class ImportOrderService {
     }
 
     // 前端提交，后端将进货订单状态设置为审核中
+    @Transactional
     public void check(Long importOrderId){
         // 首先找订单是否存在
         ImportOrder importOrder = importOrderRepository.findById(importOrderId)
@@ -128,6 +129,7 @@ public class ImportOrderService {
     }
 
     // 拒绝进货订单，前端点击拒绝按钮，后端将进货订单状态设置为已拒绝
+    @Transactional
     public void reject(Long importOrderId){
         // 首先找订单是否存在
         ImportOrder importOrder = importOrderRepository.findById(importOrderId)

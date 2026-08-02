@@ -112,6 +112,11 @@ public class EmployeeService {
         if(!employee.isEnabled()){
             throw new BusinessException(405, "员工已禁用!");
         }
+        // 验证是否属于这个仓库
+        Long wareHouseId = employee.getWareHouse().getWareHouseId();
+        if(!RequestUser.isAdmin() && !RequestUser.isCurrentWareHouse(wareHouseId)){
+            throw new BusinessException(403, "您没有权限操作该仓库的员工！");
+        }
         // 转换信息
         return EmployeeConverter.toInfo(employee);
     }

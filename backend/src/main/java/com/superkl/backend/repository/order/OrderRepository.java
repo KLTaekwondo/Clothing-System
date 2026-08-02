@@ -15,6 +15,8 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order,Long> {
     @Query("SELECT o FROM Order o " +
+            "JOIN FETCH o.employee " +
+            "JOIN FETCH o.wareHouse " +
             "WHERE o.wareHouse.wareHouseId = :warehouseId AND o.status = :status")
     Page<Order> findStatusByWareHouseId(@Param("warehouseId") Long warehouseId ,
                                         @Param("status") OrderStatusEnum status ,

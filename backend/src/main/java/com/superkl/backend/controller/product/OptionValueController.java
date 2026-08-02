@@ -3,7 +3,6 @@ package com.superkl.backend.controller.product;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.product.OptionValueCreateDto;
 import com.superkl.backend.dto.product.OptionValueUpdateDto;
-import com.superkl.backend.enums.OptionTypeEnum;
 import com.superkl.backend.info.product.OptionValueInfo;
 import com.superkl.backend.service.product.OptionValueService;
 import jakarta.validation.Valid;
@@ -53,7 +52,7 @@ public class OptionValueController {
 
     // 6. 查询指定类型的所有选项值
     @GetMapping("/search/list/{type}")
-    public Result<List<OptionValueInfo>> searchListByType(@PathVariable OptionTypeEnum type) {
+    public Result<List<OptionValueInfo>> searchListByType(@PathVariable String type) {
         return Result.success(optionValueService.searchListByType(type));
     }
 }

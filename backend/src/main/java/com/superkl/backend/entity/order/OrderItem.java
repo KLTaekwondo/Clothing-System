@@ -28,6 +28,9 @@ public class OrderItem extends BaseEntity {
     private String productName;// 商品名称快照
 
     @Column(nullable = false)
+    private String productCode;// 商品编码快照
+
+    @Column(nullable = false)
     private String skuName;// 商品名称快照
 
     @Column(nullable = false)

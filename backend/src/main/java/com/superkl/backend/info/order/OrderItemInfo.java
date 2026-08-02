@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 @SuperBuilder
 public class OrderItemInfo extends BaseInfo {
     private String productName;
+    private String productCode;
     private String skuCode;
     private String skuName;
     private BigDecimal unitPrice;

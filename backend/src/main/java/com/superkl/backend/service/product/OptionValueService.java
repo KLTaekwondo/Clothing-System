@@ -26,6 +26,10 @@ public class OptionValueService {
     // 1. 创建选项值
     @Transactional
     public void create(OptionValueCreateDto optionValueCreateDto) {
+        // 1. 检查选项值是否存在
+        if (optionValueRepository.existsByTypeAndValue(optionValueCreateDto.getOptionType(), optionValueCreateDto.getOptionValue())) {
+            throw new BusinessException(403, "选项值已存在");
+        }
         // 2. 创建选项值实体
         OptionValue optionValue = OptionValueConverter.toEntity(optionValueCreateDto);
         // 2. 保存选项值
@@ -36,12 +40,16 @@ public class OptionValueService {
 
     // 2. 更新选项值
     @Transactional
-    public void update(Long id ,  OptionValueUpdateDto optionValueUpdateDto) {
+    public void update(Long id ,  OptionValueUpdateDto dto) {
         // 1. 从数据库中查询选项值
         OptionValue optionValue = optionValueRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(403, "选项值不存在"));
+        if(optionValueRepository.existsByTypeAndValueNotId(id,dto.getOptionType(),dto.getOptionValue())) {
+            throw new BusinessException(403,"选项值已经存在");
+        }
+
         // 2. 更新选项值
-        OptionValueConverter.updateEntity(optionValue, optionValueUpdateDto);
+        OptionValueConverter.updateEntity(optionValue, dto);
         // 3. 保存更新后的选项值
         optionValueRepository.save(optionValue);
         log.info("更新选项值：ID={}", id);
@@ -78,9 +86,15 @@ public class OptionValueService {
     }
 
     // 6. 类别查询列表
-    public List<OptionValueInfo> searchListByType(OptionTypeEnum type) {
+    public List<OptionValueInfo> searchListByType(String type) {
         // 1. 从数据库中查询选项值列表
-        List<OptionValue> optionValueList = optionValueRepository.findByOptionType(type);
+        OptionTypeEnum oType ;
+        try{
+            oType = OptionTypeEnum.valueOf(type);
+        }catch(Exception e){
+            throw new BusinessException(403,"类型不存在！");
+        }
+        List<OptionValue> optionValueList = optionValueRepository.findByOptionType(oType);
         // 2. 转换为选项值信息列表
         return OptionValueConverter.toInfoList(optionValueList);
     }

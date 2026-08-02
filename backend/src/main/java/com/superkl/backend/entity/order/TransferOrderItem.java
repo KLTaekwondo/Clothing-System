@@ -29,7 +29,13 @@ public class TransferOrderItem extends BaseEntity {
     private String productName; // 商品名称
 
     @Column(nullable = false)
+    private String productCode; // 商品编码
+
+    @Column(nullable = false)
     private String skuName; // 商品SKU名称
+
+    @Column(nullable = false)
+    private String skuCode; // 商品sku编码
 
     @Column(nullable = false)
     private BigDecimal price; // 商品单价

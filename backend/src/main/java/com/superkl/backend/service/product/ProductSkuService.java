@@ -41,7 +41,9 @@ public class ProductSkuService {
         // 校验商品是否存在
         Product product = productRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new BusinessException(403, "商品不存在"));
-
+        if(!product.isEnabled()){
+            throw new BusinessException(405, "商品已被禁用，不能新增SKU");
+        }
         // 转化为Sku实体
         ProductSku productSku = ProductSkuConverter.toEntity(dto, product);
 

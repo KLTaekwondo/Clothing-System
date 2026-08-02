@@ -16,10 +16,12 @@ import com.superkl.backend.repository.product.ProductSkuRepository;
 import com.superkl.backend.repository.basic.WareHouseRepository;
 import com.superkl.backend.repository.stock.WareHouseStockRepository;
 import com.superkl.backend.utils.JwtUtil;
+import com.superkl.backend.utils.TokenCookieManager;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,16 +42,22 @@ public class WareHouseService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    @Value("${auth.cookie.secure}")
+    private boolean isSecure;
+
     // 新增仓库
     @Transactional
     public void create(WareHouseCreateDto wareHouseCreateDto) {
         // 先查找管理员是否存在
-        Admin admin = adminRepository.findById(wareHouseCreateDto.getAdminId())
+        Admin admin = adminRepository.findById(RequestUser.notNull().getRequestId())
                 .orElseThrow(() -> new BusinessException(403, "管理员不存在！"));
-
         // 检查仓库编号是否已经存在
         if(wareHouseRepository.existsByCode(wareHouseCreateDto.getCode())){
             throw new BusinessException(403, "仓库编号已存在！");
+        }
+        // 检查仓库名称是否已经存在
+        if(wareHouseRepository.existsByName(wareHouseCreateDto.getName())){
+            throw new BusinessException(403, "仓库名称已存在！");
         }
 
         // 转换为仓库实体
@@ -90,6 +98,13 @@ public class WareHouseService {
         if(wareHouseRepository.existsByCode(code) && !code.equals(wareHouse.getWareHouseCode())){
             throw new BusinessException(403, "仓库编号已存在！");
         }
+
+        // 检查是否和其他的仓库名称重复
+        String name = wareHouseUpdateDto.getName();
+        if(wareHouseRepository.existsByName(name) && !name.equals(wareHouse.getWareHouseName())){
+            throw new BusinessException(403, "仓库名称已存在！");
+        }
+
         // 更新仓库实体
         WareHouseConverter.updateEntity(wareHouse, wareHouseUpdateDto);
         // 加密密码
@@ -164,10 +179,7 @@ public class WareHouseService {
         String token = jwtUtil.generateToken(wareHouseId,claims);
 
         // 设置Cookie
-        Cookie cookie = new Cookie("token",token);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600*24*7);
-        cookie.setHttpOnly(true);
+        Cookie cookie = TokenCookieManager.writeTokenCookie(token, isSecure);
         response.addCookie(cookie);
 
         log.info("仓库登录成功：{}", account);
@@ -176,9 +188,7 @@ public class WareHouseService {
 
     // 注销
     public void logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("token", "");
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
+        Cookie cookie = TokenCookieManager.clearTokenCookie(isSecure);
         response.addCookie(cookie);
     }
 }

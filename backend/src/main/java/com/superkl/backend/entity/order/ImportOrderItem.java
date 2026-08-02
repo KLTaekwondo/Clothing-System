@@ -29,8 +29,14 @@ public class ImportOrderItem extends BaseEntity {
     private String skuName;// 商品SKU 名称(弱关联快照，用于记录当时进货时的商品SKU名称)
 
     @Column(nullable = false)
+    private String skuCode; // 商品sku编码(弱关联快照，用于记录当时进货时的商品SKU编码)
+
+    @Column(nullable = false)
     private String productName;// 商品名称(弱关联快照，用于记录当时进货时的商品名称)
 
+    @Column(nullable = false)
+    private String productCode;// 商品编码(弱关联快照，用于记录当时进货的商品的编码)
+    
     @Column(nullable = false)
     private BigDecimal importPrice;// 商品单价(弱关联快照，用于记录当时进货价)
 

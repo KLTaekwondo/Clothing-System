@@ -50,6 +50,5 @@ public class SupplierConverter {
         supplier.setContactPhone(dto.getContactPhone());
         supplier.setStatus(dto.getStatus());
         supplier.setRemark(dto.getRemark());
-        supplier.setStatus(dto.getStatus());
     }
 }

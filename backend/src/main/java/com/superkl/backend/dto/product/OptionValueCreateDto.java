@@ -11,6 +11,6 @@ public class OptionValueCreateDto {
     @NotNull(message = "选项类型不能为空")
     private OptionTypeEnum optionType;
     @NotBlank(message = "选项值不能为空")
-    @Size(min = 1, max = 8, message = "选项值长度必须在1-8之间")
+    @Size(min = 1, max = 20, message = "选项值长度必须在1-20之间")
     private String optionValue;
 }

@@ -21,7 +21,7 @@ public class WareHouse extends BaseEntity {
     @Column(nullable = false , unique = true)
     private String wareHouseCode;// 仓库编码
 
-    @Column(nullable = false)
+    @Column(nullable = false , unique = true)
     private String wareHouseName;// 仓库名称
 
     @Column(nullable = false)

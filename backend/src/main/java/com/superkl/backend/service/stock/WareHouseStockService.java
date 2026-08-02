@@ -5,6 +5,7 @@ import com.superkl.backend.converter.stock.StockRecordConverter;
 import com.superkl.backend.converter.stock.WareHouseStockConverter;
 import com.superkl.backend.dto.stock.StockContext;
 import com.superkl.backend.dto.stock.WarehouseStockUpdateDto;
+import com.superkl.backend.entity.order.StockCheckItem;
 import com.superkl.backend.entity.stock.StockRecord;
 import com.superkl.backend.entity.stock.WareHouseStock;
 import com.superkl.backend.enums.StockChangeTypeEnum;
@@ -121,6 +122,32 @@ public class WareHouseStockService {
         saveRecord(ws, beforeQuantity, afterQuantity, stock, stockContext);
         wareHouseStockRepository.save(ws);
         log.info("增加库存：仓库{}，SKU{}，数量{}，剩余{}", wareHouseId, skuId, stock, afterQuantity);
+        RequestUser.log();
+    }
+
+
+    // 盘点更新库存数量，区别于手动调整
+    public void checkUpdateStock(Long stockId, StockCheckItem item , StockContext stockContext) {
+        // 查询库存记录是否存在(这里直接使用stockId查找，精确，不像上面需要两个定位独立的字段)
+        WareHouseStock ws = wareHouseStockRepository.findById(stockId)
+                .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
+
+        // 检查actualQuantity是否小于0
+        if(item.getActualQuantity() < 0) {
+            throw new BusinessException("实际数量不得少于0");
+        }
+
+        // 检查systemQuantity是否小于0
+        if(item.getSystemQuantity() < 0) {
+            throw new BusinessException("系统数量不得少于0");
+        }
+
+        // 更新库存
+        ws.setStock(item.getActualQuantity());
+        // 保存库存记录
+        saveRecord(ws, item.getSystemQuantity(), item.getActualQuantity(), item.getDiffQuantity(), stockContext);
+        wareHouseStockRepository.save(ws);
+        log.info("盘点更新库存：stockId={}，新库存={}", stockId, item.getActualQuantity());
         RequestUser.log();
     }
 

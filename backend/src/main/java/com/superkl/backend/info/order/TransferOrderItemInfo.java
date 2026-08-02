@@ -17,7 +17,9 @@ import java.math.BigDecimal;
 public class TransferOrderItemInfo extends BaseInfo {
     private Long skuId;
     private String productName;
+    private String productCode;
     private String skuName;
+    private String skuCode;
     private BigDecimal price;
     private Integer quantity;
     private BigDecimal totalPrice;

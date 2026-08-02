@@ -17,4 +17,8 @@ public interface WareHouseRepository extends JpaRepository<WareHouse, Long> {
     // 检查仓库编号是否已经存在
     @Query("SELECT COUNT(w) > 0 FROM WareHouse w WHERE w.wareHouseCode = :wareHouseCode")
     boolean existsByCode(@Param("wareHouseCode") String wareHouseCode);
+
+    // 检查仓库名称是否已经存在
+    @Query("SELECT COUNT(w) > 0 FROM WareHouse w WHERE w.wareHouseName = :wareHouseName")
+    boolean existsByName(@Param("wareHouseName") String wareHouseName);
 }

@@ -9,7 +9,8 @@ public enum StockSourceTypeEnum {
     ORDER("ORDER","销售订单"),
     IMPORT_ORDER("IMPORT_ORDER","采购订单"),
     TRANSFER_ORDER("TRANSFER_ORDER","调拨订单"),
-    MANUAL_ADJUST("MANUAL_ADJUST","手动操作");
+    MANUAL_ADJUST("MANUAL_ADJUST","手动操作"),
+    STOCK_CHECK("STOCK_CHECK","盘点");
 
     private final String code;
     private final String desc;

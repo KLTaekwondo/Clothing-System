@@ -12,7 +12,8 @@ public enum StockChangeTypeEnum {
     IMPORT_RETURN("IMPORT_RETURN","采购退货"),
     TRANSFER_IN("TRANSFER_IN","调入"),
     TRANSFER_OUT("TRANSFER_OUT","调出"),
-    MANUAL_ADJUST("MANUAL_ADJUST","手动操作");
+    MANUAL_ADJUST("MANUAL_ADJUST","手动操作"),
+    STOCK_CHECK("STOCK_CHECK","盘点");
 
     private final String code;
     private final String desc;

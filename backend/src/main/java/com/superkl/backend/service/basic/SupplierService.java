@@ -1,5 +1,6 @@
 package com.superkl.backend.service.basic;
 
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.basic.SupplierConverter;
 import com.superkl.backend.dto.basic.SupplierCreateDto;
 import com.superkl.backend.dto.basic.SupplierUpdateDto;
@@ -25,7 +26,7 @@ public class SupplierService {
     // 1. 创建供应商
     @Transactional
     public void create (SupplierCreateDto dto){
-        Admin admin = adminRepository.findById(dto.getAdminId())
+        Admin admin = adminRepository.findById(RequestUser.notNull().getRequestId())
                 .orElseThrow(() -> new BusinessException("管理员不存在"));
         // 检查是否已经存在一样的供应商编号
         if(supplierRepository.existsByCode(dto.getSupplierCode())){

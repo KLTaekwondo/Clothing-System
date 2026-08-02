@@ -25,5 +25,7 @@ public interface ProductSkuRepository extends JpaRepository<ProductSku, Long> {
     @Query("SELECT p FROM ProductSku p " +
             "JOIN FETCH p.product " +
             "WHERE p.product.productCode = :productCode AND p.status = :status")
-    List<ProductSku> findByProductCodeAndStatus(@Param("productCode") String productCode, @Param("status") StatusEnum status);
+    List<ProductSku> findByProductCodeAndStatus(@Param("productCode") String productCode,
+                                                @Param("status") StatusEnum status);
+
 }

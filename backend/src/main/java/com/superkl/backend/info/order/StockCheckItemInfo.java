@@ -7,19 +7,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class ImportOrderItemInfo extends BaseInfo {
-    private String productName;// 产品名称
-    private String productCode;// 产品编码
-    private String skuCode;
+public class StockCheckItemInfo extends BaseInfo {
     private String skuName;
-    private BigDecimal importPrice;
-    private Integer quantity;
-    private BigDecimal totalPrice;
+    private String skuCode;
+    private String productName;
+    private String productCode;
+    private Integer actualQuantity;
+    private Integer systemQuantity;
+    private Integer diffQuantity;
 }

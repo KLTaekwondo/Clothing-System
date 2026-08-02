@@ -29,7 +29,7 @@ public class JwtUtil {
         byte[] keyBytes = jwtKey.getBytes(StandardCharsets.UTF_8);
 
         // 检查密钥长度是否大于32位
-        if(keyBytes.length <= 32) {
+        if(keyBytes.length < 32) {
             throw new BusinessException("JWT密钥长度必须大于32位");
         }
 

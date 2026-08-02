@@ -9,10 +9,12 @@ import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.basic.AdminInfo;
 import com.superkl.backend.repository.basic.AdminRepository;
 import com.superkl.backend.utils.JwtUtil;
+import com.superkl.backend.utils.TokenCookieManager;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,9 @@ public class AdminService {
     private final AdminRepository adminRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${auth.cookie.secure}")
+    private boolean isSecure;
 
     //1.管理员登录
     public AdminInfo login(LoginDto dto, HttpServletResponse response) {
@@ -63,10 +68,7 @@ public class AdminService {
 
         // 3.登录成功，开始处理Cookie
         String token = jwtUtil.generateToken(adminId, claims);
-        Cookie cookie = new Cookie("token", token);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(7 * 24 * 3600);
+        Cookie cookie = TokenCookieManager.writeTokenCookie(token, isSecure);
         response.addCookie(cookie);
         log.info("管理员登录成功：{}", account);
         return AdminConverter.toInfo(admin);
@@ -74,9 +76,7 @@ public class AdminService {
 
     // 2.管理员退出登录
     public void logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("token", "");
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
+        Cookie cookie = TokenCookieManager.clearTokenCookie(isSecure);
         response.addCookie(cookie);
         log.info("管理员退出登录");
         RequestUser.log();
@@ -86,12 +86,12 @@ public class AdminService {
     @Transactional
     public void resetPassword(ResetDto resetDto) {
         // 先提取出来，更加方便操作
-        String account = resetDto.getAccount();
+        Long account = RequestUser.notNull().getRequestId();
         String oldPassword = resetDto.getOldPassword();
         String newPassword = resetDto.getNewPassword();
 
         // 先查找管理员是否存在
-        Admin admin = adminRepository.findByAccount(account)
+        Admin admin = adminRepository.findById(account)
                 .orElseThrow(() -> new BusinessException(403, "账号不存在"));
 
         // 先编码新密码，再比较是否匹配
