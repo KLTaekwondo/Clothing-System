@@ -33,6 +33,7 @@
                     <th>季节</th>
                     <th>年份</th>
                     <th>销售价</th>
+                    <th>是否特价</th>
                     <th>状态</th>
                     <th>操作</th>
                 </tr>
@@ -46,6 +47,11 @@
                     <td>{{ seasonLabels[item.season] || item.season || '-' }}</td>
                     <td>{{ item.year || '-' }}</td>
                     <td>¥{{ item.salePrice ?? '-' }}</td>
+                    <td>
+                        <span :class="item.special ? 'special-status' : 'regular-status'">
+                            {{ item.special ? '是' : '否' }}
+                        </span>
+                    </td>
                     <td>
                             <span :class="item.status === STATUS.ENABLE ? 'status-ok' : 'status-error'"
                                   class="status-badge">
@@ -251,6 +257,11 @@ async function handleDelete() {
     font-size: var(--font-sm);
 }
 
+.data-table th,
+.data-table td {
+    text-align: center;
+}
+
 .data-table th {
     height: 46px;
     background: #fbfdfd;
@@ -266,6 +277,27 @@ async function handleDelete() {
 
 .data-table tbody tr:hover td {
     background: #f2fbfa;
+}
+
+.special-status,
+.regular-status {
+    display: inline-block;
+    min-width: 42px;
+    padding: 4px 9px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.special-status {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.regular-status {
+    background: #f1f5f9;
+    color: #64748b;
 }
 
 .actions {

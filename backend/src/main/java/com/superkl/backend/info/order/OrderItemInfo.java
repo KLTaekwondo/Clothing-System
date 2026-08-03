@@ -26,4 +26,5 @@ public class OrderItemInfo extends BaseInfo {
     private BigDecimal totalPrice;
     private BigDecimal actualPrice;
     private DirectionEnum direction;
+    private boolean special;
 }

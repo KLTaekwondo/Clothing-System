@@ -620,7 +620,8 @@ async function restoreDraft(draftId) {
             skuName: item.skuName || item.skuCode,
             unitPrice: Number(item.unitPrice || 0),
             quantity: Number(item.quantity || 1),
-            discount: Number(item.discount ?? 1),
+            discount: item.special ? 1 : Number(item.discount ?? 1),
+            special: Boolean(item.special),
             direction: item.direction === 'OUT' ? 'OUT' : 'IN'
         }))
         currentDraftOrderId.value = detail.id

@@ -24,6 +24,7 @@ public class OrderItemConverter {
                 .discount(orderItem.getDiscount())
                 .totalPrice(orderItem.getTotalPrice())
                 .actualPrice(orderItem.getActualPrice())
+                .special(orderItem.isSpecial())
                 .direction(orderItem.getDirection())
                 .createTime(orderItem.getCreateTime())
                 .updateTime(orderItem.getUpdateTime())
@@ -57,6 +58,7 @@ public class OrderItemConverter {
                 .quantity(quantity.intValue())
                 .totalPrice(totalPrice)
                 .actualPrice(actualPrice)
+                .special(productSku.getProduct().isSpecial())
                 .build();
     }
 }
