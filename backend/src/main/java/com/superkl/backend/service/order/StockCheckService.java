@@ -1,5 +1,7 @@
 package com.superkl.backend.service.order;
 
+import com.superkl.backend.common.PageResult;
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.order.StockCheckConverter;
 import com.superkl.backend.dto.order.StockCheckDraftDto;
 import com.superkl.backend.dto.stock.StockContext;
@@ -7,6 +9,7 @@ import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.entity.order.StockCheck;
 import com.superkl.backend.entity.order.StockCheckItem;
 import com.superkl.backend.enums.AuditStatusEnum;
+import com.superkl.backend.enums.CheckEnum;
 import com.superkl.backend.enums.StockChangeTypeEnum;
 import com.superkl.backend.enums.StockSourceTypeEnum;
 import com.superkl.backend.exception.BusinessException;
@@ -17,6 +20,7 @@ import com.superkl.backend.repository.basic.WareHouseRepository;
 import com.superkl.backend.repository.order.StockCheckRepository;
 import com.superkl.backend.service.stock.WareHouseStockService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StockCheckService {
@@ -40,6 +45,14 @@ public class StockCheckService {
         // 现生成库存盘点单号
         StockCheck stockCheck = StockCheckConverter.toEntity();
         applyStockCheck(stockCheck, stockCheckDraftDto);
+
+        // 日志记录
+        RequestUser.log();
+        log.info("创建库存盘点单，库存盘点单号：{}, 目标仓库：{}-{} , 盘点数量：{}",
+                stockCheck.getStockCheckNo(),
+                stockCheck.getTargetWarehouse().getWareHouseCode(),
+                stockCheck.getTargetWarehouse().getWareHouseName(),
+                stockCheck.getStockCheckItems().size());
     }
 
     // 提交库存盘点单，自动进入CHECKING模式
@@ -52,6 +65,10 @@ public class StockCheckService {
         }
         stockCheck.setStatus(AuditStatusEnum.CHECKING);
         stockCheckRepository.save(stockCheck);
+        // 日志记录
+        RequestUser.log();
+        log.info("提交库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
+
     }
 
     // 审批通过库存盘点单，自动进入APPROVED模式，并更新库存数量
@@ -74,9 +91,13 @@ public class StockCheckService {
         }
 
         stockCheck.setStatus(AuditStatusEnum.APPROVED);
-        // TODO:释放仓库的CHECKING字段
+        // 释放仓库的CHECKING字段
+        stockCheck.getTargetWarehouse().setCheckStatus(CheckEnum.NO_CHECK);
         // 保存库存盘点单
         stockCheckRepository.save(stockCheck);
+        // 日志记录
+        RequestUser.log();
+        log.info("审批通过库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
     }
 
     // 拒绝库存盘点单，自动进入REJECTED模式
@@ -88,8 +109,12 @@ public class StockCheckService {
             throw new BusinessException("库存盘点单不处于审查中状态，无法拒绝");
         }
         stockCheck.setStatus(AuditStatusEnum.REJECTED);
-        // TODO: 释放仓库的CHECKING字段
+        // 释放仓库的CHECKING字段
+        stockCheck.getTargetWarehouse().setCheckStatus(CheckEnum.NO_CHECK);
         stockCheckRepository.save(stockCheck);
+        // 日志记录
+        RequestUser.log();
+        log.info("拒绝库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
     }
 
     // 更新盘点单草稿
@@ -97,6 +122,8 @@ public class StockCheckService {
     public void update(Long stockCheckId, StockCheckDraftDto stockCheckDraftDto) {
         StockCheck stockCheck = stockCheckRepository.findById(stockCheckId)
                 .orElseThrow(() -> new BusinessException("库存盘点单不存在"));
+        // 短暂释放仓库的CHECKING字段
+        stockCheck.getTargetWarehouse().setCheckStatus(CheckEnum.NO_CHECK);
         if (!stockCheck.isDraft()) {
             throw new BusinessException("库存盘点单不处于草稿状态，无法更新");
         }
@@ -106,6 +133,9 @@ public class StockCheckService {
         applyStockCheck(stockCheck, stockCheckDraftDto);
         // 保存库存盘点单
         stockCheckRepository.save(stockCheck);
+        // 日志记录
+        RequestUser.log();
+        log.info("更新库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
     }
 
     // 查询库存盘点单详情
@@ -117,9 +147,25 @@ public class StockCheckService {
     }
 
     // 查询库存分页
-    public Page<StockCheckInfo> searchPage(Pageable pageable) {
+    public PageResult<StockCheckInfo> searchPage(Pageable pageable) {
         Page<StockCheck> page = stockCheckRepository.findPage(pageable);
         return StockCheckConverter.toInfoPage(page);
+    }
+
+    // 删除草稿
+    @Transactional
+    public void delete(Long stockCheckId) {
+        StockCheck stockCheck = stockCheckRepository.findById(stockCheckId)
+                .orElseThrow(() -> new BusinessException("库存盘点单不存在"));
+        if (!stockCheck.isDraft()) {
+            throw new BusinessException("库存盘点单不处于草稿状态，无法删除");
+        }
+        // 先释放仓库的CHECKING字段
+        stockCheck.getTargetWarehouse().setCheckStatus(CheckEnum.NO_CHECK);
+        stockCheckRepository.delete(stockCheck);
+        // 日志记录
+        RequestUser.log();
+        log.info("删除库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
     }
 
     private void applyStockCheck(StockCheck stockCheck, StockCheckDraftDto dto) {
@@ -130,8 +176,13 @@ public class StockCheckService {
             throw new BusinessException("仓库未启用");
         }
 
-        //TODO: 暂未添加仓库是否已绑定库存盘点单的检查，如果正在盘点，不能重复盘点
-        //TODO: 如果没有正在进行的库存绑定单，则给仓库的CHECKING字段设置为true，目前还未给仓库添加CHECKING字段，需要在仓库实体中添加
+        // 暂未添加仓库是否已绑定库存盘点单的检查，如果正在盘点，不能重复盘点
+        if (wareHouse.isUnderCheck()) {
+            throw new BusinessException(403,"仓库正在盘点，不能重复盘点");
+        }
+
+        // 如果没有正在进行的库存绑定单，则给仓库的CHECKING字段设置为true，目前还未给仓库添加CHECKING字段，需要在仓库实体中添加
+        wareHouse.setCheckStatus(CheckEnum.UNDER_CHECK);
         stockCheck.setTargetWarehouse(wareHouse);
         List<StockCheckItem> stockCheckItems = stockCheckItemService.createList(dto.getStockCheckItems(), stockCheck);
 

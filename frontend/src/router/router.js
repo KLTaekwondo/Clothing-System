@@ -6,13 +6,13 @@ const routes = [
     {
         path: '/',
         name: 'Login',
-        component: () => import('../page/index.vue'),
+        component: () => import('../page/auth/Login.vue'),
         meta: {title: '登录'}
     },
     {
         path: '/manage',
         name: 'Manage',
-        component: () => import('../page/Manage.vue'),
+        component: () => import('../page/manage/Manage.vue'),
         meta: {title: '管理后台'},
         redirect: '/manage/dashboard',
         children: ManageChildren
@@ -20,8 +20,14 @@ const routes = [
     {
         path: '/checkout',
         name: 'Checkout',
-        component: () => import('../page/Checkout.vue'),
+        component: () => import('../page/checkout/Checkout.vue'),
         meta: {title: '收银结账'}
+    },
+    {
+        path: '/checkout/drafts',
+        name: 'DraftOrderManage',
+        component: () => import('../page/checkout/DraftOrderManage.vue'),
+        meta: {title: '挂单查询'}
     }
 ]
 

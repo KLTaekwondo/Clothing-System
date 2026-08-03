@@ -37,7 +37,7 @@ public class WareHouseStockService {
     @Transactional
     public void batchUpdate(List<WarehouseStockUpdateDto> dtos) {
         for (WarehouseStockUpdateDto dto : dtos) {
-            WareHouseStock ws = wareHouseStockRepository.findById(dto.getStockId())
+            WareHouseStock ws = wareHouseStockRepository.findByStockId(dto.getStockId())
                     .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
             Integer beforeQuantity = ws.getStock();
             Integer afterQuantity = dto.getStock();
@@ -68,6 +68,7 @@ public class WareHouseStockService {
     }
 
     // 查询某一个商品的某一个仓库的库存记录
+    @Transactional(readOnly = true)
     public List<WareHouseStockInfo> findByWareHouseIdAndProductId(Long warehouseId, Long productId) {
         if (!RequestUser.isCurrentWareHouse(warehouseId) && !RequestUser.isAdmin()) {
             throw new BusinessException(403, "您没有权限查询该仓库的库存记录");
@@ -127,9 +128,10 @@ public class WareHouseStockService {
 
 
     // 盘点更新库存数量，区别于手动调整
+    @Transactional
     public void checkUpdateStock(Long stockId, StockCheckItem item , StockContext stockContext) {
         // 查询库存记录是否存在(这里直接使用stockId查找，精确，不像上面需要两个定位独立的字段)
-        WareHouseStock ws = wareHouseStockRepository.findById(stockId)
+        WareHouseStock ws = wareHouseStockRepository.findByStockId(stockId)
                 .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
 
         // 检查actualQuantity是否小于0

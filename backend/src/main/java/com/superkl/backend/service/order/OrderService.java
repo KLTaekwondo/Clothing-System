@@ -54,6 +54,10 @@ public class OrderService {
         applyOrder(dto,order);
         order.setStatus(OrderStatusEnum.DRAFT);
         orderRepository.save(order);
+        // 日志记录
+        RequestUser.log();
+        log.info("挂单订单，订单编号：{} ，订单总价：{} ，数量：{}",
+                order.getOrderNo(),order.getTotalPrice(),order.getOrderItems().size());
     }
 
     // 2.完成订单
@@ -113,6 +117,10 @@ public class OrderService {
 
         // 6.保存订单
         orderRepository.save(order);
+        // 日志记录
+        RequestUser.log();
+        log.info("完成订单，订单编号：{} ，订单总价：{} ，数量：{}",
+                order.getOrderNo(),order.getTotalPrice(),order.getOrderItems().size());
     }
 
     // 3.更新草稿订单
@@ -136,6 +144,11 @@ public class OrderService {
         orderItemService.updateDelete(orderId);
         applyOrder(dto,order);
         orderRepository.save(order);
+
+        // 日志记录
+        RequestUser.log();
+        log.info("更新订单，订单编号：{} ，订单总价：{} ，数量：{}",
+                order.getOrderNo(),order.getTotalPrice(),order.getOrderItems().size());
     }
 
     // 4.查询单个订单
@@ -149,7 +162,7 @@ public class OrderService {
     }
 
     // 5.查询订单订单列表
-    @Transactional
+    @Transactional(readOnly = true)
     public PageResult<OrderInfo> searchPage(Pageable pageable) {
         return OrderConverter.toInfoPage(orderRepository.findPage(pageable));
     }
@@ -164,6 +177,9 @@ public class OrderService {
             throw new BusinessException(403, "订单不是草稿状态，不可删除！");
         }
         orderRepository.delete(order);
+        // 日志记录
+        RequestUser.log();
+        log.info("删除订单，订单编号：{}", order.getOrderNo());
     }
 
     // 7.查询当前仓库的挂单列表

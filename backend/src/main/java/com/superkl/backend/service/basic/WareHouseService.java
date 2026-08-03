@@ -133,7 +133,7 @@ public class WareHouseService {
     }
 
     // 查询单个仓库
-    @Transactional
+    @Transactional(readOnly = true)
     public WareHouseInfo search(Long wareHouseId) {
         WareHouse wareHouse =  wareHouseRepository.findById(wareHouseId)
                 .orElseThrow(() -> new BusinessException(403, "仓库不存在"));

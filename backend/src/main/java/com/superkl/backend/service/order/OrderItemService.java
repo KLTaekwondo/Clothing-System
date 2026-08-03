@@ -13,6 +13,7 @@ import com.superkl.backend.repository.product.ProductSkuRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +58,14 @@ public class OrderItemService {
     }
 
     // 3.根据订单ID查询订单项列表
+    @Transactional(readOnly = true)
     public List<OrderItemInfo> findByOrderId(Long orderId){
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
         return OrderItemConverter.toInfoList(orderItems);
     }
 
     // 4.根据订单号，删除订单项(不会暴露接口，仅用于内部调用)
+    @Transactional
     public void updateDelete(Long orderId){
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
         orderItemRepository.deleteAll(orderItems);

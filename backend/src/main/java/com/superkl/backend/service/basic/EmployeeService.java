@@ -87,6 +87,7 @@ public class EmployeeService {
     }
 
     // 查询员工
+    @Transactional(readOnly = true)
     public EmployeeInfo search(Long employeeId) {
         // 从员工ID查询员工
         Employee employee = employeeRepository.findById(employeeId)
@@ -96,6 +97,7 @@ public class EmployeeService {
     }
 
     // 查询所有员工
+    @Transactional(readOnly = true)
     public List<EmployeeInfo> searchList() {
         // 查询所有员工
         List<Employee> employees = employeeRepository.findAll();
@@ -104,6 +106,7 @@ public class EmployeeService {
     }
 
     // 收银前端验证员工
+    @Transactional(readOnly = true)
     public EmployeeInfo verify(Long employeeId) {
         // 从员工ID查询员工
         Employee employee = employeeRepository.findById(employeeId)
@@ -122,6 +125,7 @@ public class EmployeeService {
     }
 
     // 收银前端查询所有属于该仓库的员工
+    @Transactional(readOnly = true)
     public List<EmployeeInfo> verifyList() {
         // 查询所有员工
         // 从RequestUser中获取当前仓库ID

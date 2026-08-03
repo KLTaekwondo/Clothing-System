@@ -25,7 +25,6 @@ public class ImportOrderItemService {
     private final ProductSkuRepository productSkuRepository;
 
     // 1.创建订单项
-    @Transactional
     public ImportOrderItem create(ImportOrderItemCreateDto dto, ImportOrder importOrder){
         // 查找商品SKU是否存在
         ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode())
@@ -47,7 +46,6 @@ public class ImportOrderItemService {
     }
 
     // 2.创建订单项列表
-    @Transactional
     public List<ImportOrderItem> createList(List<ImportOrderItemCreateDto> dtos, ImportOrder importOrder){
         List<ImportOrderItem> importOrderItems = new ArrayList<>();
         for (ImportOrderItemCreateDto dto : dtos) {

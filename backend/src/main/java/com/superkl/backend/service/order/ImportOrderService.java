@@ -159,9 +159,15 @@ public class ImportOrderService {
         }
         // 删除订单
         importOrderRepository.deleteById(importOrderId);
+        // 日志记录
+        RequestUser.log();
+        log.info("删除进货订单，订单编号：{}", importOrder.getImportOrderNo());
     }
 
+
+
     // 查询单个进货订单详情
+    @Transactional(readOnly = true)
     public ImportOrderWithItemsInfo search(Long importOrderId){
         ImportOrder importOrder = importOrderRepository.findById(importOrderId)
                 .orElseThrow(() -> new BusinessException(403, "进货订单不存在"));
@@ -170,6 +176,7 @@ public class ImportOrderService {
     }
 
     // 查询进货订单列表
+    @Transactional(readOnly = true)
     public PageResult<ImportOrderInfo> searchPage(Pageable pageable){
         Page<ImportOrder> importOrders = importOrderRepository.findPage(pageable);
         return ImportOrderConverter.toInfoPage(importOrders);

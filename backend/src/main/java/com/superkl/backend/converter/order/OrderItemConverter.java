@@ -42,7 +42,7 @@ public class OrderItemConverter {
     public static OrderItem toEntity(OrderItemCreateDto dto, ProductSku productSku){
         BigDecimal price = productSku.getProduct().getSalePrice();
         BigDecimal quantity = BigDecimal.valueOf(dto.getQuantity());
-        BigDecimal discount = dto.getDiscount();
+        BigDecimal discount = productSku.getProduct().isSpecial() ? BigDecimal.ONE : dto.getDiscount();
         BigDecimal totalPrice = price.multiply(quantity);
         BigDecimal actualPrice = totalPrice.multiply(discount);
 

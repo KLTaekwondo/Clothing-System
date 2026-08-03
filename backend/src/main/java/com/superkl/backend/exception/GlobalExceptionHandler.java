@@ -9,6 +9,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -58,6 +59,13 @@ public class GlobalExceptionHandler {
     public Result<?> handleConversion(HttpMessageConversionException e) {
         log.warn("参数转换异常：{}", e.getMessage());
         return Result.error(413, "参数格式不正确");
+    }
+
+    // 键重复异常
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public Result<?> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        log.warn("键重复异常：{}", e.getMessage());
+        return Result.error(414, "键重复异常：" + e.getMessage());
     }
 
     // 其他未预期异常

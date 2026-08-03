@@ -1,6 +1,7 @@
 package com.superkl.backend.entity.basic;
 
 import com.superkl.backend.entity.BaseEntity;
+import com.superkl.backend.enums.CheckEnum;
 import com.superkl.backend.enums.StatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,6 +33,12 @@ public class WareHouse extends BaseEntity {
     @Column(nullable = false)
     private String wareHousePassword;// 仓库密码,用于登录前端的售货系统
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private CheckEnum checkStatus = CheckEnum.NO_CHECK;// 仓库盘点状态，默认未在盘点
+
+
     // ===== 关联属性 =====
     // 关联管理员
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,5 +48,8 @@ public class WareHouse extends BaseEntity {
     // 辅助方法
     public boolean isEnabled() {
         return StatusEnum.ENABLE.equals(status);
+    }
+    public boolean isUnderCheck() {
+        return CheckEnum.UNDER_CHECK.equals(checkStatus);
     }
 }

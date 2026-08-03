@@ -18,6 +18,7 @@ public class WareHouseConverter {
                 .code(wareHouse.getWareHouseCode())
                 .name(wareHouse.getWareHouseName())
                 .status(wareHouse.getStatus())
+                .checkStatus(wareHouse.getCheckStatus())
                 .createTime(wareHouse.getCreateTime())
                 .updateTime(wareHouse.getUpdateTime())
                 .build();

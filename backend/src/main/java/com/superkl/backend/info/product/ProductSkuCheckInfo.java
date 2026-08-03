@@ -17,4 +17,5 @@ public class ProductSkuCheckInfo extends ProductSkuInfo{
     private String productCode; // 商品编码
     private String productName; // 商品名称
     private BigDecimal salePrice;// 商品SKU价格
+    private boolean special;// 是否特价
 }

@@ -11,6 +11,7 @@ import com.superkl.backend.repository.product.ProductSkuRepository;
 import com.superkl.backend.repository.order.TransferOrderItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,12 +48,14 @@ public class TransferOrderItemService {
     }
 
     // 查找转移订单号下的订单项列表
+    @Transactional(readOnly = true)
     public List<TransferOrderItemInfo> findByTransferOrderId(Long transferOrderId) {
         List<TransferOrderItem> list = transferOrderItemRepository.findByTransferOrderId(transferOrderId);
         return TransferOrderItemConverter.toInfoList(list);
     }
 
     // 更新删除(只用于内部使用，不允许外部调用)
+    @Transactional
     public void updateDelete(Long transferOrderId) {
         List<TransferOrderItem> list = transferOrderItemRepository.findByTransferOrderId(transferOrderId);
         transferOrderItemRepository.deleteAll(list);

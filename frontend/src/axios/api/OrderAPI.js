@@ -7,7 +7,8 @@ const orderAPI = {
     deleteOrder: (id) => backendService.delete(`/order/delete/${id}`),
     searchOrder: (id) => backendService.get(`/order/search/${id}`),
     searchOrderPage: (page,size) => backendService.get("/order/page", {params:{page,size}}),
-    searchCurrentWareHouseOrderPage: (page, size) => backendService.get("/order/search/wareHouse/draft", {params: {page, size}}),
+    searchCurrentDraftOrderPage: (page, size) => backendService.get("/order/search/wareHouse/draft", {params: {page, size}}),
+    searchCurrentCompleteOrderPage: (page, size) => backendService.get("/order/search/wareHouse/complete", {params: {page, size}}),
 }
 
 export default orderAPI;

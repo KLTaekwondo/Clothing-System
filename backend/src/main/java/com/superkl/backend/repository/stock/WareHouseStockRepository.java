@@ -26,4 +26,11 @@ public interface WareHouseStockRepository extends CrudRepository<WareHouseStock,
             "WHERE sku.skuId = :skuId AND wh.wareHouseId = :warehouseId")
     Optional<WareHouseStock> findBySkuIdAndWarehouseId(@Param("skuId") Long skuId,
                                                        @Param("warehouseId") Long warehouseId);
+
+    @Query("SELECT ws FROM WareHouseStock ws " +
+            "JOIN FETCH ws.productSku sku " +
+            "JOIN FETCH sku.product p " +
+            "JOIN FETCH ws.wareHouse wh " +
+            "WHERE ws.stockId = :stockId")
+    Optional<WareHouseStock> findByStockId(@Param("stockId") Long stockId);
 }

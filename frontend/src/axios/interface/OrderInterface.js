@@ -37,8 +37,19 @@ function orderInterface() {
         };
     }
 
-    const searchCurrentWareHousePage = async (page = 0, size = 10) => {
-        const data = await orderAPI.searchCurrentWareHouseOrderPage(page, size);
+    const searchCurrentDraftPage = async (page = 0, size = 10) => {
+        const data = await orderAPI.searchCurrentDraftOrderPage(page, size);
+        return data || {
+            content: [],
+            totalElements: 0,
+            totalPages: 0,
+            page,
+            size,
+        };
+    }
+
+    const searchCurrentCompletePage = async (page = 0, size = 10) => {
+        const data = await orderAPI.searchCurrentCompleteOrderPage(page, size);
         return data || {
             content: [],
             totalElements: 0,
@@ -55,7 +66,8 @@ function orderInterface() {
         hardDelete,
         search,
         searchPage,
-        searchCurrentWareHousePage,
+        searchCurrentDraftPage,
+        searchCurrentCompletePage,
     }
 }
 

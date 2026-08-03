@@ -1,5 +1,6 @@
 package com.superkl.backend.converter.order;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.entity.order.StockCheck;
 import com.superkl.backend.entity.order.StockCheckItem;
 import com.superkl.backend.info.order.StockCheckInfo;
@@ -37,8 +38,9 @@ public class StockCheckConverter {
     }
 
     // 实体分页转Info分页
-    public static Page<StockCheckInfo> toInfoPage(Page<StockCheck> stockCheckPage) {
-        return stockCheckPage.map(StockCheckConverter::toInfo);
+    public static PageResult<StockCheckInfo> toInfoPage(Page<StockCheck> stockCheckPage) {
+        Page<StockCheckInfo> page = stockCheckPage.map(StockCheckConverter::toInfo);
+        return new PageResult<>(page);
     }
 
     // dto转实体

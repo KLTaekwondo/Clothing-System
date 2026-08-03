@@ -27,7 +27,6 @@ public class StockCheckItemService {
     private final WareHouseStockRepository wareHouseStockRepository;
 
     // 创建盘点项
-    @Transactional
     public StockCheckItem create(StockCheckItemCreateDto dto , StockCheck stockCheck) {
         Long targetWareHouseId = stockCheck.getTargetWarehouse().getWareHouseId();
         // 先查找需要盘点的商品sku
@@ -52,7 +51,6 @@ public class StockCheckItemService {
     }
 
     // 创建盘点项列表
-    @Transactional
     public List<StockCheckItem> createList(List<StockCheckItemCreateDto> dtos, StockCheck stockCheck) {
         List<StockCheckItem> stockCheckItems = new ArrayList<>();
         for(StockCheckItemCreateDto dto : dtos) {
@@ -62,12 +60,14 @@ public class StockCheckItemService {
     }
 
     // 根据盘点单Id查询盘点项列表
+    @Transactional(readOnly = true)
     public List<StockCheckItemInfo> findByStockCheckId(Long stockCheckId) {
         List<StockCheckItem> stockCheckItemList = stockCheckItemRepository.findByStockCheckId(stockCheckId);
         return StockCheckItemConverter.toInfoList(stockCheckItemList);
     }
 
     // 更新盘点项
+    @Transactional
     public void updateDelete(Long stockCheckId) {
         List<StockCheckItem> stockCheckItemList = stockCheckItemRepository.findByStockCheckId(stockCheckId);
         stockCheckItemRepository.deleteAll(stockCheckItemList);

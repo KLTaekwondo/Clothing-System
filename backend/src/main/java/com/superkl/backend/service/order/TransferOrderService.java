@@ -43,6 +43,10 @@ public class TransferOrderService {
         // 先生成订单号，然后填充订单信息
         TransferOrder transferOrder = TransferOrderConverter.toEntity();
         applyTransferOrder(transferOrder,dto);
+        // 日志记录
+        RequestUser.log();
+        log.info("创建转移订单，订单编号：{} ，订单总价：{} ，数量：{}",
+                transferOrder.getTransferOrderNo(),transferOrder.getTotalPrice(),transferOrder.getTransferOrderItems().size());
     }
 
     // 更新转移订单
@@ -58,6 +62,10 @@ public class TransferOrderService {
 
         // 填充新的订单
         applyTransferOrder(transferOrder,dto);
+        // 日志记录
+        RequestUser.log();
+        log.info("更新转移订单，订单编号：{} ，订单总价：{} ，数量：{}",
+                transferOrder.getTransferOrderNo(),transferOrder.getTotalPrice(),transferOrder.getTransferOrderItems().size());
     }
 
     // 保存并提交了转移订单，自动设置为CHECKING状态
@@ -72,6 +80,10 @@ public class TransferOrderService {
         // 设置为审核中状态
         transferOrder.setStatus(AuditStatusEnum.CHECKING);
         transferOrderRepository.save(transferOrder);
+
+        // 日志记录
+        RequestUser.log();
+        log.info("提交转移订单，订单编号：{}", transferOrder.getTransferOrderNo());
     }
 
     // 校验通过了转移订单，自动设置为通过状态
@@ -107,6 +119,10 @@ public class TransferOrderService {
         transferOrder.setStatus(AuditStatusEnum.APPROVED);
         transferOrderRepository.save(transferOrder);
 
+        // 日志记录
+        RequestUser.log();
+        log.info("通过转移订单，订单编号：{}", transferOrder.getTransferOrderNo());
+
     }
 
     // 校验拒绝了转移订单，自动设置为拒绝状态
@@ -120,6 +136,10 @@ public class TransferOrderService {
         // 设置为拒绝状态
         transferOrder.setStatus(AuditStatusEnum.REJECTED);
         transferOrderRepository.save(transferOrder);
+
+        // 日志记录
+        RequestUser.log();
+        log.info("拒绝转移订单，订单编号：{}", transferOrder.getTransferOrderNo());
     }
 
     // 删除转移订单(仅在草稿状态下删除)
@@ -131,6 +151,10 @@ public class TransferOrderService {
             throw new BusinessException("转移订单不是草稿状态，不能删除");
         }
         transferOrderRepository.delete(transferOrder);
+
+        // 日志记录
+        RequestUser.log();
+        log.info("删除转移订单草稿，订单编号：{}", transferOrder.getTransferOrderNo());
     }
 
     // 查找特定转移订单

@@ -44,6 +44,7 @@ public class ProductSkuConverter {
                 .salePrice(productSku.getProduct().getSalePrice())
                 .productCode(productSku.getProduct().getProductCode())
                 .productName(productSku.getProduct().getProductName())
+                .special(productSku.getProduct().isSpecial())
                 .createTime(productSku.getCreateTime())
                 .updateTime(productSku.getUpdateTime())
                 .build();
