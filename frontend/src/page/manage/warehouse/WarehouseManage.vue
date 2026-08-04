@@ -11,6 +11,13 @@
             <div class="card-header">
                 <span class="card-title">仓库列表</span>
                 <div class="header-actions">
+                    <div class="search-bar">
+                        <input
+                            v-model="searchQuery"
+                            placeholder="搜索仓库名称或编码"
+                            type="text"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -18,7 +25,7 @@
                 <div class="loading-spinner"></div>
             </div>
 
-            <div v-else-if="warehouseList.length === 0" class="empty-state">
+            <div v-else-if="filteredList.length === 0" class="empty-state">
                 <div class="empty-icon"><IconGraphic name="warehouse"/></div>
                 <div class="empty-text">暂无仓库数据</div>
             </div>
@@ -33,7 +40,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="item in warehouseList" :key="item.id" style="cursor:pointer" @dblclick="goDetail(item)">
+                <tr v-for="item in filteredList" :key="item.id" style="cursor:pointer" @dblclick="goDetail(item)">
                     <td><code>{{ item.code }}</code></td>
                     <td><strong>{{ item.name }}</strong></td>
                     <td>
@@ -78,7 +85,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
@@ -89,7 +96,18 @@ const toast = useToastStore()
 const statusLabels = STATUS_LABELS
 
 const warehouseList = ref([])
+const searchQuery = ref('')
 const loading = ref(true)
+
+const filteredList = computed(() => {
+    const query = searchQuery.value.trim().toLowerCase()
+    if (!query) return warehouseList.value
+    return warehouseList.value.filter(item =>
+        item.name?.toLowerCase().includes(query) ||
+        item.code?.toLowerCase().includes(query) ||
+        String(item.id).includes(query)
+    )
+})
 
 onMounted(() => fetchList())
 
@@ -162,17 +180,54 @@ async function handleDelete() {
     box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
 }
 
+.data-table th,
+.data-table td {
+    text-align: center;
+}
+
+.data-table .actions {
+    justify-content: center;
+}
+
 .header-actions {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
+.search-bar {
+    width: 300px;
+}
+
+.search-bar input {
+    width: 100%;
+}
+
 @media (max-width: 760px) {
+    .page-heading,
+    .card-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .warehouse-manage > .card {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        min-width: 760px;
+    }
+
     .header-actions {
         align-items: stretch;
         flex-direction: column;
         gap: 12px;
+        width: 100%;
+    }
+
+    .search-bar {
+        width: 100%;
     }
 }
 </style>

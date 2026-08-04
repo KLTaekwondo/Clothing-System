@@ -1,6 +1,38 @@
 <template>
     <div class="manage-container">
-        <aside :class="{ collapsed }" class="sidebar">
+        <header class="mobile-header">
+            <button
+                aria-label="打开导航菜单"
+                class="mobile-menu-button"
+                type="button"
+                @click="mobileMenuOpen = true"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="mobile-brand">
+                <IconGraphic
+                    name="clothing"
+                />
+                <span>服装管理</span>
+            </div>
+            <strong class="mobile-page-title">{{ currentPageTitle }}</strong>
+        </header>
+        <button
+            v-if="mobileMenuOpen"
+            aria-label="关闭导航菜单"
+            class="mobile-sidebar-mask"
+            type="button"
+            @click="mobileMenuOpen = false"
+        ></button>
+        <aside
+            :class="{
+                collapsed,
+                'mobile-open': mobileMenuOpen
+            }"
+            class="sidebar"
+        >
             <div class="sidebar-logo">
                 <button
                     :title="collapsed ? '展开导航栏' : '收起导航栏'"
@@ -57,7 +89,7 @@
 </template>
 
 <script setup>
-import {ref, watch} from 'vue'
+import {computed, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useUserStore} from '../../stores/userStore.js'
 import adminInterface from '../../axios/interface/AdminInterface.js'
@@ -78,8 +110,10 @@ const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 const collapsed = ref(false)
+const mobileMenuOpen = ref(false)
 const currentPath = ref('')
 const tabs = ref(loadSavedTabs())
+const currentPageTitle = computed(() => route.meta?.title || '管理后台')
 
 const navItems = [
     {path: '/manage/dashboard', label: '仪表盘', icon: dashboardIcon},
@@ -87,7 +121,7 @@ const navItems = [
     {path: '/manage/employee', label: '员工管理', icon: employeeIcon},
     {path: '/manage/supplier', label: '供应商管理', icon: supplierIcon},
     {path: '/manage/warehouse', label: '仓库管理', icon: warehouseIcon},
-    {path: '/manage/stock', label: '库存管理', icon: stockIcon},
+    {path: '/manage/stock', label: '人工库存调整', icon: stockIcon},
     {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon},
     {path: '/manage/stock-check', label: '库存盘点', icon: stockRecordIcon},
     {path: '/manage/order', label: '订单管理', icon: orderIcon},
@@ -109,6 +143,7 @@ function loadSavedTabs() {
 // 监听路由变化，自动加 tab
 watch(() => route.path, (path) => {
     currentPath.value = path
+    mobileMenuOpen.value = false
     const meta = route.meta
     const label = meta?.title || path.split('/').pop() || '未知'
     sessionStorage.setItem('clothing_current_route', JSON.stringify({name: route.name}))
@@ -127,6 +162,7 @@ function addTab(path, label) {
 
 function openTab(path, label) {
     addTab(path, label)
+    mobileMenuOpen.value = false
     router.push(path)
 }
 
@@ -167,9 +203,16 @@ async function handleLogout() {
 
 <style scoped>
 .manage-container {
+    position: relative;
     display: flex;
     height: 100vh;
+    height: 100dvh;
     background: var(--bg-body);
+}
+
+.mobile-header,
+.mobile-sidebar-mask {
+    display: none;
 }
 
 /* ── 侧栏 ── */
@@ -538,5 +581,172 @@ async function handleLogout() {
     flex: 1;
     padding: 30px 34px;
     overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+    .manage-container {
+        display: block;
+        padding-top: 56px;
+        overflow: hidden;
+    }
+
+    .mobile-header {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 40;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 16px;
+        border-bottom: 1px solid #dfece9;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(18px);
+        box-shadow: 0 4px 16px rgba(22, 83, 78, 0.08);
+    }
+
+    .mobile-menu-button {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 9px;
+        border: 1px solid #dceae7;
+        background: #f8fcfb;
+    }
+
+    .mobile-menu-button span {
+        width: 18px;
+        height: 2px;
+        border-radius: 2px;
+        background: #0f766e;
+    }
+
+    .mobile-brand {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #173b3a;
+        font-size: 14px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .mobile-brand :deep(img) {
+        width: 25px;
+        height: 25px;
+    }
+
+    .mobile-page-title {
+        min-width: 0;
+        margin-left: auto;
+        overflow: hidden;
+        color: #64807e;
+        font-size: 13px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mobile-sidebar-mask {
+        position: fixed;
+        inset: 56px 0 0;
+        z-index: 45;
+        width: 100%;
+        height: calc(100dvh - 56px);
+        display: block;
+        border-radius: 0;
+        background: rgba(11, 48, 45, 0.38);
+        backdrop-filter: blur(2px);
+    }
+
+    .sidebar,
+    .sidebar.collapsed {
+        position: fixed;
+        top: 56px;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        width: min(82vw, 300px);
+        transform: translateX(-105%);
+        transition: transform 0.25s var(--ease-out);
+        box-shadow: 14px 0 34px rgba(11, 48, 45, 0.18);
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .sidebar-logo {
+        display: none;
+    }
+
+    .sidebar.collapsed .nav-item {
+        width: 100%;
+        align-self: stretch;
+        justify-content: flex-start;
+        gap: 11px;
+        padding: 11px 14px;
+    }
+
+    .sidebar.collapsed .nav-label {
+        width: auto;
+        display: inline;
+        overflow: visible;
+        opacity: 1;
+    }
+
+    .sidebar.collapsed .nav-item-active {
+        background: linear-gradient(90deg, #d9f6f1, #effbf9) !important;
+        border-color: #b9ded7 !important;
+        box-shadow: inset 3px 0 0 #0d9488, 0 4px 12px rgba(13, 148, 136, 0.12);
+    }
+
+    .sidebar.collapsed .nav-item-active::after {
+        display: none;
+    }
+
+    .sidebar-nav {
+        padding-top: 14px;
+        overflow-y: auto;
+    }
+
+    .right-area {
+        width: 100%;
+        height: calc(100dvh - 56px);
+    }
+
+    .tab-bar {
+        height: 38px;
+        padding: 0 6px;
+    }
+
+    .tab-item {
+        height: 30px;
+        padding: 0 8px 0 11px;
+        font-size: 12px;
+    }
+
+    .content-body {
+        padding: 20px 18px;
+    }
+}
+
+@media (max-width: 560px) {
+    .mobile-header {
+        gap: 9px;
+        padding: 0 10px;
+    }
+
+    .mobile-brand span {
+        display: none;
+    }
+
+    .content-body {
+        padding: 14px 10px 22px;
+    }
 }
 </style>

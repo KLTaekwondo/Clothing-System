@@ -12,15 +12,17 @@
         </div>
 
         <div class="card">
-            <div class="toolbar">
-                <div class="search-bar">
-                    <input
-                        v-model="searchQuery"
-                        placeholder="搜索供应商编码、名称或电话"
-                        type="text"
-                    />
+            <div class="card-header">
+                <span class="card-title">供应商列表</span>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input
+                            v-model="searchQuery"
+                            placeholder="搜索供应商编码、名称或电话"
+                            type="text"
+                        />
+                    </div>
                 </div>
-                <span class="result-count">当前显示 {{ filteredList.length }} 家供应商</span>
             </div>
 
             <div
@@ -213,12 +215,9 @@ async function handleDisable() {
     font-size: var(--font-sm);
 }
 
-.toolbar {
+.header-actions {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 18px;
 }
 
 .search-bar {
@@ -229,9 +228,13 @@ async function handleDisable() {
     width: 100%;
 }
 
-.result-count {
-    color: var(--text-secondary);
-    font-size: 13px;
+.data-table th,
+.data-table td {
+    text-align: center;
+}
+
+.data-table .actions {
+    justify-content: center;
 }
 
 .supplier-row {
@@ -247,5 +250,25 @@ async function handleDisable() {
 
 .confirm-modal {
     width: 380px;
+}
+
+@media (max-width: 760px) {
+    .page-heading,
+    .card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .search-bar {
+        width: 100%;
+    }
+
+    .supplier-manage > .card {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        min-width: 860px;
+    }
 }
 </style>

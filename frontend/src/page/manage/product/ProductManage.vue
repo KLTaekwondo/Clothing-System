@@ -9,11 +9,17 @@
         </div>
 
         <div class="card">
-            <div class="toolbar">
-                <div class="search-bar">
-                    <input v-model="searchQuery" placeholder="搜索商品名称或编码" type="text"/>
+            <div class="card-header">
+                <span class="card-title">商品列表</span>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input
+                            v-model="searchQuery"
+                            placeholder="搜索商品名称或编码"
+                            type="text"
+                        />
+                    </div>
                 </div>
-                <span class="result-count">共 {{ pageInfo.totalElements }} 件商品</span>
             </div>
 
             <div v-if="loading" class="loading-overlay">
@@ -236,13 +242,9 @@ async function handleDelete() {
     box-shadow: 0 8px 26px rgba(15, 118, 110, 0.06);
 }
 
-.toolbar {
+.header-actions {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding-bottom: 18px;
-    margin-bottom: 0;
-    border-bottom: 1px solid var(--border-light);
 }
 
 .search-bar input {
@@ -250,11 +252,6 @@ async function handleDelete() {
     height: 42px;
     border-radius: 10px;
     background: #f8fafc;
-}
-
-.result-count {
-    color: var(--text-muted);
-    font-size: var(--font-sm);
 }
 
 .data-table th,
@@ -336,7 +333,7 @@ tr:hover .actions {
 
 @media (max-width: 900px) {
     .page-heading,
-    .toolbar {
+    .card-header {
         align-items: flex-start;
         flex-direction: column;
         gap: 14px;

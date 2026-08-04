@@ -182,6 +182,15 @@ async function handleDelete() {
     box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
 }
 
+.data-table th,
+.data-table td {
+    text-align: center;
+}
+
+.data-table .actions {
+    justify-content: center;
+}
+
 .header-actions {
     display: flex;
     align-items: center;
@@ -207,6 +216,20 @@ async function handleDelete() {
 }
 
 @media (max-width: 760px) {
+    .page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .employee-manage > .card {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        min-width: 620px;
+    }
+
     .header-actions {
         align-items: stretch;
         flex-direction: column;

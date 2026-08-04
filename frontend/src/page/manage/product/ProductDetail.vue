@@ -41,22 +41,28 @@
                 </div>
                 <div class="info-card">
                     <span class="info-label">类型</span>
-                    <select v-if="editing" v-model="form.type" class="card-select">
-                        <option v-for="opt in typeOptions" :key="opt.id" :value="opt.optionValue">{{
-                                opt.optionValue
-                            }}
-                        </option>
-                    </select>
+                    <OptionValuePicker
+                        v-if="editing"
+                        ref="typePicker"
+                        v-model="form.type"
+                        :options="typeOptions"
+                        error-message="该类型不在选项管理中，请选择有效类型"
+                        placeholder="输入类型关键词"
+                        select-placeholder="选择类型"
+                    />
                     <strong v-else>{{ product.type || '-' }}</strong>
                 </div>
                 <div class="info-card">
                     <span class="info-label">种类</span>
-                    <select v-if="editing" v-model="form.category" class="card-select">
-                        <option v-for="opt in categoryOptions" :key="opt.id" :value="opt.optionValue">{{
-                                opt.optionValue
-                            }}
-                        </option>
-                    </select>
+                    <OptionValuePicker
+                        v-if="editing"
+                        ref="categoryPicker"
+                        v-model="form.category"
+                        :options="categoryOptions"
+                        error-message="该种类不在选项管理中，请选择有效种类"
+                        placeholder="输入种类关键词"
+                        select-placeholder="选择种类"
+                    />
                     <strong v-else>{{ product.category || '-' }}</strong>
                 </div>
                 <div class="info-card">
@@ -68,30 +74,41 @@
                 </div>
                 <div class="info-card">
                     <span class="info-label">单位</span>
-                    <select v-if="editing" v-model="form.unit" class="card-select">
-                        <option v-for="opt in unitOptions" :key="opt.id" :value="opt.optionValue">{{
-                                opt.optionValue
-                            }}
-                        </option>
-                    </select>
+                    <OptionValuePicker
+                        v-if="editing"
+                        ref="unitPicker"
+                        v-model="form.unit"
+                        :options="unitOptions"
+                        error-message="该单位不在选项管理中，请选择有效单位"
+                        placeholder="输入单位关键词"
+                        select-placeholder="选择单位"
+                    />
                     <strong v-else>{{ product.unit || '-' }}</strong>
                 </div>
                 <div class="info-card">
                     <span class="info-label">面料组合</span>
-                    <select v-if="editing" v-model="form.composition" class="card-select">
-                        <option v-for="opt in compositionOptions" :key="opt.id" :value="opt.optionValue">
-                            {{ opt.optionValue }}
-                        </option>
-                    </select>
+                    <OptionValuePicker
+                        v-if="editing"
+                        ref="compositionPicker"
+                        v-model="form.composition"
+                        :options="compositionOptions"
+                        error-message="该面料组合不在选项管理中，请选择有效面料组合"
+                        placeholder="输入面料组合关键词"
+                        select-placeholder="选择面料组合"
+                    />
                     <strong v-else>{{ product.composition || '-' }}</strong>
                 </div>
                 <div class="info-card">
                     <span class="info-label">年份</span>
-                    <select v-if="editing" v-model="form.year" class="card-select">
-                        <option v-for="opt in yearOptions" :key="opt.id" :value="opt.optionValue">
-                            {{ opt.optionValue }}
-                        </option>
-                    </select>
+                    <OptionValuePicker
+                        v-if="editing"
+                        ref="yearPicker"
+                        v-model="form.year"
+                        :options="yearOptions"
+                        error-message="该年份不在选项管理中，请选择有效年份"
+                        placeholder="输入年份关键词"
+                        select-placeholder="选择年份"
+                    />
                     <strong v-else>{{ product.year || '-' }}</strong>
                 </div>
                 <div class="info-card">
@@ -197,6 +214,7 @@ import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js
 import {SEASON_LABELS, SEASON_OPTIONS} from '../../../constants/season.js'
 import {STATUS, STATUS_LABELS, STATUS_OPTIONS} from '../../../constants/status.js'
 import {useProductOptions} from './composables/useProductOptions.js'
+import OptionValuePicker from './components/OptionValuePicker.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -212,6 +230,11 @@ const loading = ref(true)
 const skuLoading = ref(false)
 const editing = ref(false)
 const saving = ref(false)
+const typePicker = ref(null)
+const categoryPicker = ref(null)
+const unitPicker = ref(null)
+const compositionPicker = ref(null)
+const yearPicker = ref(null)
 const form = ref({})
 const formBackup = ref(null)
 const activeTab = ref('info')
@@ -268,6 +291,17 @@ function cancelEdit() {
 }
 
 async function saveEdit() {
+    const optionValidation = [
+        typePicker,
+        categoryPicker,
+        unitPicker,
+        compositionPicker,
+        yearPicker
+    ].map(picker => picker.value?.validate())
+    if (optionValidation.some(valid => !valid)) {
+        toast.warning('商品选项必须使用选项管理中的已有值')
+        return
+    }
     saving.value = true
     try {
         await productInterface.update(product.value.id, {

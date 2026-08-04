@@ -229,4 +229,19 @@ function confirmLeave() {
 .confirm-modal {
     width: 380px;
 }
+
+@media (max-width: 640px) {
+    .form-card {
+        width: 100%;
+        padding: 18px;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}
 </style>

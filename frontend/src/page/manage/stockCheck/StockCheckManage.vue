@@ -429,6 +429,10 @@ async function handleDelete() {
     height: 36px;
 }
 
+.check-table-card .data-table {
+    min-width: 980px;
+}
+
 .sub-text {
     display: block;
     margin-top: 4px;

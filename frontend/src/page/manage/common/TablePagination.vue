@@ -81,4 +81,26 @@ const safeTotalPages = computed(() => Math.max(props.totalPages || 1, 1))
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+@media (max-width: 560px) {
+    .pagination-bar {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .page-info {
+        text-align: center;
+    }
+
+    .page-actions {
+        width: 100%;
+    }
+
+    .page-actions .btn-outline {
+        width: calc(50% - 4px);
+        min-height: 38px;
+    }
+}
 </style>

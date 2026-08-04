@@ -136,4 +136,29 @@ function goBack() {
     color: var(--error);
     font-weight: 800
 }
+
+@media (max-width: 760px) {
+    .page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .stock-search,
+    .heading-left {
+        width: 100%;
+    }
+
+    .stock-search input {
+        width: 100%;
+    }
+
+    .table-card {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        min-width: 720px;
+    }
+}
 </style>

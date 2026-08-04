@@ -367,6 +367,10 @@ async function handleDelete() {
     height: 36px;
 }
 
+.order-table-card .data-table {
+    min-width: 980px;
+}
+
 .data-table td {
     height: 56px;
 }

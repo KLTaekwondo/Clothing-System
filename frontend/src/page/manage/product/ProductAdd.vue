@@ -11,67 +11,143 @@
                     <div class="card-header">
                         <span class="card-title">基本信息</span>
                     </div>
-                    <form class="add-form" @submit.prevent="handleSubmit">
-                        <div class="form-row">
-                            <div class="form-group"><label>商品编码</label><input v-model="form.code" maxlength="20"
-                                                                                  required type="text"/></div>
-                            <div class="form-group"><label>商品名称</label><input v-model="form.name" maxlength="20"
-                                                                                  required type="text"/></div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group"><label>季节</label><select v-model="form.season" required>
-                                <option disabled value="">请选择</option>
-                                <option v-for="s in seasons" :key="s.value" :value="s.value">{{ s.label }}</option>
-                            </select></div>
-                            <div class="form-group"><label>类型</label><select v-model="form.type" required>
-                                <option disabled value="">请选择</option>
-                                <option v-for="opt in typeOptions" :key="opt.id" :value="opt.optionValue">
-                                    {{ opt.optionValue }}
-                                </option>
-                            </select></div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group"><label>种类</label><select v-model="form.category" required>
-                                <option disabled value="">请选择</option>
-                                <option v-for="opt in categoryOptions" :key="opt.id" :value="opt.optionValue">
-                                    {{ opt.optionValue }}
-                                </option>
-                            </select></div>
-                            <div class="form-group"><label>单位</label><select v-model="form.unit" required>
-                                <option disabled value="">请选择</option>
-                                <option v-for="opt in unitOptions" :key="opt.id" :value="opt.optionValue">
-                                    {{ opt.optionValue }}
-                                </option>
-                            </select></div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group"><label>年份</label><select v-model="form.year" required>
-                                <option disabled value="">请选择</option>
-                                <option v-for="opt in yearOptions" :key="opt.id" :value="opt.optionValue">
-                                    {{ opt.optionValue }}
-                                </option>
-                            </select></div>
-                            <div class="form-group"><label>是否特价</label>
-                                <div class="toggle-row">
-                                    <button :class="{ active: form.special }" class="toggle-btn" type="button"
-                                            @click="form.special = !form.special">{{ form.special ? '是' : '否' }}
-                                    </button>
+                    <form
+                        class="add-form"
+                        @submit.prevent="handleSubmit"
+                    >
+                        <div class="basic-info-layout">
+                            <div class="basic-info-column">
+                                <div class="info-section-title">关键信息</div>
+                                <div class="form-group">
+                                    <label>商品编码</label>
+                                    <input
+                                        v-model="form.code"
+                                        maxlength="20"
+                                        required
+                                        type="text"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label>商品名称</label>
+                                    <input
+                                        v-model="form.name"
+                                        maxlength="20"
+                                        required
+                                        type="text"
+                                    />
+                                </div>
+                                <div class="season-special-group">
+                                    <div class="season-section">
+                                        <label>季节</label>
+                                        <div class="season-options">
+                                            <button
+                                                v-for="season in seasons"
+                                                :key="season.value"
+                                                :aria-pressed="form.season === season.value"
+                                                :class="seasonClass(season)"
+                                                type="button"
+                                                @click="form.season = season.value"
+                                            >
+                                                {{ season.label }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="special-section">
+                                        <label>是否特价</label>
+                                        <button
+                                            :class="form.special ? 'special-active' : 'special-inactive'"
+                                            class="toggle-btn"
+                                            type="button"
+                                            @click="form.special = !form.special"
+                                        >
+                                            {{ form.special ? '是' : '否' }}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>进货价格</label>
+                                    <input
+                                        v-model.number="form.importPrice"
+                                        min="0"
+                                        required
+                                        step="0.01"
+                                        type="number"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label>销售价格</label>
+                                    <input
+                                        v-model.number="form.salePrice"
+                                        min="0"
+                                        required
+                                        step="0.01"
+                                        type="number"
+                                    />
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group"><label>面料组合</label><select v-model="form.composition" required>
-                                <option disabled value="">请选择</option>
-                                <option v-for="opt in compositionOptions" :key="opt.id" :value="opt.optionValue">
-                                    {{ opt.optionValue }}
-                                </option>
-                            </select></div>
-                            <div class="form-group"><label>进货价格</label><input v-model.number="form.importPrice"
-                                                                                  min="0" required step="0.01"
-                                                                                  type="number"/></div>
-                            <div class="form-group"><label>销售价格</label><input v-model.number="form.salePrice"
-                                                                                  min="0" required step="0.01"
-                                                                                  type="number"/></div>
+                            <div class="basic-info-column">
+                                <div class="info-section-title">选项信息</div>
+                                <div class="form-group">
+                                    <label>类型</label>
+                                    <OptionValuePicker
+                                        ref="typePicker"
+                                        v-model="form.type"
+                                        :disabled="optionLoading"
+                                        :options="typeOptions"
+                                        error-message="该类型不在选项管理中，请选择有效类型"
+                                        placeholder="输入类型关键词"
+                                        select-placeholder="选择类型"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label>种类</label>
+                                    <OptionValuePicker
+                                        ref="categoryPicker"
+                                        v-model="form.category"
+                                        :disabled="optionLoading"
+                                        :options="categoryOptions"
+                                        error-message="该种类不在选项管理中，请选择有效种类"
+                                        placeholder="输入种类关键词"
+                                        select-placeholder="选择种类"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label>单位</label>
+                                    <OptionValuePicker
+                                        ref="unitPicker"
+                                        v-model="form.unit"
+                                        :disabled="optionLoading"
+                                        :options="unitOptions"
+                                        error-message="该单位不在选项管理中，请选择有效单位"
+                                        placeholder="输入单位关键词"
+                                        select-placeholder="选择单位"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label>年份</label>
+                                    <OptionValuePicker
+                                        ref="yearPicker"
+                                        v-model="form.year"
+                                        :disabled="optionLoading"
+                                        :options="yearOptions"
+                                        error-message="该年份不在选项管理中，请选择有效年份"
+                                        placeholder="输入年份关键词"
+                                        select-placeholder="选择年份"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label>面料组合</label>
+                                    <OptionValuePicker
+                                        ref="compositionPicker"
+                                        v-model="form.composition"
+                                        :disabled="optionLoading"
+                                        :options="compositionOptions"
+                                        error-message="该面料组合不在选项管理中，请选择有效面料组合"
+                                        placeholder="输入面料组合关键词"
+                                        select-placeholder="选择面料组合"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -134,12 +210,25 @@ import productInterface from '../../../axios/interface/ProductInterface.js'
 import {SEASON_OPTIONS} from '../../../constants/season.js'
 import {OPTION_TYPE} from '../../../constants/optionType.js'
 import {useProductOptions} from './composables/useProductOptions.js'
+import OptionValuePicker from './components/OptionValuePicker.vue'
 
 const router = useRouter()
 const toast = useToastStore()
 
 const submitting = ref(false)
+const typePicker = ref(null)
+const categoryPicker = ref(null)
+const unitPicker = ref(null)
+const compositionPicker = ref(null)
+const yearPicker = ref(null)
 const seasons = SEASON_OPTIONS
+const seasonClassMap = {
+    SPRING: 'season-spring',
+    SUMMER: 'season-summer',
+    AUTUMN: 'season-autumn',
+    WINTER: 'season-winter',
+    ALL_SEASONS: 'season-all'
+}
 const {
     loading: optionLoading,
     typeOptions,
@@ -164,6 +253,14 @@ const form = ref({
     salePrice: '',
     special: false
 })
+
+function seasonClass(season) {
+    return {
+        'season-btn': true,
+        [seasonClassMap[season.value]]: true,
+        'season-active': form.value.season === season.value
+    }
+}
 
 // SKU 多选 tags（仅颜色+尺码）
 const skuOptionGroups = computed(() => [
@@ -225,8 +322,19 @@ const skuPreview = computed(() => {
 })
 
 async function handleSubmit() {
-    if (!form.value.code || !form.value.name || !form.value.season || !form.value.type || !form.value.category || !form.value.unit || !form.value.composition || !form.value.year || form.value.importPrice === '' || form.value.salePrice === '') {
-        toast.warning('请填写完整的商品信息');
+    if (!form.value.code || !form.value.name || !form.value.season || form.value.importPrice === '' || form.value.salePrice === '') {
+        toast.warning('请填写完整的商品信息')
+        return
+    }
+    const optionValidation = [
+        typePicker,
+        categoryPicker,
+        unitPicker,
+        compositionPicker,
+        yearPicker
+    ].map(picker => picker.value?.validate())
+    if (optionValidation.some(valid => !valid)) {
+        toast.warning('商品选项必须使用选项管理中的已有值')
         return
     }
     if (selectedCount.value === 0) {
@@ -313,9 +421,125 @@ function goBack() {
 }
 
 .add-form {
+    width: 100%;
+}
+
+.basic-info-layout {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+}
+
+.basic-info-column {
+    width: calc(50% - 14px);
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.basic-info-column + .basic-info-column {
+    padding-left: 28px;
+    border-left: 1px solid #e3efed;
+}
+
+.basic-info-column .form-group {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.info-section-title {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eaf2f0;
+    color: #315d59;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.season-special-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+}
+
+.season-section {
+    width: calc(100% - 78px);
+}
+
+.special-section {
+    width: 60px;
+}
+
+.season-section label,
+.special-section label {
+    display: block;
+    margin-bottom: 7px;
+    color: #496865;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.season-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.season-btn {
+    min-width: 64px;
+    height: 36px;
+    padding: 0 15px;
+    border: 1px solid #d5e3e0;
+    border-radius: 8px;
+    background: #fff;
+    color: #64807e;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.season-btn:hover {
+    border-color: #9ebbb6;
+    background: #f7fbfa;
+    color: #315d59;
+}
+
+.season-spring.season-active {
+    border-color: #69b77b;
+    background: #e4f5e6;
+    color: #28733b;
+    box-shadow: 0 0 0 3px rgba(105, 183, 123, 0.18), 0 5px 12px rgba(40, 115, 59, 0.12);
+}
+
+.season-summer.season-active {
+    border-color: #eea43e;
+    background: #ffedc2;
+    color: #9a4908;
+    box-shadow: 0 0 0 3px rgba(238, 164, 62, 0.18), 0 5px 12px rgba(154, 73, 8, 0.12);
+}
+
+.season-autumn.season-active {
+    border-color: #c99420;
+    background: #ffefaa;
+    color: #765006;
+    box-shadow: 0 0 0 3px rgba(201, 148, 32, 0.18), 0 5px 12px rgba(118, 80, 6, 0.12);
+}
+
+.season-winter.season-active {
+    border-color: #83b7db;
+    background: #edf8ff;
+    color: #31698f;
+    box-shadow: 0 0 0 3px rgba(131, 183, 219, 0.2), 0 5px 12px rgba(49, 105, 143, 0.12);
+}
+
+.season-all.season-active {
+    border-color: #7eb9af;
+    background: #e8f5f2;
+    color: #315d59;
+    box-shadow: 0 0 0 3px rgba(126, 185, 175, 0.18), 0 5px 12px rgba(49, 93, 89, 0.12);
+}
+
+.season-active {
+    transform: translateY(-1px);
 }
 
 .card-hint {
@@ -326,20 +550,35 @@ function goBack() {
 
 .toggle-btn {
     width: 60px;
-    height: 32px;
-    border-radius: 6px;
+    height: 36px;
+    border-radius: 8px;
     font-size: 13px;
-    font-weight: 600;
-    border: 1px solid var(--border);
-    background: #fff;
-    color: var(--text-secondary);
+    font-weight: 700;
     cursor: pointer;
 }
 
-.toggle-btn.active {
-    background: var(--primary-gradient);
-    color: #fff;
-    border-color: transparent;
+.toggle-btn.special-inactive {
+    border: 1px solid #ef9a9a;
+    background: #fff1f1;
+    color: #b42323;
+    box-shadow: 0 3px 8px rgba(180, 35, 35, 0.08);
+}
+
+.toggle-btn.special-inactive:hover {
+    border-color: #e56b6b;
+    background: #ffe5e5;
+}
+
+.toggle-btn.special-active {
+    border: 1px solid #69b77b;
+    background: #e4f5e6;
+    color: #28733b;
+    box-shadow: 0 3px 8px rgba(40, 115, 59, 0.1);
+}
+
+.toggle-btn.special-active:hover {
+    border-color: #48a460;
+    background: #d8f0dc;
 }
 
 .options-area {
@@ -446,12 +685,43 @@ function goBack() {
         flex-direction: column;
     }
 
-    .add-main, .add-side {
+    .add-main,
+    .add-side {
         width: 100%;
     }
 
     .add-side {
         position: static;
+    }
+}
+
+@media (max-width: 760px) {
+    .basic-info-layout {
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .basic-info-column {
+        width: 100%;
+    }
+
+    .basic-info-column + .basic-info-column {
+        padding-top: 22px;
+        padding-left: 0;
+        border-top: 1px solid #e3efed;
+        border-left: none;
+    }
+}
+@media (max-width: 560px) {
+    .season-special-group {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .season-section,
+    .special-section {
+        width: 100%;
     }
 }
 </style>

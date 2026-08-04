@@ -209,4 +209,27 @@ function goBack() {
 .data-table td {
     height: 52px;
 }
+
+@media (max-width: 900px) {
+    .page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .card {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        min-width: 820px;
+    }
+}
+
+@media (max-width: 560px) {
+    .info-card {
+        width: 100%;
+        min-width: 0;
+    }
+}
 </style>

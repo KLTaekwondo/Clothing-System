@@ -2,8 +2,8 @@
     <div class="stock-manage">
         <div class="page-heading">
             <div>
-                <h2 class="page-title">库存管理</h2>
-                <p class="page-desc">查询商品后添加到下方表单，可同时维护多个商品库存</p>
+                <h2 class="page-title">人工库存调整</h2>
+                <p class="page-desc">直接调整指定仓库中商品 SKU 的库存数量</p>
             </div>
         </div>
 
@@ -44,15 +44,26 @@
         </div>
 
         <div v-if="formList.length > 0" class="stock-form-list">
+            <div class="product-list-header">
+                <span class="product-header-name">商品名称</span>
+                <span class="product-header-code">商品编码</span>
+                <span class="product-header-price">商品价格</span>
+                <span class="product-header-special">是否特价</span>
+                <span class="product-header-sku">SKU 数量</span>
+                <span class="product-header-action">操作</span>
+            </div>
             <div v-for="(item, index) in formList" :key="item.key" class="stock-product-card card">
                 <div class="product-form-header" @click="item.expanded = !item.expanded">
-                    <div class="product-summary">
+                    <div class="product-name-cell">
                         <span class="product-mark"><IconGraphic name="product"/></span>
-                        <div>
-                            <strong class="product-name">{{ item.product.name }}</strong>
-                            <span class="product-code">{{ item.product.code }}</span>
-                        </div>
+                        <strong class="product-name">{{ item.product.name }}</strong>
                     </div>
+                    <code class="product-code">{{ item.product.code }}</code>
+                    <span class="product-price">¥{{ item.product.salePrice ?? '0.00' }}</span>
+                    <span :class="item.product.special ? 'special-status' : 'regular-status'" class="product-special">
+                        {{ item.product.special ? '是' : '否' }}
+                    </span>
+                    <span class="product-sku-count">{{ item.skus.length }} 个</span>
                     <div class="product-form-actions">
                         <span v-if="item.hasChanges" class="changed-hint">有修改</span>
                         <button class="btn-danger btn-sm" @click.stop="removeItem(index)">移除</button>
@@ -60,30 +71,33 @@
                     </div>
                 </div>
 
-                <div v-show="item.expanded" class="matrix-wrapper">
-                    <div v-if="item.rowHeaders.length === 0" class="empty-state compact-empty">
-                        <div class="empty-text">该商品无规格数据</div>
+                <div v-show="item.expanded" class="sku-list-wrapper">
+                    <div v-if="item.skus.length === 0" class="empty-state compact-empty">
+                        <div class="empty-text">该商品暂无可调整的 SKU</div>
                     </div>
-                    <div v-else class="table-wrap">
-                        <table class="matrix-table">
-                            <thead>
-                            <tr>
-                                <th class="corner-cell">{{ item.rowLabel }}</th>
-                                <th v-for="col in item.colHeaders" :key="col" class="col-header">{{ col }}</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr v-for="(row, ri) in item.rowHeaders" :key="ri">
-                                <td class="row-header">{{ row }}</td>
-                                <td v-for="(col, ci) in item.colHeaders" :key="ci" class="cell-input">
-                                    <input v-model.number="item.cells[ri][ci].stock"
-                                           :class="{ changed: item.cells[ri][ci].changed }" class="stock-input"
-                                           min="0" type="number"
-                                           @input="item.cells[ri][ci].changed = true; markChanged(item)"/>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                    <div v-else class="sku-list">
+                        <div class="sku-list-header">
+                            <span class="sku-header-name">SKU 名称</span>
+                            <span class="sku-header-code">SKU 编码</span>
+                            <span class="sku-header-spec">规格</span>
+                            <span class="sku-header-current">当前库存</span>
+                            <span class="sku-header-target">调整后库存</span>
+                        </div>
+                        <div v-for="sku in item.skus" :key="sku.skuId" class="sku-row">
+                            <strong class="sku-name">{{ sku.skuName || sku.skuCode }}</strong>
+                            <code class="sku-code">{{ sku.skuCode }}</code>
+                            <span class="sku-spec">{{ formatSpec(sku.spec) }}</span>
+                            <span class="current-stock">{{ sku.originalStock }}</span>
+                            <input
+                                v-model.number="sku.stock"
+                                :class="{ changed: sku.changed }"
+                                class="stock-input"
+                                min="0"
+                                type="number"
+                                @input="sku.changed = true; markChanged(item)"
+                                @keydown.enter.prevent="focusNextSku($event)"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -99,12 +113,6 @@ import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
-import {
-    buildSkuMatrix,
-    createStockBySpec,
-    fillMatrixFromStock,
-    parseSkuSpecs
-} from './utils/skuMatrix.js'
 
 const toast = useToastStore()
 const warehouses = ref([])
@@ -172,46 +180,85 @@ async function searchProduct() {
 }
 
 function buildStockBlock(product, skuList) {
-    const specs = parseSkuSpecs(skuList)
-    const matrix = buildSkuMatrix(specs, '库存', sku => ({
-        stock: 0,
-        changed: false,
+    const skuRecords = skuList.map(sku => ({
+        skuId: sku.id,
+        skuCode: sku.code,
+        skuName: sku.name,
+        spec: parseSpec(sku.spec),
         stockId: null,
-        skuSpec: sku?.parsedSpec || null
+        originalStock: 0,
+        stock: 0,
+        changed: false
     }))
 
-    loadStock(product.id, matrix)
+    loadStock(product.id, skuRecords)
 
     return {
         key: ++keyCounter,
         product,
         expanded: true,
-        rowLabel: matrix.rowLabel,
-        rowHeaders: matrix.rowHeaders,
-        colHeaders: matrix.colHeaders,
-        cells: matrix.cells,
+        skus: skuRecords,
         hasChanges: false
     }
 }
 
-async function loadStock(productId, matrix) {
+async function loadStock(productId, skuRecords) {
     try {
         const records = await wareHouseStockInterface.searchStock(warehouseId.value, productId)
         if (!Array.isArray(records)) return
-        const stockBySpec = createStockBySpec(records, record => ({
-            stockId: record.id,
-            stock: record.stock ?? 0
-        }))
-        fillMatrixFromStock(matrix, stockBySpec, (cell, stock) => {
-            cell.stock = stock.stock
-            cell.stockId = stock.stockId
+        records.forEach(record => {
+            const sku = skuRecords.find(item => sameSpec(item.spec, record.spec))
+            if (!sku) return
+            sku.stockId = record.id
+            sku.originalStock = record.stock ?? 0
+            sku.stock = record.stock ?? 0
         })
     } catch {
     }
 }
 
 function markChanged(item) {
-    item.hasChanges = item.cells.some(row => row.some(c => c.changed))
+    item.hasChanges = item.skus.some(sku => sku.changed)
+}
+
+function focusNextSku(event) {
+    const currentInput = event.currentTarget
+    const wrapper = currentInput.closest('.sku-list-wrapper')
+    if (!wrapper) return
+    const inputs = [...wrapper.querySelectorAll('.stock-input')]
+    const currentIndex = inputs.indexOf(currentInput)
+    const nextInput = inputs[currentIndex + 1]
+    if (nextInput) {
+        nextInput.focus()
+        nextInput.select()
+    }
+}
+
+function parseSpec(spec) {
+    if (!spec) return {}
+    if (typeof spec === 'object') return spec
+    try {
+        return JSON.parse(spec)
+    } catch {
+        return {}
+    }
+}
+
+function sameSpec(first, second) {
+    return JSON.stringify(sortSpec(first)) === JSON.stringify(sortSpec(second))
+}
+
+function sortSpec(spec) {
+    return Object.keys(parseSpec(spec)).sort().reduce((result, key) => {
+        result[key] = parseSpec(spec)[key]
+        return result
+    }, {})
+}
+
+function formatSpec(spec) {
+    const entries = Object.entries(parseSpec(spec))
+    if (!entries.length) return '无规格'
+    return entries.map(([key, value]) => `${key}：${value}`).join(' / ')
 }
 
 async function saveAll() {
@@ -219,11 +266,11 @@ async function saveAll() {
     try {
         const allUpdates = []
         formList.value.forEach(item => {
-            item.cells.forEach(row => row.forEach(cell => {
-                if (cell.changed && cell.stockId != null) {
-                    allUpdates.push({stockId: cell.stockId, stock: cell.stock})
+            item.skus.forEach(sku => {
+                if (sku.changed && sku.stockId != null) {
+                    allUpdates.push({stockId: sku.stockId, stock: sku.stock})
                 }
-            }))
+            })
         })
         if (!allUpdates.length) {
             toast.info('没有需要保存的修改');
@@ -232,9 +279,10 @@ async function saveAll() {
         await wareHouseStockInterface.batchUpdateStock(allUpdates)
         // 后端已返回提示
         formList.value.forEach(item => {
-            item.cells.forEach(row => row.forEach(c => {
-                c.changed = false
-            }))
+            item.skus.forEach(sku => {
+                sku.changed = false
+                sku.originalStock = sku.stock
+            })
             item.hasChanges = false
         })
     } catch {
@@ -362,49 +410,155 @@ function handleBeforeUnload(event) {
     gap: 12px;
 }
 
-.stock-product-card {
-    padding: 0;
-    overflow: hidden;
-    border-radius: 16px;
+.product-list-header,
+.product-form-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+.product-list-header {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    color: #47615e;
+    font-size: 12px;
+    font-weight: 700;
+    background: #dcebe8;
+    border: 1px solid #c5ddd8;
+    border-radius: 9px;
+    box-shadow: 0 2px 5px rgba(22, 83, 78, 0.1);
 }
 
 .product-form-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
+    padding-top: 12px;
+    padding-bottom: 12px;
     cursor: pointer;
     user-select: none;
     transition: background 0.2s;
     border-bottom: 1px solid var(--border-light);
 }
 
+.product-header-name,
+.product-name-cell {
+    width: 200px;
+}
+
+.product-header-code,
+.product-code {
+    width: calc(100% - 648px);
+}
+
+.product-header-price,
+.product-header-special,
+.product-header-sku,
+.product-price,
+.product-special,
+.product-sku-count {
+    width: 88px;
+    text-align: center;
+}
+
+.product-header-action,
+.product-form-actions {
+    width: 124px;
+    text-align: center;
+}
+
+.product-header-name,
+.product-header-code,
+.product-header-price,
+.product-header-special,
+.product-header-sku,
+.product-header-action,
+.product-name-cell,
+.product-code,
+.product-price,
+.product-special,
+.product-sku-count,
+.product-form-actions {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 0 10px;
+    border-right: 1px solid #b8d2cd;
+}
+
+.product-header-action,
+.product-form-actions {
+    border-right: none;
+}
+
+.stock-product-card {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
 .product-form-header:hover {
     background: #f4fbfa;
 }
 
-.product-summary {
+.product-name-cell {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .product-mark {
-    font-size: 22px;
+    font-size: 20px;
+    flex-shrink: 0;
 }
 
 .product-name {
-    font-size: 15px;
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .product-code {
-    font-size: 12px;
+    overflow: hidden;
+    color: var(--primary);
+    font-size: 14px;
+    font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-price {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.product-sku-count {
     color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.product-special {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.special-status {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.regular-status {
+    background: #f1f5f9;
+    color: #64748b;
 }
 
 .product-form-actions {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
 }
 
@@ -421,65 +575,136 @@ function handleBeforeUnload(event) {
     font-weight: 600;
 }
 
-.matrix-wrapper {
-    padding: 12px 20px 16px;
+.sku-list-wrapper {
+    padding: 10px 14px 12px;
+    background: #f8fcfb;
+    box-shadow: inset 0 3px 8px rgba(22, 83, 78, 0.06);
 }
 
-.table-wrap {
-    min-width: 480px;
-    overflow-x: auto;
+.sku-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.matrix-table {
-    width: 100%;
-    border-collapse: collapse;
+.sku-list-header,
+.sku-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-right: 12px;
+    padding-left: 12px;
 }
 
-.matrix-table th {
-    padding: 8px 14px;
-    text-align: center;
+.sku-list-header {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    color: #47615e;
+    font-size: 12px;
     font-weight: 700;
-    color: var(--text-secondary);
-    background: #fafafa;
-    border-bottom: 2px solid #dceae7;
+    background: #dcebe8;
+    border: 1px solid #c5ddd8;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(22, 83, 78, 0.1);
+}
+
+.sku-row {
+    padding-top: 9px;
+    padding-bottom: 9px;
+    border: 1px solid #e1eeeb;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(22, 83, 78, 0.07);
+}
+
+.sku-header-name,
+.sku-name {
+    width: 150px;
+}
+
+.sku-header-code,
+.sku-code {
+    width: 170px;
+}
+
+.sku-header-spec,
+.sku-spec {
+    width: calc(100% - 542px);
+}
+
+.sku-header-current,
+.current-stock {
+    width: 80px;
+    text-align: center;
+}
+
+.sku-header-target,
+.stock-input {
+    width: 94px;
+}
+
+.sku-header-name,
+.sku-header-code,
+.sku-header-spec,
+.sku-header-current,
+.sku-header-target,
+.sku-name,
+.sku-code,
+.sku-spec,
+.current-stock {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 0 8px;
+    border-right: 1px solid #c5ddd8;
+}
+
+.sku-header-target,
+.stock-input {
+    text-align: center;
+}
+
+.sku-header-target,
+.stock-input {
+    border-right: none;
+}
+
+.sku-name,
+.sku-code,
+.sku-spec {
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.corner-cell {
-    text-align: left;
-    min-width: 90px;
+.sku-name {
+    font-size: 13px;
 }
 
-.col-header {
-    min-width: 82px;
+.sku-code {
+    color: var(--primary);
+    font-size: 12px;
 }
 
-.matrix-table td {
-    padding: 6px;
-    border-bottom: 1px solid #edf4f2;
-    text-align: center;
+.sku-spec {
+    color: var(--text-secondary);
+    font-size: 12px;
 }
 
-.row-header {
-    font-weight: 700;
-    color: var(--text);
-    text-align: left;
-    padding: 6px 14px;
-}
-
-.cell-input {
-    padding: 3px 5px !important;
+.current-stock {
+    color: var(--text-secondary);
+    font-size: 12px;
 }
 
 .stock-input {
-    width: 72px;
-    height: 36px;
-    padding: 0;
+    width: 94px;
+    height: 32px;
+    box-sizing: border-box;
+    padding: 0 6px;
     border: 1px solid #dceae7;
-    border-radius: 8px;
+    border-radius: 7px;
     text-align: center;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 14px;
     background: #fbfefd;
     transition: border-color 0.2s, background 0.2s;
 }
@@ -494,7 +719,99 @@ function handleBeforeUnload(event) {
     border-color: #f59e0b;
 }
 
-.matrix-table tbody tr:hover td {
-    background: #f4fbfa;
+@media (max-width: 900px) {
+    .search-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .field,
+    .wh-select,
+    .search-row input,
+    .search-button {
+        width: 100%;
+    }
+
+    .product-form-header {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .product-name-cell,
+    .product-code,
+    .product-price,
+    .product-special,
+    .product-sku-count,
+    .product-form-actions {
+        width: auto;
+        padding: 0;
+        border-right: none;
+    }
+
+    .product-name-cell {
+        width: 100%;
+    }
+
+    .product-form-actions {
+        justify-content: flex-start;
+    }
+
+    .product-list-header {
+        display: none;
+    }
+
+    .sku-list-header {
+        display: none;
+    }
+
+    .sku-row {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .sku-name,
+    .sku-code,
+    .sku-spec,
+    .current-stock,
+    .stock-input {
+        width: auto;
+        padding: 0;
+        border-right: none;
+    }
+
+    .sku-name {
+        width: 100%;
+    }
+
+    .current-stock {
+        width: auto;
+        text-align: left;
+    }
+
+    .stock-input {
+        width: 94px;
+    }
+}
+
+@media (max-width: 560px) {
+    .search-panel,
+    .sku-list-wrapper {
+        padding: 14px;
+    }
+
+    .stock-form-actions-bar {
+        flex-direction: column;
+    }
+
+    .stock-form-actions-bar button {
+        width: 100%;
+    }
+
+    .sku-info {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
 }
 </style>

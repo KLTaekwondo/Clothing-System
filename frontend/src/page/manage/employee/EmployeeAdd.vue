@@ -113,4 +113,19 @@ const goBack = () => {
     padding-top: 20px;
     border-top: 1px solid var(--border-light);
 }
+
+@media (max-width: 640px) {
+    .standalone-form-card {
+        width: 100%;
+        padding: 18px;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}
 </style>

@@ -147,7 +147,7 @@ const ManageChildren = [
         path: 'stock',
         name: 'StockManage',
         component: () => import('../page/manage/stock/StockManage.vue'),
-        meta: {title: '库存管理', icon: 'stock'}
+        meta: {title: '人工库存调整', icon: 'stock'}
     },
     {
         path: 'import-order',

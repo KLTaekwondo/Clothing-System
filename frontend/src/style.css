@@ -646,6 +646,183 @@ input:focus, select:focus, textarea:focus {
     border-color: transparent;
 }
 
+/* ── 管理后台表单控件 ── */
+.manage-container input,
+.manage-container select,
+.manage-container textarea {
+    border-color: #c8ded9;
+    background-color: #f2f8f7;
+    color: #173b3a;
+    box-shadow: inset 0 1px 2px rgba(22, 83, 78, 0.05);
+}
+
+.manage-container input:hover:not(:disabled):not([readonly]),
+.manage-container select:hover:not(:disabled),
+.manage-container textarea:hover:not(:disabled):not([readonly]) {
+    border-color: #91cec4;
+    background-color: #f7fbfa;
+}
+
+.manage-container input:focus,
+.manage-container select:focus,
+.manage-container textarea:focus {
+    border-color: #14b8a6;
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.12), 0 5px 14px rgba(13, 148, 136, 0.08);
+}
+
+.manage-container input::placeholder,
+.manage-container textarea::placeholder {
+    color: #829895;
+}
+
+.manage-container input:disabled,
+.manage-container select:disabled,
+.manage-container textarea:disabled,
+.manage-container input[readonly],
+.manage-container textarea[readonly] {
+    border-color: #d7e5e2;
+    background-color: #eaf1ef;
+    color: #718784;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.manage-container .form-group label {
+    margin-bottom: 7px;
+    color: #496865;
+    font-weight: 700;
+}
+
+.manage-container textarea {
+    min-height: 100px;
+    line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+    .manage-container .page-heading,
+    .manage-container .page-top {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .manage-container .page-heading > .btn-primary,
+    .manage-container .page-heading > .btn-outline,
+    .manage-container .page-top > .btn-primary,
+    .manage-container .page-top > .btn-outline {
+        min-height: 40px;
+    }
+
+    .manage-container .card-header,
+    .manage-container .toolbar,
+    .manage-container .table-toolbar {
+        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .manage-container .search-bar {
+        width: 100%;
+    }
+
+    .manage-container .search-bar input,
+    .manage-container .search-bar select {
+        width: 100%;
+    }
+
+    .manage-container .data-table {
+        white-space: nowrap;
+    }
+
+    .manage-container .card:has(> .data-table) {
+        overflow-x: auto;
+    }
+
+    .manage-container .modal-content {
+        width: calc(100vw - 32px);
+        min-width: 0 !important;
+        max-width: 560px;
+        max-height: calc(100dvh - 32px);
+    }
+
+    .manage-container .form-actions {
+        flex-wrap: wrap;
+    }
+
+    .manage-container .order-stats,
+    .manage-container .record-stats,
+    .manage-container .stock-check-stats,
+    .manage-container .summary-cards,
+    .manage-container .stats-row {
+        flex-wrap: wrap;
+    }
+
+    .manage-container .order-stat-card,
+    .manage-container .record-stat-card,
+    .manage-container .stock-check-stat,
+    .manage-container .summary-card,
+    .manage-container .stat-card {
+        width: calc(50% - 7px);
+        min-width: 180px;
+    }
+
+    .manage-container .order-table-card,
+    .manage-container .record-table-card,
+    .manage-container .stock-check-table-card,
+    .manage-container .table-card,
+    .manage-container .matrix-wrapper,
+    .manage-container .items-table-wrapper {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .manage-container .detail-tabs {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .manage-container .detail-tab {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .manage-container .info-grid,
+    .manage-container .detail-grid,
+    .manage-container .detail-list,
+    .manage-container .info-list {
+        flex-wrap: wrap;
+    }
+
+    .manage-container .info-card,
+    .manage-container .detail-card {
+        width: calc(50% - 7px);
+        min-width: 190px;
+    }
+
+    .manage-container .form-card,
+    .manage-container .standalone-form-card {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .manage-container .add-layout,
+    .manage-container .stock-layout,
+    .manage-container .transfer-layout {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .manage-container .add-main,
+    .manage-container .add-side,
+    .manage-container .stock-main,
+    .manage-container .stock-side,
+    .manage-container .transfer-main,
+    .manage-container .transfer-side {
+        width: 100%;
+    }
+}
+
 @media (max-width: 760px) {
     .content-body {
         padding: 18px 14px;
@@ -654,5 +831,128 @@ input:focus, select:focus, textarea:focus {
     .form-row {
         flex-direction: column;
         gap: 0;
+    }
+
+    .manage-container input,
+    .manage-container select {
+        min-height: 46px;
+        font-size: 16px;
+    }
+
+    .manage-container textarea {
+        min-height: 110px;
+        font-size: 16px;
+    }
+
+    .manage-container .form-group {
+        margin-bottom: 18px;
+    }
+
+    .manage-container .form-group label {
+        margin-bottom: 8px;
+    }
+
+    .manage-container .page-title {
+        font-size: 23px;
+    }
+
+    .manage-container .card {
+        padding: 16px;
+    }
+
+    .manage-container .heading-left {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .manage-container .heading-left > div {
+        min-width: 0;
+    }
+
+    .manage-container .filter-tabs {
+        max-width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .manage-container .order-stat-card,
+    .manage-container .record-stat-card,
+    .manage-container .stock-check-stat,
+    .manage-container .summary-card,
+    .manage-container .stat-card {
+        width: calc(50% - 6px);
+        min-width: 145px;
+    }
+
+    .manage-container .info-card,
+    .manage-container .detail-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .manage-container .actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 560px) {
+    .manage-container .page-heading,
+    .manage-container .page-top {
+        margin-bottom: 18px;
+    }
+
+    .manage-container .page-desc {
+        line-height: 1.6;
+    }
+
+    .manage-container .card {
+        padding: 14px;
+        border-radius: 13px;
+    }
+
+    .manage-container .form-actions,
+    .manage-container .modal-footer {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .manage-container .form-actions button,
+    .manage-container .form-actions a,
+    .manage-container .modal-footer button {
+        width: 100%;
+        min-height: 42px;
+    }
+
+    .manage-container .modal-overlay {
+        padding: 10px;
+    }
+
+    .manage-container .modal-content {
+        width: 100%;
+        max-height: calc(100dvh - 20px);
+    }
+
+    .manage-container .modal-body {
+        padding: 16px;
+    }
+
+    .manage-container .modal-footer {
+        padding: 12px 16px 16px;
+    }
+
+    .manage-container .order-stat-card,
+    .manage-container .record-stat-card,
+    .manage-container .stock-check-stat,
+    .manage-container .summary-card,
+    .manage-container .stat-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .manage-container .table-toolbar input,
+    .manage-container .table-toolbar select,
+    .manage-container .toolbar input,
+    .manage-container .toolbar select {
+        width: 100%;
     }
 }
