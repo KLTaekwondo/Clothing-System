@@ -79,6 +79,11 @@
                     <td>
                         <div class="actions">
                             <router-link :to="`/manage/import-order/${item.id}`" class="btn-outline btn-sm">详情</router-link>
+                            <router-link
+                                v-if="item.status === AUDIT_STATUS.DRAFT"
+                                :to="`/manage/import-order/${item.id}/edit`"
+                                class="btn-outline btn-sm"
+                            >编辑</router-link>
                             <button v-if="item.status === AUDIT_STATUS.DRAFT" class="btn-primary btn-sm" @click="handleCheck(item)">提交</button>
                             <button v-if="item.status === AUDIT_STATUS.DRAFT" class="btn-danger btn-sm" @click="confirmDelete(item)">删除</button>
                             <button v-if="item.status === AUDIT_STATUS.CHECKING" class="btn-primary btn-sm" @click="handleApprove(item)">通过</button>

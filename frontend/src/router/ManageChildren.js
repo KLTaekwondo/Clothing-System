@@ -138,6 +138,12 @@ const ManageChildren = [
         meta: {title: '新建盘点单', icon: 'stock'}
     },
     {
+        path: 'stock-check/:id/edit',
+        name: 'StockCheckEdit',
+        component: () => import('../page/manage/stockCheck/StockCheckEdit.vue'),
+        meta: {title: '编辑盘点草稿', icon: 'stock'}
+    },
+    {
         path: 'stock-check/:id',
         name: 'StockCheckDetail',
         component: () => import('../page/manage/stockCheck/StockCheckDetail.vue'),
@@ -160,6 +166,12 @@ const ManageChildren = [
         name: 'ImportOrderAdd',
         component: () => import('../page/manage/importOrder/ImportOrderAdd.vue'),
         meta: {title: '新建采购单', icon: 'order'}
+    },
+    {
+        path: 'import-order/:id/edit',
+        name: 'ImportOrderEdit',
+        component: () => import('../page/manage/importOrder/ImportOrderEdit.vue'),
+        meta: {title: '编辑采购草稿', icon: 'order'}
     },
     {
         path: 'import-order/:id',

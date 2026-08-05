@@ -122,6 +122,11 @@
                                 :to="`/manage/stock-check/${item.id}`"
                                 class="btn-outline"
                             >详情</router-link>
+                            <router-link
+                                v-if="item.status === AUDIT_STATUS.DRAFT"
+                                :to="`/manage/stock-check/${item.id}/edit`"
+                                class="btn-outline"
+                            >编辑</router-link>
                             <button
                                 v-if="item.status === AUDIT_STATUS.DRAFT"
                                 class="btn-primary"

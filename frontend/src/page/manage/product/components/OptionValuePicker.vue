@@ -9,6 +9,7 @@
                 type="text"
                 @blur="handleBlur"
                 @input="handleInput"
+                @keydown.enter.prevent="handleEnter"
             />
             <select
                 :disabled="disabled || options.length === 0"
@@ -16,7 +17,11 @@
                 class="picker-select"
                 @change="handleSelect"
             >
-                <option value="">{{ selectPlaceholder }}</option>
+                <option
+                    class="picker-placeholder"
+                    disabled
+                    value=""
+                >{{ selectPlaceholder }}</option>
                 <option
                     v-for="option in filteredOptions"
                     :key="option.id"
@@ -106,6 +111,12 @@ function handleSelect(event) {
     emit('update:modelValue', event.target.value)
 }
 
+function handleEnter() {
+    touched.value = true
+    const option = matchedOption.value || filteredOptions.value[0]
+    if (option) emit('update:modelValue', option.optionValue)
+}
+
 function handleBlur() {
     touched.value = true
     if (matchedOption.value && props.modelValue !== matchedOption.value.optionValue) {
@@ -163,7 +174,7 @@ defineExpose({validate})
 .picker-controls .picker-input-error,
 .picker-controls-error .picker-input,
 .picker-controls-error .picker-input-error {
-    width: 62%;
+    width: 55%;
     border: none;
     border-radius: 0;
     background: transparent;
@@ -181,19 +192,56 @@ defineExpose({validate})
 
 .picker-controls .picker-select,
 .picker-controls-error .picker-select {
-    width: 38%;
+    width: 45%;
+    padding: 0 32px 0 14px;
     border: none;
     border-left: 1px solid #d7e5e2;
     border-radius: 0;
-    background-color: rgba(255, 255, 255, 0.45);
+    color: #47615e;
+    background-color: rgba(255, 255, 255, 0.58);
+    background-image: linear-gradient(45deg, transparent 50%, #64807e 50%), linear-gradient(135deg, #64807e 50%, transparent 50%);
+    background-position: calc(100% - 18px) 17px, calc(100% - 13px) 17px;
+    background-repeat: no-repeat;
+    background-size: 5px 5px, 5px 5px;
     box-shadow: none;
+    cursor: pointer;
+    appearance: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.picker-controls .picker-select:hover,
+.picker-controls-error .picker-select:hover {
+    color: var(--primary);
+    background-color: rgba(255, 255, 255, 0.86);
 }
 
 .picker-controls .picker-select:focus,
 .picker-controls-error .picker-select:focus {
     border-color: #d7e5e2;
-    background-color: rgba(255, 255, 255, 0.7);
+    color: var(--primary);
+    background-color: rgba(255, 255, 255, 0.92);
     box-shadow: none;
+    outline: none;
+}
+
+.picker-controls .picker-select option,
+.picker-controls-error .picker-select option {
+    padding: 10px 12px;
+    color: #47615e;
+    background: #ffffff;
+    font-size: 13px;
+}
+
+.picker-controls .picker-select option:checked,
+.picker-controls-error .picker-select option:checked {
+    color: #0f766e;
+    background: #dff5f1;
+}
+
+.picker-controls .picker-select .picker-placeholder,
+.picker-controls-error .picker-select .picker-placeholder {
+    color: #829895;
+    background: #f2f8f7;
 }
 
 .picker-error,
@@ -228,8 +276,10 @@ defineExpose({validate})
 
     .picker-controls .picker-select,
     .picker-controls-error .picker-select {
+        padding: 0 14px;
         border-left: none;
         border-top: 1px solid #d7e5e2;
+        background-position: calc(100% - 16px) 17px, calc(100% - 11px) 17px;
     }
 }
 </style>

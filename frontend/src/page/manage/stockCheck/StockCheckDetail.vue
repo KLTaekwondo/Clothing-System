@@ -18,12 +18,11 @@
                 v-if="checkOrder"
                 class="heading-actions"
             >
-                <button
+                <router-link
                     v-if="isDraft"
-                    :disabled="saving || !warehouseId"
+                    :to="`/manage/stock-check/${checkOrder.id}/edit`"
                     class="btn-outline"
-                    @click="handleUpdate"
-                >{{ saving ? '保存中...' : '保存修改' }}</button>
+                >编辑草稿</router-link>
                 <button
                     v-if="isDraft"
                     :disabled="submitting"
@@ -93,19 +92,7 @@
 
             <div class="remark-card">
                 <label>备注</label>
-                <input
-                    v-if="isDraft"
-                    v-model="remark"
-                    maxlength="100"
-                    placeholder="不超过 100 字"
-                    type="text"
-                    @input="dirty = true"
-                />
-                <strong v-else>{{ checkOrder.remark || '-' }}</strong>
-                <span
-                    v-if="isDraft && !warehouseId"
-                    class="warehouse-warning"
-                >未能匹配仓库编号，当前草稿无法保存修改</span>
+                <strong>{{ checkOrder.remark || '-' }}</strong>
             </div>
 
             <div class="detail-card">
@@ -148,16 +135,7 @@
                         </td>
                         <td>{{ item.systemQuantity ?? 0 }}</td>
                         <td>
-                            <input
-                                v-if="isDraft"
-                                v-model.number="item.actualQuantity"
-                                class="quantity-input"
-                                min="0"
-                                step="1"
-                                type="number"
-                                @input="normalizeQuantity(item)"
-                            />
-                            <strong v-else>{{ item.actualQuantity ?? 0 }}</strong>
+                            <strong>{{ item.actualQuantity ?? 0 }}</strong>
                         </td>
                         <td>
                             <strong :class="diffClass(item)">{{ formatDiff(getDiff(item)) }}</strong>
@@ -171,11 +149,10 @@
 </template>
 
 <script setup>
-import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
-import {onBeforeRouteLeave, useRoute, useRouter} from 'vue-router'
+import {computed, onMounted, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import stockCheckInterface from '../../../axios/interface/StockCheckInterface.js'
-import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import {AUDIT_STATUS, AUDIT_STATUS_LABELS} from '../../../constants/auditStatus.js'
 
 const route = useRoute()
@@ -184,49 +161,24 @@ const toast = useToastStore()
 const statusLabels = AUDIT_STATUS_LABELS
 const checkOrder = ref(null)
 const items = ref([])
-const warehouses = ref([])
-const warehouseId = ref(null)
-const remark = ref('')
 const loading = ref(true)
-const saving = ref(false)
 const submitting = ref(false)
 const deleting = ref(false)
-const dirty = ref(false)
 
 const isDraft = computed(() => checkOrder.value?.status === AUDIT_STATUS.DRAFT)
 const isChecking = computed(() => checkOrder.value?.status === AUDIT_STATUS.CHECKING)
 const differenceCount = computed(() => items.value.filter(item => getDiff(item) !== 0).length)
 
 onMounted(async () => {
-    window.addEventListener('beforeunload', handleBeforeUnload)
     try {
         const detail = await stockCheckInterface.search(route.params.id)
         checkOrder.value = detail
         items.value = (detail.stockCheckItems || []).map(item => ({...item}))
-        remark.value = detail.remark || ''
-        if (detail.status === AUDIT_STATUS.DRAFT) {
-            try {
-                warehouses.value = await wareHouseInterface.searchList()
-                warehouseId.value = warehouses.value.find(item => item.code === detail.wareHouseCode)?.id || null
-            } catch {
-                warehouses.value = []
-                warehouseId.value = null
-            }
-        }
     } catch {
         checkOrder.value = null
     } finally {
         loading.value = false
     }
-})
-
-onBeforeUnmount(() => {
-    window.removeEventListener('beforeunload', handleBeforeUnload)
-})
-
-onBeforeRouteLeave(() => {
-    if (!dirty.value) return true
-    return window.confirm('当前盘点修改尚未保存，确定要离开吗？')
 })
 
 function statusClass(status) {
@@ -253,45 +205,7 @@ function formatDiff(value) {
     return String(value)
 }
 
-function normalizeQuantity(item) {
-    const value = Number(item.actualQuantity)
-    item.actualQuantity = Number.isInteger(value) && value >= 0 ? value : 0
-    dirty.value = true
-}
-
-function buildDto() {
-    return {
-        wareHouseId: Number(warehouseId.value),
-        remark: remark.value.trim(),
-        stockCheckItems: items.value.map(item => ({
-            skuCode: item.skuCode,
-            actualQuantity: Number(item.actualQuantity)
-        }))
-    }
-}
-
-async function handleUpdate() {
-    if (!warehouseId.value) {
-        toast.warning('未能匹配盘点仓库，无法保存修改')
-        return
-    }
-    saving.value = true
-    try {
-        await stockCheckInterface.update(checkOrder.value.id, buildDto())
-        checkOrder.value.remark = remark.value.trim()
-        dirty.value = false
-        toast.success('盘点单草稿已更新')
-    } catch {
-    } finally {
-        saving.value = false
-    }
-}
-
 async function handleCheck() {
-    if (dirty.value) {
-        toast.warning('请先保存当前修改，再提交审核')
-        return
-    }
     submitting.value = true
     try {
         await stockCheckInterface.check(checkOrder.value.id)
@@ -326,19 +240,12 @@ async function handleDelete() {
     deleting.value = true
     try {
         await stockCheckInterface.hardDelete(checkOrder.value.id)
-        dirty.value = false
         toast.success('盘点单已删除')
         await router.push('/manage/stock-check')
     } catch {
     } finally {
         deleting.value = false
     }
-}
-
-function handleBeforeUnload(event) {
-    if (!dirty.value) return
-    event.preventDefault()
-    event.returnValue = ''
 }
 
 function goBack() {
@@ -459,20 +366,6 @@ function goBack() {
     font-weight: 700;
 }
 
-.remark-card input {
-    width: 55%;
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid #dceae7;
-    border-radius: 10px;
-    background: #fbfefd;
-}
-
-.warehouse-warning {
-    color: #dc2626;
-    font-size: 12px;
-}
-
 .card-header {
     display: flex;
     align-items: center;
@@ -497,17 +390,6 @@ function goBack() {
     font-size: 12px;
 }
 
-.quantity-input {
-    width: 90px;
-    height: 36px;
-    padding: 0 8px;
-    border: 1px solid #dceae7;
-    border-radius: 8px;
-    background: #fbfefd;
-    text-align: center;
-    font-weight: 700;
-}
-
 .diff-positive {
     color: #16a34a;
 }
@@ -529,10 +411,6 @@ function goBack() {
 
     .info-card {
         width: calc(50% - 7px);
-    }
-
-    .remark-card input {
-        width: 100%;
     }
 }
 </style>

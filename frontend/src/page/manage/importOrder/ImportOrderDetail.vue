@@ -9,6 +9,11 @@
                 </div>
             </div>
             <div v-if="order" class="heading-actions">
+                <router-link
+                    v-if="order.status === AUDIT_STATUS.DRAFT"
+                    :to="`/manage/import-order/${order.id}/edit`"
+                    class="btn-outline"
+                >编辑草稿</router-link>
                 <button v-if="order.status === AUDIT_STATUS.DRAFT" class="btn-primary" @click="handleCheck">提交</button>
                 <button v-if="order.status === AUDIT_STATUS.CHECKING" class="btn-primary" @click="handleApprove">通过</button>
                 <button v-if="order.status === AUDIT_STATUS.CHECKING" class="btn-danger" @click="handleReject">拒绝</button>

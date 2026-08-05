@@ -12,10 +12,11 @@
                 <span></span>
             </button>
             <div class="mobile-brand">
-                <IconGraphic
-                    name="clothing"
+                <img
+                    :src="brandMark"
+                    alt=""
                 />
-                <span>服装管理</span>
+                <span>KL-KOOLE</span>
             </div>
             <strong class="mobile-page-title">{{ currentPageTitle }}</strong>
         </header>
@@ -39,9 +40,12 @@
                     class="logo-toggle"
                     @click="collapsed = !collapsed"
                 >
-                    <IconGraphic name="clothing"/>
+                    <img
+                        :src="brandMark"
+                        alt=""
+                    />
                 </button>
-                <span class="logo-text">服装管理</span>
+                <span class="logo-text">KL-KOOLE</span>
             </div>
             <nav class="sidebar-nav">
                 <router-link v-for="item in navItems" :key="item.path" :title="collapsed ? item.label : ''" :to="item.path" active-class="nav-item-active"
@@ -105,6 +109,7 @@ import importOrderIcon from '../../assets/icons/navigation/import-order.svg'
 import transferOrderIcon from '../../assets/icons/navigation/transfer-order.svg'
 import optionIcon from '../../assets/icons/navigation/option.svg'
 import logoutIcon from '../../assets/icons/navigation/logout.svg'
+import brandMark from '../../assets/brand-mark.svg'
 
 const router = useRouter()
 const route = useRoute()

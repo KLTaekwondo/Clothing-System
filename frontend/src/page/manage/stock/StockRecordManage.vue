@@ -62,6 +62,13 @@
                     >
                         调整
                     </button>
+                    <button
+                        :class="{ active: changeTypeFilter === 'check' }"
+                        class="filter-tab"
+                        @click="changeTypeFilter = 'check'"
+                    >
+                        盘点
+                    </button>
                 </div>
                 <input
                     v-model="searchQuery"
@@ -150,14 +157,16 @@ const changeTypeLabels = {
     IMPORT_RETURN: '采购退货',
     TRANSFER_IN: '调入',
     TRANSFER_OUT: '调出',
-    MANUAL_ADJUST: '手动操作'
+    MANUAL_ADJUST: '手动操作',
+    STOCK_CHECK: '盘点'
 }
 
 const sourceTypeLabels = {
     ORDER: '销售订单',
     IMPORT_ORDER: '采购订单',
     TRANSFER_ORDER: '调拨订单',
-    MANUAL_ADJUST: '手动操作'
+    MANUAL_ADJUST: '手动操作',
+    STOCK_CHECK: '盘点'
 }
 
 const recordList = ref([])
@@ -225,6 +234,7 @@ function changePage(page) {
 function getChangeDirection(changeType) {
     if (['IMPORT_IN', 'SALE_RETURN', 'TRANSFER_IN'].includes(changeType)) return 'in'
     if (['SALE_OUT', 'IMPORT_RETURN', 'TRANSFER_OUT'].includes(changeType)) return 'out'
+    if (changeType === 'STOCK_CHECK') return 'check'
     return 'adjust'
 }
 
@@ -232,6 +242,7 @@ function changeTypeClass(changeType) {
     const direction = getChangeDirection(changeType)
     if (direction === 'in') return 'status-ok'
     if (direction === 'out') return 'status-error'
+    if (direction === 'check') return 'status-warn'
     return 'status-pending'
 }
 
@@ -384,6 +395,11 @@ function formatQuantity(quantity) {
 
 .record-table-card .data-table {
     min-width: 1180px;
+}
+
+.record-table-card .data-table th,
+.record-table-card .data-table td {
+    text-align: center;
 }
 
 .record-table-card .data-table td {

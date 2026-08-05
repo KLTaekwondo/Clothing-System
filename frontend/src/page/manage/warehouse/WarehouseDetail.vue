@@ -46,6 +46,10 @@
                                class="status-badge">{{
                         statusLabels[warehouse.status] || warehouse.status
                     }}</span></div>
+                <div class="info-card"><span>盘点状态</span><span
+                    :class="warehouse.checkStatus === CHECK_STATUS.UNDER_CHECK ? 'status-warn' : 'status-ok'"
+                    class="status-badge"
+                >{{ checkStatusLabels[warehouse.checkStatus] || warehouse.checkStatus || '-' }}</span></div>
                 <div v-if="editing" class="info-card"><span>新密码</span><input v-model="form.password" class="card-input"
                                                                                 maxlength="12" minlength="6"
                                                                                 type="password"/></div>
@@ -102,11 +106,13 @@ import {useToastStore} from '../../../stores/toastStore.js';
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js';
 import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js';
 import {STATUS, STATUS_LABELS, STATUS_OPTIONS} from '../../../constants/status.js'
+import {CHECK_STATUS, CHECK_STATUS_LABELS} from '../../../constants/checkStatus.js'
 
 const route = useRoute();
 const router = useRouter();
 const toast = useToastStore();
 const statusLabels = STATUS_LABELS;
+const checkStatusLabels = CHECK_STATUS_LABELS;
 const statusOptions = STATUS_OPTIONS
 const warehouse = ref(null);
 const loading = ref(true);

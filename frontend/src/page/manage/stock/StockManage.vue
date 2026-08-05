@@ -11,10 +11,15 @@
             <div class="search-row">
                 <div class="field">
                     <label>仓库</label>
-                    <select v-model="warehouseId" class="wh-select">
-                        <option disabled value="">请选择仓库</option>
-                        <option v-for="item in warehouses" :key="item.id" :value="item.id">{{ item.name }}</option>
-                    </select>
+                    <OptionValuePicker
+                        v-model="warehousePickerValue"
+                        :disabled="warehouseLoading"
+                        :options="warehouseOptions"
+                        error-message="请从仓库列表中选择有效仓库"
+                        placeholder="输入仓库名称或编码筛选"
+                        select-placeholder="选择仓库"
+                        @update:model-value="syncWarehouseId"
+                    />
                 </div>
                 <div class="field field-product">
                     <label>商品编码</label>
@@ -113,10 +118,13 @@ import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
+import OptionValuePicker from '../product/components/OptionValuePicker.vue'
 
 const toast = useToastStore()
 const warehouses = ref([])
 const warehouseId = ref('')
+const warehousePickerValue = ref('')
+const warehouseLoading = ref(false)
 const searchCode = ref('')
 const loading = ref(false)
 const savingAll = ref(false)
@@ -125,12 +133,20 @@ let keyCounter = 0
 
 const hasAnyChanges = computed(() => formList.value.some(item => item.hasChanges))
 
+const warehouseOptions = computed(() => warehouses.value.map(item => ({
+    id: item.id,
+    optionValue: formatWarehouseOption(item)
+})))
+
 onMounted(async () => {
     window.addEventListener('beforeunload', handleBeforeUnload)
+    warehouseLoading.value = true
     try {
         warehouses.value = await wareHouseInterface.searchList()
     } catch {
         warehouses.value = []
+    } finally {
+        warehouseLoading.value = false
     }
 })
 
@@ -142,6 +158,16 @@ onBeforeRouteLeave(() => {
     if (!hasAnyChanges.value) return true
     return window.confirm('当前有未保存的库存修改，确定要离开吗？')
 })
+
+function syncWarehouseId(value) {
+    const selected = warehouses.value.find(item => formatWarehouseOption(item) === value)
+    warehouseId.value = selected?.id || ''
+}
+
+function formatWarehouseOption(warehouse) {
+    if (warehouse.code) return `${warehouse.name}（${warehouse.code}）`
+    return warehouse.name
+}
 
 async function searchProduct() {
     if (!warehouseId.value || !searchCode.value) {
@@ -399,7 +425,7 @@ function handleBeforeUnload(event) {
 }
 
 .total-hint {
-    flex: 1;
+    width: calc(100% - 300px);
     font-size: 14px;
     color: var(--text-secondary);
 }

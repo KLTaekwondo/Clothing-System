@@ -36,6 +36,7 @@
                     <th>编码</th>
                     <th>仓库名称</th>
                     <th>状态</th>
+                    <th>盘点状态</th>
                     <th>操作</th>
                 </tr>
                 </thead>
@@ -48,6 +49,14 @@
                                   class="status-badge">
                                 {{ statusLabels[item.status] || item.status || '-' }}
                             </span>
+                    </td>
+                    <td>
+                        <span
+                            :class="item.checkStatus === CHECK_STATUS.UNDER_CHECK ? 'status-warn' : 'status-ok'"
+                            class="status-badge"
+                        >
+                            {{ checkStatusLabels[item.checkStatus] || item.checkStatus || '-' }}
+                        </span>
                     </td>
                     <td>
                         <div class="actions">
@@ -90,10 +99,12 @@ import {useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import {STATUS, STATUS_LABELS} from '../../../constants/status.js'
+import {CHECK_STATUS, CHECK_STATUS_LABELS} from '../../../constants/checkStatus.js'
 
 const router = useRouter()
 const toast = useToastStore()
 const statusLabels = STATUS_LABELS
+const checkStatusLabels = CHECK_STATUS_LABELS
 
 const warehouseList = ref([])
 const searchQuery = ref('')

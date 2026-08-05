@@ -12,44 +12,86 @@
 
         <div class="card form-card">
             <div class="form-grid">
-                <div class="field">
-                    <label>供应商 <span class="required">*</span></label>
-                    <select v-model="form.supplierId" class="form-select">
-                        <option disabled value="">请选择供应商</option>
-                        <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.supplierName }}</option>
-                    </select>
+                <div class="reference-column">
+                    <div class="supplier-field">
+                        <label>供应商 <span class="required">*</span></label>
+                        <OptionValuePicker
+                            v-model="supplierPickerValue"
+                            :disabled="supplierLoading"
+                            :options="supplierOptions"
+                            error-message="请从供应商列表中选择有效供应商"
+                            placeholder="输入供应商名称或编码筛选"
+                            select-placeholder="选择供应商"
+                            @update:model-value="syncSupplierId"
+                        />
+                    </div>
+                    <div class="warehouse-field">
+                        <label>仓库 <span class="required">*</span></label>
+                        <OptionValuePicker
+                            v-model="warehousePickerValue"
+                            :disabled="warehouseLoading"
+                            :options="warehouseOptions"
+                            error-message="请从仓库列表中选择有效仓库"
+                            placeholder="输入仓库名称或编码筛选"
+                            select-placeholder="选择仓库"
+                            @update:model-value="syncWarehouseId"
+                        />
+                    </div>
                 </div>
-                <div class="field">
-                    <label>仓库 <span class="required">*</span></label>
-                    <select v-model="form.wareHouseId" class="form-select">
-                        <option disabled value="">请选择仓库</option>
-                        <option v-for="w in warehouses" :key="w.id" :value="w.id">{{ w.name }}</option>
-                    </select>
+                <div class="direction-column">
+                    <div class="direction-field">
+                        <label>业务方向 <span class="required">*</span></label>
+                        <div class="direction-options">
+                            <button
+                                :class="form.direction === 'IN' ? 'direction-in-selected' : 'direction-in'"
+                                type="button"
+                                @click="form.direction = 'IN'"
+                            >
+                                <strong>采购入库</strong>
+                                <span>商品进入所选仓库</span>
+                            </button>
+                            <button
+                                :class="form.direction === 'OUT' ? 'direction-out-selected' : 'direction-out'"
+                                type="button"
+                                @click="form.direction = 'OUT'"
+                            >
+                                <strong>采购退货</strong>
+                                <span>商品从所选仓库出库</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="field">
-                    <label>业务方向 <span class="required">*</span></label>
-                    <select v-model="form.direction" class="form-select">
-                        <option disabled value="">请选择方向</option>
-                        <option value="IN">采购入库</option>
-                        <option value="OUT">采购退货</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>备注</label>
-                    <input v-model="form.remark" class="form-input" maxlength="100" placeholder="不超过 100 字" type="text"/>
+                <div class="remark-column">
+                    <div class="field">
+                        <label>备注</label>
+                        <textarea
+                            v-model="form.remark"
+                            maxlength="100"
+                            placeholder="不超过 100 字"
+                            rows="5"
+                        ></textarea>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="card search-card">
-            <div class="search-row">
-                <div class="field field-product">
-                    <label>商品编码</label>
-                    <input v-model="searchCode" placeholder="输入商品编码后查询" type="text" @keyup.enter="searchProduct"/>
+            <div class="field-product">
+                <label>商品编码</label>
+                <div class="search-control">
+                    <input
+                        v-model="searchCode"
+                        placeholder="输入商品编码后查询"
+                        type="text"
+                        @keyup.enter="searchProduct"
+                    />
+                    <button
+                        :disabled="searching"
+                        class="search-button"
+                        type="button"
+                        @click="searchProduct"
+                    >{{ searching ? '查询中...' : '查询并添加' }}</button>
                 </div>
-                <button :disabled="searching" class="btn-primary search-button" @click="searchProduct">
-                    {{ searching ? '查询中...' : '查询并添加' }}
-                </button>
             </div>
         </div>
 
@@ -87,12 +129,17 @@ import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
 import importOrderInterface from '../../../axios/interface/ImportOrderInterface.js'
 import ImportOrderItemList from './components/ImportOrderItemList.vue'
+import OptionValuePicker from '../product/components/OptionValuePicker.vue'
 
 const router = useRouter()
 const toast = useToastStore()
 
 const suppliers = ref([])
+const supplierPickerValue = ref('')
+const supplierLoading = ref(false)
 const warehouses = ref([])
+const warehousePickerValue = ref('')
+const warehouseLoading = ref(false)
 const form = ref({
     supplierId: '',
     wareHouseId: '',
@@ -105,6 +152,14 @@ const searching = ref(false)
 const saving = ref(false)
 
 const canSave = computed(() => form.value.supplierId && form.value.wareHouseId && form.value.direction)
+const supplierOptions = computed(() => suppliers.value.map(supplier => ({
+    id: supplier.id,
+    optionValue: formatSupplierOption(supplier)
+})))
+const warehouseOptions = computed(() => warehouses.value.map(warehouse => ({
+    id: warehouse.id,
+    optionValue: formatWarehouseOption(warehouse)
+})))
 
 const totalAmount = computed(() => {
     let total = 0
@@ -132,17 +187,44 @@ const groupedItems = computed(() => {
 })
 
 onMounted(async () => {
+    supplierLoading.value = true
     try {
         suppliers.value = await supplierInterface.searchList()
     } catch {
         suppliers.value = []
+    } finally {
+        supplierLoading.value = false
     }
+    warehouseLoading.value = true
     try {
         warehouses.value = await wareHouseInterface.searchList()
     } catch {
         warehouses.value = []
+    } finally {
+        warehouseLoading.value = false
     }
 })
+
+function syncSupplierId(value) {
+    const selected = suppliers.value.find(supplier => formatSupplierOption(supplier) === value)
+    form.value.supplierId = selected?.id || ''
+}
+
+function formatSupplierOption(supplier) {
+    if (supplier.supplierCode) return `${supplier.supplierName}（${supplier.supplierCode}）`
+    if (supplier.code) return `${supplier.supplierName}（${supplier.code}）`
+    return supplier.supplierName
+}
+
+function syncWarehouseId(value) {
+    const selected = warehouses.value.find(warehouse => formatWarehouseOption(warehouse) === value)
+    form.value.wareHouseId = selected?.id || ''
+}
+
+function formatWarehouseOption(warehouse) {
+    if (warehouse.code) return `${warehouse.name}（${warehouse.code}）`
+    return warehouse.name
+}
 
 async function searchProduct() {
     const code = searchCode.value.trim()
@@ -230,7 +312,7 @@ async function handleSave() {
             supplierId: Number(form.value.supplierId),
             wareHouseId: Number(form.value.wareHouseId),
             direction: form.value.direction,
-            totalAmount,
+            totalAmount: Number(totalAmount.value),
             remark: form.value.remark || '',
             importItems
         })
@@ -291,20 +373,134 @@ function goBack() {
 
 .form-grid {
     display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 18px;
 }
 
-.field {
+.reference-column,
+.direction-column,
+.remark-column {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.reference-column {
+    width: calc(40% - 12px);
+    gap: 14px;
+}
+
+.direction-column {
+    width: calc(28% - 12px);
+}
+
+.remark-column {
+    width: calc(32% - 12px);
+}
+
+.field,
+.supplier-field,
+.warehouse-field,
+.direction-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.field label {
+.field label,
+.supplier-field label,
+.warehouse-field label,
+.direction-field label {
     font-size: 13px;
     font-weight: 600;
     color: var(--text-secondary);
+}
+
+.supplier-field,
+.warehouse-field,
+.direction-field {
+    width: 100%;
+}
+
+.direction-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.direction-in,
+.direction-in-selected,
+.direction-out,
+.direction-out-selected {
+    width: 100%;
+    min-height: 58px;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 12px;
+    border: 1px solid #dceae7;
+    border-radius: 9px;
+    background: #fbfefd;
+    text-align: left;
+    cursor: pointer;
+}
+
+.direction-in strong,
+.direction-in-selected strong,
+.direction-out strong,
+.direction-out-selected strong {
+    font-size: 13px;
+}
+
+.direction-in span,
+.direction-in-selected span,
+.direction-out span,
+.direction-out-selected span {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.direction-in:hover,
+.direction-in-selected {
+    border-color: #22c55e;
+    color: #15803d;
+    background: #f0fdf4;
+}
+
+.direction-out:hover,
+.direction-out-selected {
+    border-color: #ef4444;
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+.direction-in-selected,
+.direction-out-selected {
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.direction-out-selected {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.remark-column textarea {
+    width: 100%;
+    min-height: 137px;
+    box-sizing: border-box;
+    padding: 12px;
+    resize: vertical;
+    border: 1px solid #dceae7;
+    border-radius: 10px;
+    background: #fbfefd;
+    font: inherit;
+}
+
+.remark-column textarea:focus {
+    border-color: #14b8a6;
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+    outline: none;
 }
 
 .required {
@@ -312,17 +508,49 @@ function goBack() {
 }
 
 .field-product {
-    width: 400px;
+    width: 432px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.form-select, .form-input {
-    width: 260px;
+.field-product label {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.search-control {
+    width: 432px;
+    display: flex;
+    align-items: stretch;
+}
+
+.search-control input {
+    width: 320px;
     height: 40px;
     padding: 0 12px;
     border: 1px solid #dceae7;
-    border-radius: 10px;
+    border-right: 0;
+    border-radius: 10px 0 0 10px;
     background: #fbfefd;
-    font-size: 14px;
+}
+
+.search-button {
+    width: 112px;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--primary);
+    border-radius: 0 10px 10px 0;
+    color: #fff;
+    background: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.search-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
 }
 
 .form-select {
@@ -336,26 +564,6 @@ function goBack() {
 
 .search-card {
     margin-bottom: 16px;
-}
-
-.search-row {
-    display: flex;
-    gap: 14px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-}
-
-.search-button {
-    height: 40px;
-}
-
-.search-row input {
-    width: 320px;
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid #dceae7;
-    border-radius: 10px;
-    background: #fbfefd;
 }
 
 .empty-card {
@@ -375,24 +583,41 @@ function goBack() {
 }
 
 .total-hint {
+    width: 100px;
     color: var(--text-secondary);
     font-size: 14px;
 }
 
 .amount-hint {
-    flex: 1;
+    width: calc(100% - 260px);
     color: var(--primary);
     font-weight: 700;
     font-size: 15px;
 }
 
 @media (max-width: 900px) {
-    .search-row {
-        flex-direction: column;
-        align-items: stretch;
+    .field-product,
+    .supplier-field,
+    .warehouse-field,
+    .direction-field,
+    .form-select,
+    .form-input,
+    .search-control {
+        width: 100%;
     }
 
-    .search-row input, .form-select, .form-input {
+    .search-control input {
+        width: calc(100% - 112px);
+    }
+
+    .direction-options {
+        flex-direction: column;
+    }
+
+    .direction-in,
+    .direction-in-selected,
+    .direction-out,
+    .direction-out-selected {
         width: 100%;
     }
 

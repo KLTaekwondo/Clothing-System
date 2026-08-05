@@ -3,9 +3,14 @@
         <div class="auth-card">
             <div class="brand-panel">
                 <div class="brand-content">
-                    <div class="brand-icon"><IconGraphic name="clothing"/></div>
-                    <h1 class="brand-title">服装管理系统</h1>
-                    <p class="brand-slogan">Clothing Management System</p>
+                    <div class="brand-icon">
+                        <img
+                            :src="brandMark"
+                            alt="KL-KOOLE"
+                        />
+                    </div>
+                    <h1 class="brand-title">KL-KOOLE</h1>
+                    <p class="brand-slogan">服装管理系统</p>
                     <p class="brand-desc">高效管理商品、订单、库存和员工，让服装生意更简单。</p>
                 </div>
             </div>
@@ -68,6 +73,7 @@ import {reactive, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import { useUserStore } from '../../stores/userStore.js'
 import {useToastStore} from "../../stores/toastStore.js";
+import brandMark from '../../assets/brand-mark.svg'
 
 const router = useRouter()
 const loading = ref(false)
@@ -176,6 +182,8 @@ async function handleLogin() {
     font-size: 48px;
     width: 72px;
     height: 72px;
+    padding: 8px;
+    box-sizing: border-box;
     border-radius: 20px;
     background: rgba(255, 255, 255, 0.15);
     display: inline-flex;
@@ -194,7 +202,7 @@ async function handleLogin() {
 .brand-title {
     font-size: 30px;
     font-weight: 800;
-    letter-spacing: -1px;
+    letter-spacing: 0;
     margin-bottom: 8px;
     line-height: 1.3;
 }

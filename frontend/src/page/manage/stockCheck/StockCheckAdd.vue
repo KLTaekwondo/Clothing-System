@@ -17,24 +17,15 @@
             <div class="form-row">
                 <div class="field">
                     <label>盘点仓库 <span class="required">*</span></label>
-                    <select
-                        v-model="form.wareHouseId"
-                        class="form-select"
-                        @change="handleWarehouseChange"
-                    >
-                        <option
-                            disabled
-                            value=""
-                        >请选择仓库</option>
-                        <option
-                            v-for="warehouse in warehouses"
-                            :key="warehouse.id"
-                            :disabled="warehouse.checkStatus === 'UNDER_CHECK'"
-                            :value="warehouse.id"
-                        >
-                            {{ warehouse.name }}{{ warehouse.checkStatus === 'UNDER_CHECK' ? '（盘点中）' : '' }}
-                        </option>
-                    </select>
+                    <OptionValuePicker
+                        v-model="warehousePickerValue"
+                        :disabled="warehouseLoading"
+                        :options="warehouseOptions"
+                        error-message="请从仓库列表中选择有效仓库"
+                        placeholder="输入仓库名称或编码筛选"
+                        select-placeholder="选择仓库"
+                        @update:model-value="syncWarehouseId"
+                    />
                 </div>
                 <div class="remark-field">
                     <label>备注</label>
@@ -49,9 +40,9 @@
         </div>
 
         <div class="search-card">
-            <div class="search-row">
-                <div class="search-field">
-                    <label>商品或 SKU 编码</label>
+            <div class="search-field">
+                <label>商品或 SKU 编码</label>
+                <div class="search-control">
                     <input
                         v-model="searchCode"
                         :disabled="!form.wareHouseId"
@@ -59,12 +50,13 @@
                         type="text"
                         @keyup.enter="searchSku"
                     />
+                    <button
+                        :disabled="searching || !form.wareHouseId || !searchCode.trim()"
+                        class="search-button"
+                        type="button"
+                        @click="searchSku"
+                    >{{ searching ? '查询中...' : '查询 SKU' }}</button>
                 </div>
-                <button
-                    :disabled="searching || !form.wareHouseId || !searchCode.trim()"
-                    class="btn-primary"
-                    @click="searchSku"
-                >{{ searching ? '查询中...' : '查询 SKU' }}</button>
             </div>
 
             <div
@@ -118,9 +110,7 @@
             class="item-list"
         >
             <StockCheckItemList
-                v-for="item in items"
-                :key="item.skuCode"
-                :item="item"
+                :items="items"
                 @remove="removeItem"
                 @update-quantity="updateQuantity"
             />
@@ -138,10 +128,13 @@ import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInte
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
 import StockCheckItemList from './components/StockCheckItemList.vue'
+import OptionValuePicker from '../product/components/OptionValuePicker.vue'
 
 const router = useRouter()
 const toast = useToastStore()
 const warehouses = ref([])
+const warehousePickerValue = ref('')
+const warehouseLoading = ref(false)
 const form = ref({
     wareHouseId: '',
     remark: ''
@@ -153,6 +146,13 @@ const candidates = ref([])
 const items = ref([])
 const saved = ref(false)
 const previousWarehouseId = ref('')
+
+const warehouseOptions = computed(() => warehouses.value
+    .filter(warehouse => warehouse.checkStatus !== 'UNDER_CHECK')
+    .map(warehouse => ({
+        id: warehouse.id,
+        optionValue: formatWarehouseOption(warehouse)
+    })))
 
 const differenceCount = computed(() => {
     return items.value.filter(item => {
@@ -166,12 +166,30 @@ const hasUnsavedContent = computed(() => {
 
 onMounted(async () => {
     window.addEventListener('beforeunload', handleBeforeUnload)
+    warehouseLoading.value = true
     try {
         warehouses.value = await wareHouseInterface.searchList()
     } catch {
         warehouses.value = []
+    } finally {
+        warehouseLoading.value = false
     }
 })
+
+function syncWarehouseId(value) {
+    const selected = warehouses.value.find(warehouse => formatWarehouseOption(warehouse) === value)
+    if (!selected) {
+        if (!items.value.length) form.value.wareHouseId = ''
+        return
+    }
+    if (selected.id === previousWarehouseId.value) return
+    handleWarehouseChange(selected)
+}
+
+function formatWarehouseOption(warehouse) {
+    if (warehouse.code) return `${warehouse.name}（${warehouse.code}）`
+    return warehouse.name
+}
 
 onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', handleBeforeUnload)
@@ -304,20 +322,22 @@ function clearItems() {
     candidates.value = []
 }
 
-function handleWarehouseChange() {
-    const selectedWarehouseId = form.value.wareHouseId
+function handleWarehouseChange(selectedWarehouse) {
     candidates.value = []
     searchCode.value = ''
     if (!items.value.length) {
-        previousWarehouseId.value = selectedWarehouseId
+        form.value.wareHouseId = selectedWarehouse.id
+        previousWarehouseId.value = selectedWarehouse.id
         return
     }
     if (window.confirm('切换仓库会清空当前盘点项，确定继续吗？')) {
+        form.value.wareHouseId = selectedWarehouse.id
         items.value = []
-        previousWarehouseId.value = selectedWarehouseId
+        previousWarehouseId.value = selectedWarehouse.id
         return
     }
-    form.value.wareHouseId = previousWarehouseId.value
+    const previousWarehouse = warehouses.value.find(warehouse => warehouse.id === previousWarehouseId.value)
+    warehousePickerValue.value = previousWarehouse ? formatWarehouseOption(previousWarehouse) : ''
 }
 
 async function handleSave() {
@@ -401,8 +421,7 @@ function goBack() {
     box-shadow: 0 8px 26px rgba(15, 118, 110, 0.06);
 }
 
-.form-row,
-.search-row {
+.form-row {
     display: flex;
     align-items: flex-end;
     gap: 16px;
@@ -429,18 +448,13 @@ function goBack() {
     color: #dc2626;
 }
 
-.form-select,
 .remark-field input,
-.search-field input {
+.search-control input {
     height: 40px;
     padding: 0 12px;
     border: 1px solid #dceae7;
     border-radius: 10px;
     background: #fbfefd;
-}
-
-.form-select {
-    width: 280px;
 }
 
 .remark-field {
@@ -453,11 +467,36 @@ function goBack() {
 }
 
 .search-field {
-    width: 420px;
+    width: 432px;
 }
 
-.search-field input {
-    width: 100%;
+.search-control {
+    width: 432px;
+    display: flex;
+    align-items: stretch;
+}
+
+.search-control input {
+    width: 320px;
+    border-right: 0;
+    border-radius: 10px 0 0 10px;
+}
+
+.search-button {
+    width: 112px;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--primary);
+    border-radius: 0 10px 10px 0;
+    color: #fff;
+    background: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.search-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
 }
 
 .candidate-list {
@@ -513,6 +552,7 @@ function goBack() {
 
 .action-bar strong {
     width: 35%;
+    margin-right: auto;
     color: #16a34a;
 }
 
@@ -527,16 +567,19 @@ function goBack() {
 }
 
 @media (max-width: 900px) {
-    .form-row,
-    .search-row {
+    .form-row {
         align-items: stretch;
         flex-direction: column;
     }
 
-    .form-select,
     .remark-field,
-    .search-field {
+    .search-field,
+    .search-control {
         width: 100%;
+    }
+
+    .search-control input {
+        width: calc(100% - 112px);
     }
 
     .action-bar {

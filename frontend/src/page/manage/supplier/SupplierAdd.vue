@@ -13,9 +13,9 @@
             </div>
         </div>
 
-        <div class="card form-card">
+        <div class="form-card">
             <form @submit.prevent="handleSubmit">
-                <div class="form-row">
+                <div class="form-content">
                     <div class="form-group">
                         <label>供应商编码</label>
                         <input
@@ -26,6 +26,7 @@
                             required
                             type="text"
                         />
+                        <span class="field-hint">用于采购订单和供应商资料识别</span>
                     </div>
                     <div class="form-group">
                         <label>供应商名称</label>
@@ -38,8 +39,6 @@
                             type="text"
                         />
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-group">
                         <label>联系电话</label>
                         <input
@@ -50,11 +49,12 @@
                     </div>
                     <div class="form-group">
                         <label>备注</label>
-                        <input
+                        <textarea
                             v-model="form.remark"
+                            maxlength="200"
                             placeholder="请输入备注"
-                            type="text"
-                        />
+                            rows="4"
+                        ></textarea>
                     </div>
                 </div>
                 <div class="form-actions">
@@ -211,10 +211,51 @@ function confirmLeave() {
 }
 
 .form-card {
-    max-width: 840px;
+    width: 100%;
+    max-width: 620px;
+    box-sizing: border-box;
     padding: 28px;
+    margin-right: auto;
+    margin-left: auto;
+    background: #fff;
+    border: 1px solid #e3efed;
     border-radius: 16px;
     box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
+}
+
+.form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    width: 100%;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+}
+
+.form-group textarea {
+    min-height: 104px;
+    resize: vertical;
+}
+
+.field-hint {
+    display: block;
+    margin-top: 6px;
+    color: #829895;
+    font-size: 12px;
 }
 
 .form-actions {

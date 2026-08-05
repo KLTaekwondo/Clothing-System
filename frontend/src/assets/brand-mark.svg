@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+    <title id="title">KL-KOOLE 品牌标志</title>
+    <desc id="desc">红黑双色字母 K 位于飞扬的阳光橙色飘带上方</desc>
+    <defs>
+        <linearGradient id="ribbon" x1="16" y1="118" x2="145" y2="92" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#f59e0b"/>
+            <stop offset="0.55" stop-color="#fb923c"/>
+            <stop offset="1" stop-color="#f97316"/>
+        </linearGradient>
+        <linearGradient id="ribbonFold" x1="110" y1="103" x2="143" y2="79" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#ea580c"/>
+            <stop offset="1" stop-color="#fdba74"/>
+        </linearGradient>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+            <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#7c2d12" flood-opacity="0.16"/>
+        </filter>
+    </defs>
+    <g filter="url(#shadow)">
+        <path d="M42 22H61V98H42Z" fill="#dc2626"/>
+        <path d="M61 51L96 22H121L82 56L123 98H98L65 66L61 69Z" fill="#18181b"/>
+        <path d="M15 111C35 100 51 106 69 111C89 117 108 111 123 101C134 94 141 87 147 79L143 112C135 115 128 120 119 126C102 138 81 139 61 132C42 126 29 121 12 129Z" fill="url(#ribbon)"/>
+        <path d="M123 101C134 94 141 87 147 79L143 112C135 115 128 120 119 126C125 117 127 108 123 101Z" fill="url(#ribbonFold)"/>
+        <path d="M25 113C43 108 57 115 72 119C91 125 108 119 122 110" fill="none" stroke="#fed7aa" stroke-linecap="round" stroke-width="4" opacity="0.76"/>
+    </g>
+</svg>
