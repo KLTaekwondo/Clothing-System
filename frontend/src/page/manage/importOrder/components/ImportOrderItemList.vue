@@ -27,44 +27,47 @@
                 </div>
             </div>
 
-            <div
-                v-show="isExpanded(group.productId)"
-                class="sku-wrapper"
-            >
-                <div class="sku-list-header">
-                    <span class="sku-header-name">SKU 名称</span>
-                    <span class="sku-header-code">SKU 编码</span>
-                    <span class="sku-header-spec">规格</span>
-                    <span class="sku-header-price">采购单价</span>
-                    <span class="sku-header-quantity">数量</span>
-                    <span class="sku-header-subtotal">小计</span>
-                    <span class="sku-header-action">操作</span>
-                </div>
+            <Transition name="sku-expand">
                 <div
-                    v-for="item in group.skus"
-                    :key="item.skuId"
-                    class="sku-row"
+                    v-show="isExpanded(group.productId)"
+                    class="sku-wrapper"
                 >
-                    <strong class="sku-name">{{ item.skuName || item.skuCode || '-' }}</strong>
-                    <code class="sku-code">{{ item.skuCode || '-' }}</code>
-                    <span class="sku-spec">{{ formatSpec(item.spec) }}</span>
-                    <span class="sku-price">¥{{ formatMoney(item.importPrice) }}</span>
-                    <input
-                        v-model.number="item.quantity"
-                        class="quantity-input"
-                        min="1"
-                        step="1"
-                        type="number"
-                        @keydown.enter.prevent="focusNextQuantity($event)"
-                    />
-                    <strong class="sku-subtotal">¥{{ calculateSubtotal(item) }}</strong>
-                    <button
-                        class="remove-button"
-                        type="button"
-                        @click.stop="emit('remove', item.skuId)"
-                    >移除</button>
+                    <div class="sku-list-header">
+                        <span class="sku-header-name">SKU 名称</span>
+                        <span class="sku-header-code">SKU 编码</span>
+                        <span class="sku-header-spec">规格</span>
+                        <span class="sku-header-price">采购单价</span>
+                        <span class="sku-header-quantity">数量</span>
+                        <span class="sku-header-subtotal">小计</span>
+                        <span class="sku-header-action">操作</span>
+                    </div>
+                    <div
+                        v-for="item in group.skus"
+                        :key="item.skuId"
+                        class="sku-row"
+                    >
+                        <strong class="sku-name">{{ item.skuName || item.skuCode || '-' }}</strong>
+                        <code class="sku-code">{{ item.skuCode || '-' }}</code>
+                        <span class="sku-spec">{{ formatSpec(item.spec) }}</span>
+                        <span class="sku-price">¥{{ formatMoney(item.importPrice) }}</span>
+                        <input
+                            v-model.number="item.quantity"
+                            class="quantity-input"
+                            min="1"
+                            step="1"
+                            type="number"
+                            @input="updateQuantity(item, $event)"
+                            @keydown.enter.prevent="focusNextQuantity($event)"
+                        />
+                        <strong class="sku-subtotal">¥{{ calculateSubtotal(item) }}</strong>
+                        <button
+                            class="remove-button"
+                            type="button"
+                            @click.stop="emit('remove', item.skuId)"
+                        >移除</button>
+                    </div>
                 </div>
-            </div>
+            </Transition>
         </div>
     </div>
 </template>
@@ -79,7 +82,7 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['remove'])
+const emit = defineEmits(['remove', 'update-quantity'])
 const collapsedGroups = ref(new Set())
 
 function toggleGroup(productId) {
@@ -91,6 +94,14 @@ function toggleGroup(productId) {
 
 function isExpanded(productId) {
     return !collapsedGroups.value.has(productId)
+}
+
+function updateQuantity(item, event) {
+    const value = Number(event.target.value)
+    const quantity = Number.isInteger(value) && value >= 1 ? value : 1
+    if (Number(event.target.value) !== quantity) event.target.value = quantity
+    item.quantity = quantity
+    emit('update-quantity', item.skuId, quantity)
 }
 
 function focusNextQuantity(event) {
@@ -267,6 +278,24 @@ function calculateSubtotal(item) {
     box-shadow: inset 0 3px 8px rgba(22, 83, 78, 0.06);
 }
 
+.sku-expand-enter-active,
+.sku-expand-leave-active {
+    overflow: hidden;
+    transition: max-height 0.24s ease, opacity 0.2s ease;
+}
+
+.sku-expand-enter-from,
+.sku-expand-leave-to {
+    max-height: 0;
+    opacity: 0;
+}
+
+.sku-expand-enter-to,
+.sku-expand-leave-from {
+    max-height: 900px;
+    opacity: 1;
+}
+
 .sku-list-header,
 .sku-row {
     display: flex;
@@ -412,6 +441,13 @@ function calculateSubtotal(item) {
 .remove-button:hover {
     border-color: #f87171;
     background: #fef2f2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sku-expand-enter-active,
+    .sku-expand-leave-active {
+        transition: none;
+    }
 }
 
 @media (max-width: 900px) {

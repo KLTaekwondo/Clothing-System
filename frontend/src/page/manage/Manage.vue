@@ -123,16 +123,17 @@ const currentPageTitle = computed(() => route.meta?.title || '管理后台')
 const navItems = [
     {path: '/manage/dashboard', label: '仪表盘', icon: dashboardIcon},
     {path: '/manage/product', label: '商品管理', icon: productIcon},
-    {path: '/manage/employee', label: '员工管理', icon: employeeIcon},
-    {path: '/manage/supplier', label: '供应商管理', icon: supplierIcon},
     {path: '/manage/warehouse', label: '仓库管理', icon: warehouseIcon},
-    {path: '/manage/stock', label: '人工库存调整', icon: stockIcon},
-    {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon},
+    {path: '/manage/employee', label: '员工管理', icon: employeeIcon},
+    {path: '/manage/member', label: '会员管理', icon: employeeIcon},
+    {path: '/manage/option', label: '选项管理', icon: optionIcon},
+    {path: '/manage/supplier', label: '供应商管理', icon: supplierIcon},
     {path: '/manage/stock-check', label: '库存盘点', icon: stockRecordIcon},
-    {path: '/manage/order', label: '订单管理', icon: orderIcon},
     {path: '/manage/import-order', label: '采购订单', icon: importOrderIcon},
     {path: '/manage/transfer-order', label: '调拨订单', icon: transferOrderIcon},
-    {path: '/manage/option', label: '选项管理', icon: optionIcon}
+    {path: '/manage/stock', label: '人工库存调整', icon: stockIcon},
+    {path: '/manage/order', label: '订单管理', icon: orderIcon},
+    {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon}
 ]
 
 function loadSavedTabs() {

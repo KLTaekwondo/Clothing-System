@@ -210,6 +210,7 @@ import productInterface from '../../../axios/interface/ProductInterface.js'
 import {SEASON_OPTIONS} from '../../../constants/season.js'
 import {OPTION_TYPE} from '../../../constants/optionType.js'
 import {useProductOptions} from './composables/useProductOptions.js'
+import usePageDraft from '../../../composables/usePageDraft.js'
 import OptionValuePicker from './components/OptionValuePicker.vue'
 
 const router = useRouter()
@@ -279,6 +280,16 @@ const selectedOptions = ref({
     [OPTION_TYPE.COLOR]: [],
     [OPTION_TYPE.SIZE]: []
 })
+
+const productDraft = usePageDraft(
+    'clothing_manage_product_add',
+    () => ({form: form.value, selectedOptions: selectedOptions.value}),
+    saved => {
+        form.value = {...form.value, ...(saved.form || {})}
+        selectedOptions.value = saved.selectedOptions || selectedOptions.value
+        toast.info('已恢复上次未完成的商品信息')
+    }
+)
 
 watch(skuOptionGroups, groups => {
     groups.forEach(group => {
@@ -358,6 +369,7 @@ async function handleSubmit() {
             selectedOptions: selectedOptionsPayload.value
         })
         // 后端已返回提示
+        productDraft.clear()
         router.push('/manage/product')
     } catch {
     } finally {

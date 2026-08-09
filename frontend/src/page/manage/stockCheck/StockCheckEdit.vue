@@ -140,6 +140,7 @@
 import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {onBeforeRouteLeave, useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
+import {useConfirmStore} from '../../../stores/confirmStore.js'
 import stockCheckInterface from '../../../axios/interface/StockCheckInterface.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js'
@@ -151,6 +152,7 @@ import {AUDIT_STATUS} from '../../../constants/auditStatus.js'
 const route = useRoute()
 const router = useRouter()
 const toast = useToastStore()
+const confirmStore = useConfirmStore()
 const checkOrder = ref(null)
 const warehouses = ref([])
 const warehouseId = ref('')
@@ -211,9 +213,14 @@ onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 
-onBeforeRouteLeave(() => {
+onBeforeRouteLeave(async () => {
     if (!hasUnsavedContent.value) return true
-    return window.confirm('当前盘点修改尚未保存，确定要离开吗？')
+    return await confirmStore.confirm({
+        title: '放弃未保存的修改？',
+        message: '当前盘点修改尚未保存，离开后修改将丢失。',
+        confirmText: '确定离开',
+        danger: true
+    })
 })
 
 async function searchSku() {
@@ -302,9 +309,15 @@ function removeItem(skuCode) {
     }
 }
 
-function clearItems() {
+async function clearItems() {
     if (!items.value.length) return
-    if (!window.confirm('确定清空全部盘点项吗？')) return
+    const confirmed = await confirmStore.confirm({
+        title: '清空盘点项？',
+        message: '清空后当前已录入的盘点 SKU 将被移除。',
+        confirmText: '确定清空',
+        danger: true
+    })
+    if (!confirmed) return
     items.value = []
     dirty.value = true
 }

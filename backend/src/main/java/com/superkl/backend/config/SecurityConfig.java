@@ -61,12 +61,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/login", "/api/warehouse/login").permitAll()
                         // 前端收银员可以访问所有接口
                         .requestMatchers("/api/employee/verify/**", "/api/order/draft/**",
-                                "/api/order/complete","/api/order/delete/**","/api/order/search/wareHouse/**").hasRole("WAREHOUSE")
+                                "/api/order/complete","/api/order/delete/**","/api/order/search/wareHouse/**")
+                        .hasRole("WAREHOUSE")
+
+
                         .requestMatchers( "/api/stock/**",
                                 "/api/product/search/**", "/api/productSku/search/**",
-                                "/api/productSku/scan/**", "/api/warehouse/logout","/api/order/search/**")
+                                "/api/productSku/scan/**", "/api/warehouse/logout","/api/order/search/**",
+                                "/api/member/search/**")
                         .hasAnyRole("ADMIN", "WAREHOUSE")
                         // 管理员可以访问所有接口
+
+
                         .requestMatchers("/api/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

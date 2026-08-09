@@ -28,6 +28,7 @@ public class OrderConverter {
                 .remark(order.getRemark())
                 .employeeName(order.getEmployee().getEmployeeName())
                 .warehouseName(order.getWareHouse().getWareHouseName())
+                .memberPhone(order.getMemberPhone())
                 .createTime(order.getCreateTime())
                 .updateTime(order.getUpdateTime())
                 .build();

@@ -92,7 +92,7 @@ public class WareHouseStockService {
         Integer beforeQuantity = ws.getStock();
         Integer afterQuantity = beforeQuantity - stock;
         if (afterQuantity < 0) {
-            throw new BusinessException("库存不足");
+            throw new BusinessException(405, ws.getProductSku().getSkuName()+"库存不足");
         }
         // 减少库存
         ws.setStock(afterQuantity);

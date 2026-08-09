@@ -71,6 +71,7 @@
 import {onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
+import {useConfirmStore} from '../../../stores/confirmStore.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
 import {SEASON_LABELS} from '../../../constants/season.js'
@@ -79,6 +80,7 @@ import {STATUS, STATUS_LABELS} from '../../../constants/status.js'
 const route = useRoute()
 const router = useRouter()
 const toast = useToastStore()
+const confirmStore = useConfirmStore()
 const productId = route.params.id
 const seasonLabels = SEASON_LABELS
 const statusLabels = STATUS_LABELS
@@ -102,7 +104,13 @@ onMounted(async () => {
 })
 
 async function handleDelete(sku) {
-    if (!window.confirm(`确定要删除 SKU“${sku.name}”吗？`)) return
+    const confirmed = await confirmStore.confirm({
+        title: '删除 SKU？',
+        message: `确定删除 SKU“${sku.name}”吗？`,
+        confirmText: '确认删除',
+        danger: true
+    })
+    if (!confirmed) return
     try {
         await productSkuInterface.softDelete(sku.id)
         // 后端已返回提示

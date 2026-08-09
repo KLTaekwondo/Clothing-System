@@ -130,6 +130,7 @@ import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js
 import importOrderInterface from '../../../axios/interface/ImportOrderInterface.js'
 import ImportOrderItemList from './components/ImportOrderItemList.vue'
 import OptionValuePicker from '../product/components/OptionValuePicker.vue'
+import usePageDraft from '../../../composables/usePageDraft.js'
 
 const router = useRouter()
 const toast = useToastStore()
@@ -150,6 +151,26 @@ const items = ref([])
 const searchCode = ref('')
 const searching = ref(false)
 const saving = ref(false)
+const importDraft = usePageDraft(
+    'clothing_manage_import_order_add',
+    () => ({
+        form: form.value,
+        supplierPickerValue: supplierPickerValue.value,
+        warehousePickerValue: warehousePickerValue.value,
+        items: items.value,
+        searchCode: searchCode.value
+    }),
+    saved => {
+        form.value = {...form.value, ...(saved.form || {})}
+        supplierPickerValue.value = saved.supplierPickerValue || ''
+        warehousePickerValue.value = saved.warehousePickerValue || ''
+        items.value = Array.isArray(saved.items) ? saved.items : []
+        searchCode.value = saved.searchCode || ''
+    },
+    {
+        saved: () => saving.value
+    }
+)
 
 const canSave = computed(() => form.value.supplierId && form.value.wareHouseId && form.value.direction)
 const supplierOptions = computed(() => suppliers.value.map(supplier => ({
@@ -316,6 +337,7 @@ async function handleSave() {
             remark: form.value.remark || '',
             importItems
         })
+        importDraft.clear()
         toast.success('采购单草稿已保存')
         router.push('/manage/import-order')
     } catch {} finally {

@@ -27,48 +27,50 @@
                 </div>
             </div>
 
-            <div
-                v-show="isExpanded(group.key)"
-                class="sku-wrapper"
-            >
-                <div class="sku-list-header">
-                    <span class="sku-header-name">SKU 名称</span>
-                    <span class="sku-header-code">SKU 编码</span>
-                    <span class="sku-header-spec">规格</span>
-                    <span class="sku-header-system">系统数量</span>
-                    <span class="sku-header-actual">实际数量</span>
-                    <span class="sku-header-diff">盘点差异</span>
-                    <span class="sku-header-action">操作</span>
-                </div>
+            <Transition name="sku-expand">
                 <div
-                    v-for="item in group.items"
-                    :key="item.skuCode"
-                    class="sku-row"
+                    v-show="isExpanded(group.key)"
+                    class="sku-wrapper"
                 >
-                    <strong class="sku-name">{{ item.name || item.skuCode }}</strong>
-                    <code class="sku-code">{{ item.skuCode }}</code>
-                    <span class="sku-spec">{{ formatSpec(item.spec) }}</span>
-                    <strong class="system-quantity">{{ item.systemQuantity ?? 0 }}</strong>
-                    <input
-                        :value="item.actualQuantity"
-                        class="actual-quantity"
-                        min="0"
-                        step="1"
-                        type="number"
-                        @input="updateQuantity(item, $event)"
-                        @keydown.enter.prevent="focusNext($event)"
-                    />
-                    <strong
-                        :class="diffClass(item)"
-                        class="difference"
-                    >{{ formatDiff(getDifference(item)) }}</strong>
-                    <button
-                        class="remove-button"
-                        type="button"
-                        @click.stop="emit('remove', item.skuCode)"
-                    >移除</button>
+                    <div class="sku-list-header">
+                        <span class="sku-header-name">SKU 名称</span>
+                        <span class="sku-header-code">SKU 编码</span>
+                        <span class="sku-header-spec">规格</span>
+                        <span class="sku-header-system">系统数量</span>
+                        <span class="sku-header-actual">实际数量</span>
+                        <span class="sku-header-diff">盘点差异</span>
+                        <span class="sku-header-action">操作</span>
+                    </div>
+                    <div
+                        v-for="item in group.items"
+                        :key="item.skuCode"
+                        class="sku-row"
+                    >
+                        <strong class="sku-name">{{ item.name || item.skuCode }}</strong>
+                        <code class="sku-code">{{ item.skuCode }}</code>
+                        <span class="sku-spec">{{ formatSpec(item.spec) }}</span>
+                        <strong class="system-quantity">{{ item.systemQuantity ?? 0 }}</strong>
+                        <input
+                            :value="item.actualQuantity"
+                            class="actual-quantity"
+                            min="0"
+                            step="1"
+                            type="number"
+                            @input="updateQuantity(item, $event)"
+                            @keydown.enter.prevent="focusNext($event)"
+                        />
+                        <strong
+                            :class="diffClass(item)"
+                            class="difference"
+                        >{{ formatDiff(getDifference(item)) }}</strong>
+                        <button
+                            class="remove-button"
+                            type="button"
+                            @click.stop="emit('remove', item.skuCode)"
+                        >移除</button>
+                    </div>
                 </div>
-            </div>
+            </Transition>
         </div>
     </div>
 </template>
@@ -303,6 +305,24 @@ function formatSpec(spec) {
     box-shadow: inset 0 3px 8px rgba(22, 83, 78, 0.06);
 }
 
+.sku-expand-enter-active,
+.sku-expand-leave-active {
+    overflow: hidden;
+    transition: max-height 0.24s ease, opacity 0.2s ease;
+}
+
+.sku-expand-enter-from,
+.sku-expand-leave-to {
+    max-height: 0;
+    opacity: 0;
+}
+
+.sku-expand-enter-to,
+.sku-expand-leave-from {
+    max-height: 900px;
+    opacity: 1;
+}
+
 .sku-list-header,
 .sku-row {
     display: flex;
@@ -455,6 +475,13 @@ function formatSpec(spec) {
 
 .diff-zero {
     color: var(--text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sku-expand-enter-active,
+    .sku-expand-leave-active {
+        transition: none;
+    }
 }
 
 @media (max-width: 900px) {

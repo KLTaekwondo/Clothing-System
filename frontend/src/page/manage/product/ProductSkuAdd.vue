@@ -91,6 +91,7 @@ import {useToastStore} from '../../../stores/toastStore.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
 import {useProductOptions} from './composables/useProductOptions.js'
+import usePageDraft from '../../../composables/usePageDraft.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -98,6 +99,16 @@ const toast = useToastStore()
 const product = ref(null)
 const submitting = ref(false)
 const form = ref({name: '', color: '', size: ''})
+const skuDraft = usePageDraft(
+    `clothing_manage_product_sku_add_${route.params.id}`,
+    form,
+    saved => {
+        form.value = {...form.value, ...saved}
+    },
+    {
+        saved: () => submitting.value
+    }
+)
 const {
     loading: optionLoading,
     colorOptions,
@@ -143,6 +154,7 @@ async function handleSubmit() {
             name: form.value.name,
             spec: specPreview.value
         })
+        skuDraft.clear()
         // 后端已返回提示
         goBack()
     } catch {

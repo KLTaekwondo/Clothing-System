@@ -152,12 +152,14 @@
 import {computed, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
+import {useConfirmStore} from '../../../stores/confirmStore.js'
 import stockCheckInterface from '../../../axios/interface/StockCheckInterface.js'
 import {AUDIT_STATUS, AUDIT_STATUS_LABELS} from '../../../constants/auditStatus.js'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToastStore()
+const confirmStore = useConfirmStore()
 const statusLabels = AUDIT_STATUS_LABELS
 const checkOrder = ref(null)
 const items = ref([])
@@ -218,7 +220,12 @@ async function handleCheck() {
 }
 
 async function handleApprove() {
-    if (!window.confirm('审批通过后，将按实际数量更新仓库库存。确定继续吗？')) return
+    const confirmed = await confirmStore.confirm({
+        title: '通过库存盘点单？',
+        message: '审批通过后，将按实际数量更新仓库库存。',
+        confirmText: '确认通过'
+    })
+    if (!confirmed) return
     try {
         await stockCheckInterface.approve(checkOrder.value.id)
         checkOrder.value.status = AUDIT_STATUS.APPROVED
@@ -227,7 +234,13 @@ async function handleApprove() {
 }
 
 async function handleReject() {
-    if (!window.confirm('确定拒绝该库存盘点单吗？')) return
+    const confirmed = await confirmStore.confirm({
+        title: '拒绝库存盘点单？',
+        message: '拒绝后该盘点单将不能继续审核。',
+        confirmText: '确认拒绝',
+        danger: true
+    })
+    if (!confirmed) return
     try {
         await stockCheckInterface.reject(checkOrder.value.id)
         checkOrder.value.status = AUDIT_STATUS.REJECTED
@@ -236,7 +249,13 @@ async function handleReject() {
 }
 
 async function handleDelete() {
-    if (!window.confirm(`确定删除盘点单“${checkOrder.value.stockCheckNo}”吗？`)) return
+    const confirmed = await confirmStore.confirm({
+        title: '删除库存盘点单？',
+        message: `确定删除盘点单“${checkOrder.value.stockCheckNo}”吗？删除后无法恢复。`,
+        confirmText: '确认删除',
+        danger: true
+    })
+    if (!confirmed) return
     deleting.value = true
     try {
         await stockCheckInterface.hardDelete(checkOrder.value.id)

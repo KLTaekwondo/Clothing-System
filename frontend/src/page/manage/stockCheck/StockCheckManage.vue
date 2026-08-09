@@ -35,41 +35,12 @@
         </div>
 
         <div class="check-table-card">
-            <div class="table-toolbar">
-                <div class="filter-tabs">
-                    <button
-                        :class="{ active: statusFilter === '' }"
-                        class="filter-tab"
-                        @click="statusFilter = ''"
-                    >全部</button>
-                    <button
-                        :class="{ active: statusFilter === AUDIT_STATUS.DRAFT }"
-                        class="filter-tab"
-                        @click="statusFilter = AUDIT_STATUS.DRAFT"
-                    >草稿</button>
-                    <button
-                        :class="{ active: statusFilter === AUDIT_STATUS.CHECKING }"
-                        class="filter-tab"
-                        @click="statusFilter = AUDIT_STATUS.CHECKING"
-                    >审核中</button>
-                    <button
-                        :class="{ active: statusFilter === AUDIT_STATUS.APPROVED }"
-                        class="filter-tab"
-                        @click="statusFilter = AUDIT_STATUS.APPROVED"
-                    >已审批</button>
-                    <button
-                        :class="{ active: statusFilter === AUDIT_STATUS.REJECTED }"
-                        class="filter-tab"
-                        @click="statusFilter = AUDIT_STATUS.REJECTED"
-                    >已拒绝</button>
-                </div>
-                <input
-                    v-model="searchQuery"
-                    class="check-search"
-                    placeholder="搜索盘点单号或仓库"
-                    type="text"
-                />
-            </div>
+            <StatusFilterToolbar
+                v-model="statusFilter"
+                v-model:search="searchQuery"
+                :tabs="statusTabs"
+                search-placeholder="搜索盘点单号或仓库"
+            />
 
             <div
                 v-if="loading"
@@ -162,42 +133,31 @@
             />
         </div>
 
-        <div
-            v-if="showDeleteConfirm"
-            class="modal-overlay"
-            @click.self="closeDeleteConfirm"
-        >
-            <div class="confirm-modal">
-                <div class="confirm-body">
-                    <div class="confirm-icon"><IconGraphic name="warning"/></div>
-                    <strong>确定删除盘点单“{{ deleteTarget?.stockCheckNo }}”吗？</strong>
-                    <span>仅草稿状态的盘点单可以删除</span>
-                </div>
-                <div class="confirm-footer">
-                    <button
-                        class="btn-outline"
-                        @click="closeDeleteConfirm"
-                    >取消</button>
-                    <button
-                        :disabled="deleting"
-                        class="btn-danger"
-                        @click="handleDelete"
-                    >{{ deleting ? '删除中...' : '确认删除' }}</button>
-                </div>
-            </div>
-        </div>
+        <DeleteConfirmDialog
+            :loading="deleting"
+            :title="`确定删除盘点单“${deleteTarget?.stockCheckNo || ''}”吗？`"
+            :visible="showDeleteConfirm"
+            hint="仅草稿状态的盘点单可以删除"
+            @cancel="closeDeleteConfirm"
+            @confirm="handleDelete"
+        />
     </div>
 </template>
 
 <script setup>
 import {computed, onMounted, ref} from 'vue'
 import {useToastStore} from '../../../stores/toastStore.js'
+import {useConfirmStore} from '../../../stores/confirmStore.js'
 import stockCheckInterface from '../../../axios/interface/StockCheckInterface.js'
+import DeleteConfirmDialog from '../../../component/DeleteConfirmDialog.vue'
+import StatusFilterToolbar from '../common/StatusFilterToolbar.vue'
 import TablePagination from '../common/TablePagination.vue'
-import {AUDIT_STATUS, AUDIT_STATUS_LABELS} from '../../../constants/auditStatus.js'
+import {AUDIT_STATUS, AUDIT_STATUS_LABELS, AUDIT_STATUS_TABS} from '../../../constants/auditStatus.js'
 
 const toast = useToastStore()
+const confirmStore = useConfirmStore()
 const statusLabels = AUDIT_STATUS_LABELS
+const statusTabs = AUDIT_STATUS_TABS
 const checkList = ref([])
 const loading = ref(true)
 const statusFilter = ref('')
@@ -272,7 +232,12 @@ async function handleCheck(item) {
 }
 
 async function handleApprove(item) {
-    if (!window.confirm(`确定通过盘点单“${item.stockCheckNo}”吗？通过后将按实际数量更新仓库库存。`)) return
+    const confirmed = await confirmStore.confirm({
+        title: '通过库存盘点单？',
+        message: `盘点单“${item.stockCheckNo}”通过后，将按实际数量更新仓库库存。`,
+        confirmText: '确认通过'
+    })
+    if (!confirmed) return
     try {
         await stockCheckInterface.approve(item.id)
         toast.success('盘点单已审核通过，库存已更新')
@@ -395,45 +360,6 @@ async function handleDelete() {
     overflow-x: auto;
 }
 
-.table-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 10px 0 16px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.filter-tabs {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-}
-
-.filter-tab {
-    padding: 7px 13px;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    background: transparent;
-    font-size: 13px;
-}
-
-.filter-tab:hover {
-    background: #f1faf8;
-    color: var(--primary);
-}
-
-.filter-tab.active {
-    background: var(--primary-light);
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.check-search {
-    width: 280px;
-    height: 36px;
-}
-
 .check-table-card .data-table {
     min-width: 980px;
 }
@@ -468,60 +394,14 @@ async function handleDelete() {
     font-size: 12px;
 }
 
-.confirm-modal {
-    width: 400px;
-    overflow: hidden;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.2);
-}
-
-.confirm-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 28px 24px 22px;
-    text-align: center;
-}
-
-.confirm-body span {
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.confirm-icon {
-    width: 48px;
-    height: 48px;
-}
-
-.confirm-icon :deep(img) {
-    width: 100%;
-    height: 100%;
-}
-
-.confirm-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 14px 20px;
-    background: #f8fbfa;
-    border-top: 1px solid var(--border-light);
-}
-
 @media (max-width: 900px) {
-    .page-heading,
-    .table-toolbar {
+    .page-heading {
         align-items: flex-start;
         flex-direction: column;
     }
 
     .check-stat-card {
         width: calc(50% - 7px);
-    }
-
-    .check-search {
-        width: 100%;
     }
 }
 </style>

@@ -77,46 +77,24 @@
                 </tbody>
             </table>
 
-            <div class="pagination-bar">
-                <span class="page-info">
-                    第 {{ pageInfo.page + 1 }} / {{ totalPages }} 页
-                </span>
-                <div class="page-actions">
-                    <button
-                        :disabled="loading || pageInfo.page <= 0"
-                        class="btn-outline btn-sm"
-                        @click="changePage(pageInfo.page - 1)"
-                    >
-                        上一页
-                    </button>
-                    <button
-                        :disabled="loading || pageInfo.page >= totalPages - 1"
-                        class="btn-outline btn-sm"
-                        @click="changePage(pageInfo.page + 1)"
-                    >
-                        下一页
-                    </button>
-                </div>
-            </div>
+            <TablePagination
+                :loading="loading"
+                :page="pageInfo.page"
+                :total-elements="pageInfo.totalElements"
+                :total-pages="totalPages"
+                @change="changePage"
+            />
         </div>
 
-        <div v-if="showDelete" class="modal-overlay" @click.self="showDelete = false">
-            <div class="modal-content confirm-modal">
-                <div class="modal-body">
-                    <div class="confirm-box">
-                        <div class="confirm-icon"><IconGraphic name="warning"/></div>
-                        <div class="confirm-msg">确定要删除“{{ deleteTarget?.name }}”吗？</div>
-                        <div class="confirm-hint">商品会被禁用，已有数据不会被物理删除</div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-outline" @click="showDelete = false">取消</button>
-                    <button :disabled="deleting" class="btn-danger" @click="handleDelete">
-                        {{ deleting ? '处理中...' : '确认删除' }}
-                    </button>
-                </div>
-            </div>
-        </div>
+        <DeleteConfirmDialog
+            :loading="deleting"
+            :title="`确定要删除“${deleteTarget?.name || ''}”吗？`"
+            :visible="showDelete"
+            hint="商品会被禁用，已有数据不会被物理删除"
+            loading-text="处理中..."
+            @cancel="showDelete = false"
+            @confirm="handleDelete"
+        />
     </div>
 </template>
 
@@ -125,6 +103,8 @@ import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
+import DeleteConfirmDialog from '../../../component/DeleteConfirmDialog.vue'
+import TablePagination from '../common/TablePagination.vue'
 import {SEASON_LABELS} from '../../../constants/season.js'
 import {STATUS, STATUS_LABELS} from '../../../constants/status.js'
 
@@ -304,31 +284,6 @@ async function handleDelete() {
 
 tr:hover .actions {
     opacity: 1;
-}
-
-.confirm-modal {
-    min-width: 380px;
-}
-
-.pagination-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border-light);
-    margin-top: 4px;
-}
-
-.page-info {
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.page-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 @media (max-width: 900px) {

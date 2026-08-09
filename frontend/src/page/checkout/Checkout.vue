@@ -125,6 +125,54 @@
         />
 
         <div class="right-container">
+            <div class="member-panel">
+                <div class="member-panel-heading">
+                    <span class="member-panel-icon"><IconGraphic name="user"/></span>
+                    <span class="member-panel-title">当前会员</span>
+                    <button
+                        v-if="selectedMember"
+                        class="member-clear-button"
+                        type="button"
+                        @click="clearMember"
+                    >清除</button>
+                </div>
+                <div v-if="selectedMember" class="member-selected">
+                    <div class="member-selected-main">
+                        <strong>{{ selectedMember.memberName }}</strong>
+                        <span>{{ memberLevelLabels[selectedMember.memberLevel] || selectedMember.memberLevel }}</span>
+                    </div>
+                    <code>{{ selectedMember.memberPhone }}</code>
+                    <div class="member-selected-meta">
+                        <span class="member-discount-value">{{ formatMemberDiscount(selectedMember.memberDiscount) }}</span>
+                        <span>{{ selectedMember.memberPoints ?? 0 }} 积分</span>
+                    </div>
+                    <button
+                        class="member-change-button"
+                        type="button"
+                        @click="focusMemberSearch"
+                    >更换会员</button>
+                </div>
+                <div v-else class="member-search-control">
+                    <span class="member-empty-text">暂未记录会员</span>
+                    <div class="member-search-row">
+                        <input
+                            ref="memberSearchField"
+                            v-model="memberPhoneQuery"
+                            :disabled="memberSearching"
+                            maxlength="11"
+                            placeholder="输入手机号"
+                            type="tel"
+                            @keydown.enter.prevent="searchMember"
+                        />
+                        <button
+                            :disabled="memberSearching || !memberPhoneQuery.trim()"
+                            type="button"
+                            @click="searchMember"
+                        >{{ memberSearching ? '查询中' : '查询' }}</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="tool-bar">
                 <button
                     :disabled="submitting"
@@ -199,7 +247,9 @@ import {useToastStore} from '../../stores/toastStore.js'
 import {useUserStore} from '../../stores/userStore.js'
 import productSkuInterface from '../../axios/interface/ProductSkuInterface.js'
 import employeeInterface from '../../axios/interface/EmployeeInterface.js'
+import memberInterface from '../../axios/interface/MemberInterface.js'
 import orderInterface from '../../axios/interface/OrderInterface.js'
+import {MEMBER_LEVEL_LABELS} from '../../constants/memberLevel.js'
 import {PAY_METHOD_OPTIONS} from '../../constants/payMethod.js'
 import cashIcon from '../../assets/icons/cash.svg'
 import bankCardIcon from '../../assets/icons/bank-card.svg'
@@ -217,6 +267,7 @@ const route = useRoute()
 const router = useRouter()
 
 const payMethodOptions = PAY_METHOD_OPTIONS
+const memberLevelLabels = MEMBER_LEVEL_LABELS
 const payMethodIcons = {
     CASH: cashIcon,
     CARD: bankCardIcon,
@@ -241,6 +292,13 @@ const showEmployeeModal = ref(false)
 const selectedEmployee = computed(() => {
     return employees.value.find(employee => employee.id === selectedEmployeeId.value) || null
 })
+
+// 当前订单会员
+const selectedMember = ref(null)
+const memberPhoneQuery = ref('')
+const memberSearching = ref(false)
+const memberSearchField = ref(null)
+
 // 购物车
 const cart = ref([])
 const totalCardCollapsed = ref(false)
@@ -332,6 +390,65 @@ function selectEmployee(employee) {
     showEmployeeModal.value = false
 }
 
+function getMemberDiscount() {
+    const discount = Number(selectedMember.value?.memberDiscount)
+    if (!Number.isFinite(discount) || discount <= 0) return 1
+    return Math.min(Number(discount.toFixed(2)), 1)
+}
+
+function applyMemberDiscount() {
+    const discount = getMemberDiscount()
+    cart.value.forEach(item => {
+        if (!item.special && !item.manualDiscount) {
+            item.discount = discount
+        }
+    })
+}
+
+async function searchMember() {
+    const phone = memberPhoneQuery.value.trim()
+    if (memberSearching.value || !/^1[3456789]\d{9}$/.test(phone)) {
+        toast.warning('请输入正确的会员手机号')
+        return
+    }
+    memberSearching.value = true
+    try {
+        const member = await memberInterface.searchMember(phone)
+        if (!member?.id) {
+            toast.warning('未找到该会员')
+            return
+        }
+        selectedMember.value = member
+        memberPhoneQuery.value = member.memberPhone || phone
+        applyMemberDiscount()
+        toast.success(`已记录会员「${member.memberName || phone}」`)
+    } catch {
+        // 请求错误由 Axios 拦截器统一提示
+    } finally {
+        memberSearching.value = false
+    }
+}
+
+function clearMember() {
+    selectedMember.value = null
+    memberPhoneQuery.value = ''
+    applyMemberDiscount()
+    focusSearchField()
+}
+
+function focusMemberSearch() {
+    selectedMember.value = null
+    memberPhoneQuery.value = ''
+    applyMemberDiscount()
+    nextTick(() => memberSearchField.value?.focus())
+}
+
+function formatMemberDiscount(value) {
+    const discount = Number(value)
+    if (!Number.isFinite(discount)) return '-'
+    return `${(discount * 10).toFixed(1)} 折`
+}
+
 // 搜索
 function handleSearchKeydown(event) {
     if (!query.value && (event.key === '+' || event.key === '-')) {
@@ -398,6 +515,7 @@ function addToCart(sku) {
     if (existing) {
         existing.quantity++
     } else {
+        const special = Boolean(sku.special)
         cart.value.push({
             productCode: sku.productCode || '',
             productName: sku.productName || '',
@@ -405,8 +523,9 @@ function addToCart(sku) {
             skuName: sku.name || sku.code,
             unitPrice: Number(sku.salePrice || 0),
             quantity: 1,
-            discount: 1,
-            special: Boolean(sku.special),
+            discount: special ? 1 : getMemberDiscount(),
+            special,
+            manualDiscount: false,
             direction
         })
     }
@@ -445,6 +564,8 @@ function clearCart() {
 function resetCurrentOrder() {
     cart.value = []
     currentDraftOrderId.value = null
+    selectedMember.value = null
+    memberPhoneQuery.value = ''
     query.value = ''
     inputDirection.value = 'IN'
     focusSearchField()
@@ -492,9 +613,11 @@ function normalizeDiscount(index) {
     const discount = Number(item.discount)
     if (!Number.isFinite(discount) || discount <= 0) {
         item.discount = 1
+        item.manualDiscount = true
         return
     }
     item.discount = Math.min(Number(discount.toFixed(2)), 1)
+    item.manualDiscount = true
 }
 
 function buildOrderData() {
@@ -519,6 +642,7 @@ function buildOrderData() {
         refundItems,
         actualAmount: Number(actualTotalAmount.value),
         totalAmount: Number(totalAmount.value),
+        memberPhone: selectedMember.value?.memberPhone || '',
         remark: ''
     }
 }
@@ -622,6 +746,7 @@ async function restoreDraft(draftId) {
             quantity: Number(item.quantity || 1),
             discount: item.special ? 1 : Number(item.discount ?? 1),
             special: Boolean(item.special),
+            manualDiscount: true,
             direction: item.direction === 'OUT' ? 'OUT' : 'IN'
         }))
         currentDraftOrderId.value = detail.id
@@ -630,6 +755,22 @@ async function restoreDraft(draftId) {
             return employee.name === detail.employeeName
         })
         selectedEmployeeId.value = draftEmployee?.id || ''
+        if (detail.memberPhone) {
+            try {
+                const restoredMember = await memberInterface.searchMember(detail.memberPhone)
+                if (!restoredMember?.id) throw new Error('member-not-found')
+                selectedMember.value = restoredMember
+                memberPhoneQuery.value = detail.memberPhone
+                applyMemberDiscount()
+            } catch {
+                selectedMember.value = null
+                memberPhoneQuery.value = ''
+                toast.warning('原挂单会员不可用，请重新选择会员')
+            }
+        } else {
+            selectedMember.value = null
+            memberPhoneQuery.value = ''
+        }
         inputDirection.value = 'IN'
         await router.replace({path: '/checkout'})
         focusSearchField()
@@ -1010,6 +1151,160 @@ function handleBeforeUnload(event) {
     padding: 20px;
     background: #fff;
     border-left: 1px solid #e3efed;
+}
+
+.member-panel {
+    width: 100%;
+    margin-bottom: 16px;
+    padding: 14px;
+    color: #fff;
+    background: linear-gradient(145deg, #0f766e, #14b8a6);
+    border: 1px solid #0d9488;
+    border-radius: 12px;
+    box-shadow: 0 8px 22px rgba(13, 148, 136, 0.2);
+}
+
+.member-panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.member-panel-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+}
+
+.member-panel-icon :deep(img) {
+    width: 100%;
+    height: 100%;
+    filter: brightness(0) invert(1);
+}
+
+.member-panel-title {
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.member-clear-button {
+    margin-left: auto;
+    padding: 5px 9px;
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.member-selected {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.member-selected-main,
+.member-selected-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.member-selected-main strong {
+    overflow: hidden;
+    font-size: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.member-selected-main span {
+    flex-shrink: 0;
+    padding: 3px 7px;
+    color: #0f766e;
+    background: #ccfbf1;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.member-selected code {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.member-selected-meta {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.member-discount-value {
+    color: #facc15;
+    font-weight: 800;
+}
+
+.member-change-button {
+    width: 100%;
+    height: 36px;
+    margin-top: 2px;
+    color: #0f766e;
+    background: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.member-search-control {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.member-empty-text {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.member-search-row {
+    display: flex;
+    align-items: stretch;
+}
+
+.member-search-row input {
+    width: calc(100% - 66px);
+    height: 40px;
+    padding: 0 10px;
+    color: #134e4a;
+    background: #fff;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    font-size: 14px;
+}
+
+.member-search-row button {
+    width: 66px;
+    border: none;
+    color: #fff;
+    background: #134e4a;
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.member-search-row button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
 }
 
 .tool-bar {

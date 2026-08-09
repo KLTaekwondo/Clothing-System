@@ -48,6 +48,24 @@ const ManageChildren = [
         meta: {title: '商品详情', icon: 'product'}
     },
     {
+        path: 'member/add',
+        name: 'MemberAdd',
+        component: () => import('../page/manage/member/MemberAdd.vue'),
+        meta: {title: '添加会员', icon: 'employee'}
+    },
+    {
+        path: 'member/:phone',
+        name: 'MemberDetail',
+        component: () => import('../page/manage/member/MemberDetail.vue'),
+        meta: {title: '会员详情', icon: 'employee'}
+    },
+    {
+        path: 'member',
+        name: 'MemberManage',
+        component: () => import('../page/manage/member/MemberManage.vue'),
+        meta: {title: '会员管理', icon: 'employee'}
+    },
+    {
         path: 'employee/add',
         name: 'EmployeeAdd',
         component: () => import('../page/manage/employee/EmployeeAdd.vue'),

@@ -209,6 +209,7 @@
 import {onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
+import {useConfirmStore} from '../../../stores/confirmStore.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
 import {SEASON_LABELS, SEASON_OPTIONS} from '../../../constants/season.js'
@@ -219,6 +220,7 @@ import OptionValuePicker from './components/OptionValuePicker.vue'
 const route = useRoute()
 const router = useRouter()
 const toast = useToastStore()
+const confirmStore = useConfirmStore()
 const seasonLabels = SEASON_LABELS
 const seasonOptions = SEASON_OPTIONS
 const statusLabels = STATUS_LABELS
@@ -328,7 +330,13 @@ async function saveEdit() {
 }
 
 async function deleteSku(sku) {
-    if (!confirm(`确定要删除 SKU「${sku.name}」吗？`)) return
+    const confirmed = await confirmStore.confirm({
+        title: '删除 SKU？',
+        message: `确定删除 SKU「${sku.name}」吗？`,
+        confirmText: '确认删除',
+        danger: true
+    })
+    if (!confirmed) return
     try {
         await productSkuInterface.softDelete(sku.id)
         skuList.value = await productSkuInterface.searchListByProductId(route.params.id)

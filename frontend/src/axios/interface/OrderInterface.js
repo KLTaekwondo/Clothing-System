@@ -1,5 +1,7 @@
 import orderAPI from "../api/OrderAPI.js";
 
+const Now = new Date().setHours(0, 0, 0, 0);
+const NowEnd = new Date().setHours(24, 59, 59, 999);
 function orderInterface() {
     const complete = async (data) => {
         await orderAPI.completeOrder(data);
@@ -48,8 +50,8 @@ function orderInterface() {
         };
     }
 
-    const searchCurrentCompletePage = async (page = 0, size = 10) => {
-        const data = await orderAPI.searchCurrentCompleteOrderPage(page, size);
+    const searchCurrentCompletePage = async (page = 0, size = 10,startTime = Now,endTime = NowEnd) => {
+        const data = await orderAPI.searchCurrentCompleteOrderPage(page, size,startTime,endTime);
         return data || {
             content: [],
             totalElements: 0,

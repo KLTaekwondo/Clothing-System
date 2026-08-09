@@ -122,6 +122,7 @@
 import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {onBeforeRouteLeave, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
+import {useConfirmStore} from '../../../stores/confirmStore.js'
 import stockCheckInterface from '../../../axios/interface/StockCheckInterface.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js'
@@ -129,9 +130,11 @@ import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
 import StockCheckItemList from './components/StockCheckItemList.vue'
 import OptionValuePicker from '../product/components/OptionValuePicker.vue'
+import usePageDraft from '../../../composables/usePageDraft.js'
 
 const router = useRouter()
 const toast = useToastStore()
+const confirmStore = useConfirmStore()
 const warehouses = ref([])
 const warehousePickerValue = ref('')
 const warehouseLoading = ref(false)
@@ -146,6 +149,26 @@ const candidates = ref([])
 const items = ref([])
 const saved = ref(false)
 const previousWarehouseId = ref('')
+const stockCheckDraft = usePageDraft(
+    'clothing_manage_stock_check_add',
+    () => ({
+        form: form.value,
+        warehousePickerValue: warehousePickerValue.value,
+        searchCode: searchCode.value,
+        items: items.value,
+        previousWarehouseId: previousWarehouseId.value
+    }),
+    draft => {
+        form.value = {...form.value, ...(draft.form || {})}
+        warehousePickerValue.value = draft.warehousePickerValue || ''
+        searchCode.value = draft.searchCode || ''
+        items.value = Array.isArray(draft.items) ? draft.items : []
+        previousWarehouseId.value = draft.previousWarehouseId || form.value.wareHouseId
+    },
+    {
+        saved: () => saving.value || saved.value
+    }
+)
 
 const warehouseOptions = computed(() => warehouses.value
     .filter(warehouse => warehouse.checkStatus !== 'UNDER_CHECK')
@@ -195,9 +218,14 @@ onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 
-onBeforeRouteLeave(() => {
+onBeforeRouteLeave(async () => {
     if (!hasUnsavedContent.value) return true
-    return window.confirm('当前盘点内容尚未保存，确定要离开吗？')
+    return await confirmStore.confirm({
+        title: '放弃未保存的盘点？',
+        message: '当前盘点内容尚未保存，离开后修改将丢失。',
+        confirmText: '确定离开',
+        danger: true
+    })
 })
 
 async function searchSku() {
@@ -316,13 +344,20 @@ function removeItem(skuCode) {
     if (index !== -1) items.value.splice(index, 1)
 }
 
-function clearItems() {
-    if (items.value.length && !window.confirm('确定清空全部盘点项吗？')) return
+async function clearItems() {
+    if (!items.value.length) return
+    const confirmed = await confirmStore.confirm({
+        title: '清空盘点项？',
+        message: '清空后当前已录入的盘点 SKU 将被移除。',
+        confirmText: '确定清空',
+        danger: true
+    })
+    if (!confirmed) return
     items.value = []
     candidates.value = []
 }
 
-function handleWarehouseChange(selectedWarehouse) {
+async function handleWarehouseChange(selectedWarehouse) {
     candidates.value = []
     searchCode.value = ''
     if (!items.value.length) {
@@ -330,7 +365,13 @@ function handleWarehouseChange(selectedWarehouse) {
         previousWarehouseId.value = selectedWarehouse.id
         return
     }
-    if (window.confirm('切换仓库会清空当前盘点项，确定继续吗？')) {
+    const confirmed = await confirmStore.confirm({
+        title: '切换盘点仓库？',
+        message: '切换仓库会清空当前全部盘点项。',
+        confirmText: '切换并清空',
+        danger: true
+    })
+    if (confirmed) {
         form.value.wareHouseId = selectedWarehouse.id
         items.value = []
         previousWarehouseId.value = selectedWarehouse.id
@@ -359,6 +400,7 @@ async function handleSave() {
                 actualQuantity: Number(item.actualQuantity)
             }))
         })
+        stockCheckDraft.clear()
         saved.value = true
         toast.success('库存盘点单草稿已保存')
         await router.push('/manage/stock-check')

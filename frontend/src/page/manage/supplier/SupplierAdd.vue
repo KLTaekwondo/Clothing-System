@@ -106,6 +106,7 @@ import {onBeforeRouteLeave, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import {useUserStore} from '../../../stores/userStore.js'
 import supplierInterface from '../../../axios/interface/SupplierInterface.js'
+import usePageDraft from '../../../composables/usePageDraft.js'
 
 const router = useRouter()
 const toast = useToastStore()
@@ -121,6 +122,17 @@ const form = ref({
     contactPhone: '',
     remark: ''
 })
+
+const supplierDraft = usePageDraft(
+    'clothing_manage_supplier_add',
+    form,
+    saved => {
+        form.value = {...form.value, ...saved}
+    },
+    {
+        saved: () => submitting.value || saved.value
+    }
+)
 
 const canSubmit = computed(() => {
     return form.value.supplierCode.trim() && form.value.supplierName.trim()
@@ -156,6 +168,7 @@ async function handleSubmit() {
             adminId
         })
         saved.value = true
+        supplierDraft.clear()
         await router.push('/manage/supplier')
     } catch {
         // 拦截器已处理

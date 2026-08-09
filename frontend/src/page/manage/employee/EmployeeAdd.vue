@@ -79,6 +79,7 @@ import {useRouter} from 'vue-router'
 import employeeInterface from '../../../axios/interface/EmployeeInterface.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import OptionValuePicker from '../product/components/OptionValuePicker.vue'
+import usePageDraft from '../../../composables/usePageDraft.js'
 
 const router = useRouter()
 const submitting = ref(false)
@@ -90,6 +91,18 @@ const form = ref({
     name: '',
     wareHouseId: ''
 })
+
+const employeeDraft = usePageDraft(
+    'clothing_manage_employee_add',
+    () => ({form: form.value, warehousePickerValue: warehousePickerValue.value}),
+    saved => {
+        form.value = {...form.value, ...(saved.form || {})}
+        warehousePickerValue.value = saved.warehousePickerValue || ''
+    },
+    {
+        saved: () => submitting.value
+    }
+)
 
 const warehouseOptions = computed(() => warehouses.value.map(item => ({
     id: item.id,
@@ -122,6 +135,7 @@ async function handleSubmit() {
             name: form.value.name.trim(),
             wareHouseId: Number(form.value.wareHouseId)
         })
+        employeeDraft.clear()
         await router.push('/manage/employee')
     } catch {
         // 请求错误由 Axios 拦截器统一提示

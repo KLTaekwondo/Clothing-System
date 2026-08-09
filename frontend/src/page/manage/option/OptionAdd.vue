@@ -66,6 +66,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import optionValueInterface from '../../../axios/interface/OptionValueInterface.js'
 import {OPTION_TYPE_OPTIONS} from '../../../constants/optionType.js'
+import usePageDraft from '../../../composables/usePageDraft.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -76,6 +77,16 @@ const initialType = typeOptions.some(item => item.value === route.query.type)
     : ''
 const submitting = ref(false)
 const form = ref({optionType: initialType, optionValue: ''})
+const optionDraft = usePageDraft(
+    'clothing_manage_option_add',
+    form,
+    saved => {
+        form.value = {...form.value, ...saved}
+    },
+    {
+        saved: () => submitting.value
+    }
+)
 
 async function handleSubmit() {
     if (!form.value.optionType) {
@@ -88,6 +99,7 @@ async function handleSubmit() {
             optionType: form.value.optionType,
             optionValue: form.value.optionValue.trim()
         })
+        optionDraft.clear()
         goBack()
     } catch {
         // 拦截器已处理

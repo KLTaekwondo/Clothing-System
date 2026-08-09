@@ -153,6 +153,7 @@
                 v-else
                 :groups="groupedItems"
                 @remove="removeSku"
+                @update-quantity="updateQuantity"
             />
         </template>
     </div>
@@ -162,6 +163,7 @@
 import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {onBeforeRouteLeave, useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
+import {useConfirmStore} from '../../../stores/confirmStore.js'
 import importOrderInterface from '../../../axios/interface/ImportOrderInterface.js'
 import supplierInterface from '../../../axios/interface/SupplierInterface.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
@@ -174,6 +176,7 @@ import {AUDIT_STATUS} from '../../../constants/auditStatus.js'
 const route = useRoute()
 const router = useRouter()
 const toast = useToastStore()
+const confirmStore = useConfirmStore()
 const order = ref(null)
 const suppliers = ref([])
 const supplierPickerValue = ref('')
@@ -264,9 +267,14 @@ onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 
-onBeforeRouteLeave(() => {
+onBeforeRouteLeave(async () => {
     if (!dirty.value) return true
-    return window.confirm('当前采购订单修改尚未保存，确定要离开吗？')
+    return await confirmStore.confirm({
+        title: '放弃未保存的采购单？',
+        message: '当前采购订单修改尚未保存，离开后修改将丢失。',
+        confirmText: '确定离开',
+        danger: true
+    })
 })
 
 function syncSupplierId(value) {
@@ -359,6 +367,13 @@ async function searchProduct() {
     }
 }
 
+function updateQuantity(skuId, quantity) {
+    const item = items.value.find(value => value.skuId === skuId)
+    if (!item) return
+    item.quantity = quantity
+    dirty.value = true
+}
+
 function removeSku(skuId) {
     const index = items.value.findIndex(item => item.skuId === skuId)
     if (index !== -1) {
@@ -367,8 +382,15 @@ function removeSku(skuId) {
     }
 }
 
-function clearItems() {
-    if (!items.value.length || !window.confirm('确定清空全部采购项吗？')) return
+async function clearItems() {
+    if (!items.value.length) return
+    const confirmed = await confirmStore.confirm({
+        title: '清空采购项？',
+        message: '清空后当前采购单中的所有 SKU 将被移除。',
+        confirmText: '确定清空',
+        danger: true
+    })
+    if (!confirmed) return
     items.value = []
     dirty.value = true
 }

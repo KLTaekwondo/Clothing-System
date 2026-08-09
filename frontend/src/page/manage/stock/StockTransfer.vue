@@ -169,7 +169,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useToastStore} from '../../../stores/toastStore.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js'
@@ -179,6 +179,7 @@ import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js
 import OptionValuePicker from '../product/components/OptionValuePicker.vue'
 
 const toast = useToastStore()
+const transferDraftStorageKey = 'clothing_stock_transfer_draft'
 const warehouses = ref([])
 const sourceId = ref('')
 const targetId = ref('')
@@ -208,7 +209,14 @@ const selectedSkuCount = computed(() => {
 })
 const hasAnyTransfer = computed(() => selectedSkuCount.value > 0)
 
+watch(
+    [sourceId, targetId, sourcePickerValue, targetPickerValue, searchCode, formList],
+    () => saveDraft(),
+    {deep: true}
+)
+
 onMounted(async () => {
+    restoreDraft()
     warehouseLoading.value = true
     try {
         warehouses.value = await wareHouseInterface.searchList()
@@ -236,8 +244,41 @@ function formatWarehouseOption(warehouse) {
     return warehouse.name
 }
 
+function saveDraft() {
+    if (!sourceId.value && !targetId.value && formList.value.length === 0 && !searchCode.value) {
+        sessionStorage.removeItem(transferDraftStorageKey)
+        return
+    }
+    sessionStorage.setItem(transferDraftStorageKey, JSON.stringify({
+        sourceId: sourceId.value,
+        targetId: targetId.value,
+        sourcePickerValue: sourcePickerValue.value,
+        targetPickerValue: targetPickerValue.value,
+        searchCode: searchCode.value,
+        formList: formList.value
+    }))
+}
+
+function restoreDraft() {
+    try {
+        const saved = JSON.parse(sessionStorage.getItem(transferDraftStorageKey) || 'null')
+        if (!saved || !Array.isArray(saved.formList)) return
+        sourceId.value = saved.sourceId || ''
+        targetId.value = saved.targetId || ''
+        sourcePickerValue.value = saved.sourcePickerValue || ''
+        targetPickerValue.value = saved.targetPickerValue || ''
+        searchCode.value = saved.searchCode || ''
+        formList.value = saved.formList
+        keyCounter = formList.value.reduce((max, item) => Math.max(max, Number(item.key) || 0), 0)
+        toast.info('已恢复上次未完成的调货内容')
+    } catch {
+        sessionStorage.removeItem(transferDraftStorageKey)
+    }
+}
+
 function clearAll() {
     formList.value = []
+    sessionStorage.removeItem(transferDraftStorageKey)
 }
 
 async function searchProduct() {
@@ -392,6 +433,7 @@ async function transferAll() {
         })
         toast.success(`调拨单已保存草稿，共 ${transferOrderItems.length} 个 SKU，请到调拨订单列表提交审核`)
         formList.value = []
+        sessionStorage.removeItem(transferDraftStorageKey)
     } catch {
         toast.error('创建调拨单失败，请检查库存是否充足')
     } finally {

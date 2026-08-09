@@ -27,4 +27,5 @@ public class OrderInfo extends BaseInfo {
     private String employeeName; // 关联员工姓名
     private String warehouseName; // 关联仓库名称
     private DirectionEnum direction;// 业务方向(IN:售出商品/OUT:退货商品)
+    private String memberPhone;// 会员手机号
 }

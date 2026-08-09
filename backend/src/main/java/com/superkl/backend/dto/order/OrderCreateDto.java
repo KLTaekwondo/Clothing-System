@@ -36,4 +36,6 @@ public class OrderCreateDto {
 
     @Size(max = 100, message = "备注长度不能超过100")
     private String remark;
+
+    private String memberPhone;
 }

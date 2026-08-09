@@ -78,6 +78,7 @@
 import {computed, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
+import usePageDraft from '../../../composables/usePageDraft.js'
 
 const router = useRouter()
 const submitting = ref(false)
@@ -86,6 +87,18 @@ const form = ref({
     name: '',
     password: ''
 })
+
+const warehouseDraft = usePageDraft(
+    'clothing_manage_warehouse_add',
+    form,
+    saved => {
+        form.value = {...form.value, ...saved}
+    },
+    {
+        saved: () => submitting.value,
+        onRestored: () => {}
+    }
+)
 
 const canSubmit = computed(() => {
     const passwordPattern = /^[a-zA-Z0-9_]{6,12}$/
@@ -103,6 +116,7 @@ async function handleSubmit() {
             name: form.value.name.trim(),
             password: form.value.password
         })
+        warehouseDraft.clear()
         await router.push('/manage/warehouse')
     } catch {
         // 请求错误由 Axios 拦截器统一提示

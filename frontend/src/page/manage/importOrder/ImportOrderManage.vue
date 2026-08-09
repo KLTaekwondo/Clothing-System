@@ -32,16 +32,12 @@
         </div>
 
         <div class="order-table-card">
-            <div class="table-toolbar">
-                <div class="filter-tabs">
-                    <button :class="{ active: statusFilter === '' }" class="filter-tab" @click="statusFilter = ''">全部</button>
-                    <button :class="{ active: statusFilter === AUDIT_STATUS.DRAFT }" class="filter-tab" @click="statusFilter = AUDIT_STATUS.DRAFT">草稿</button>
-                    <button :class="{ active: statusFilter === AUDIT_STATUS.CHECKING }" class="filter-tab" @click="statusFilter = AUDIT_STATUS.CHECKING">审核中</button>
-                    <button :class="{ active: statusFilter === AUDIT_STATUS.APPROVED }" class="filter-tab" @click="statusFilter = AUDIT_STATUS.APPROVED">已审批</button>
-                    <button :class="{ active: statusFilter === AUDIT_STATUS.REJECTED }" class="filter-tab" @click="statusFilter = AUDIT_STATUS.REJECTED">已拒绝</button>
-                </div>
-                <input v-model="searchQuery" class="order-search" placeholder="搜索单号或供应商" type="text"/>
-            </div>
+            <StatusFilterToolbar
+                v-model="statusFilter"
+                v-model:search="searchQuery"
+                :tabs="statusTabs"
+                search-placeholder="搜索单号或供应商"
+            />
 
             <div v-if="loading" class="loading-overlay">
                 <div class="loading-spinner"></div>
@@ -103,21 +99,14 @@
             />
         </div>
 
-        <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="showDeleteConfirm = false">
-            <div class="modal-content confirm-modal">
-                <div class="modal-body">
-                    <div class="confirm-box">
-                        <div class="confirm-icon"><IconGraphic name="warning"/></div>
-                        <div class="confirm-msg">确定要删除采购单“{{ deleteTarget?.importOrderNo }}”吗？</div>
-                        <div class="confirm-hint">仅草稿状态的订单可以删除</div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-outline" @click="showDeleteConfirm = false">取消</button>
-                    <button :disabled="deleting" class="btn-danger" @click="handleDelete">{{ deleting ? '删除中...' : '确认删除' }}</button>
-                </div>
-            </div>
-        </div>
+        <DeleteConfirmDialog
+            :loading="deleting"
+            :title="`确定要删除采购单“${deleteTarget?.importOrderNo || ''}”吗？`"
+            :visible="showDeleteConfirm"
+            hint="仅草稿状态的订单可以删除"
+            @cancel="showDeleteConfirm = false"
+            @confirm="handleDelete"
+        />
     </div>
 </template>
 
@@ -125,14 +114,19 @@
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
+import {useConfirmStore} from '../../../stores/confirmStore.js'
 import importOrderInterface from '../../../axios/interface/ImportOrderInterface.js'
+import DeleteConfirmDialog from '../../../component/DeleteConfirmDialog.vue'
+import StatusFilterToolbar from '../common/StatusFilterToolbar.vue'
 import TablePagination from '../common/TablePagination.vue'
-import {AUDIT_STATUS, AUDIT_STATUS_LABELS, DIRECTION_LABELS} from '../../../constants/auditStatus.js'
+import {AUDIT_STATUS, AUDIT_STATUS_LABELS, AUDIT_STATUS_TABS, DIRECTION_LABELS} from '../../../constants/auditStatus.js'
 
 const router = useRouter()
 const toast = useToastStore()
+const confirmStore = useConfirmStore()
 const statusLabels = AUDIT_STATUS_LABELS
 const directionLabels = DIRECTION_LABELS
+const statusTabs = AUDIT_STATUS_TABS
 
 const orderList = ref([])
 const loading = ref(true)
@@ -208,7 +202,12 @@ async function handleCheck(item) {
 }
 
 async function handleApprove(item) {
-    if (!window.confirm(`确定通过采购单“${item.importOrderNo}”吗？通过后将变更库存。`)) return
+    const confirmed = await confirmStore.confirm({
+        title: '通过采购单？',
+        message: `采购单“${item.importOrderNo}”通过后将变更库存。`,
+        confirmText: '确认通过'
+    })
+    if (!confirmed) return
     try {
         await importOrderInterface.approve(item.id)
         toast.success('采购单已审核通过')
@@ -336,45 +335,6 @@ async function handleDelete() {
     overflow-x: auto;
 }
 
-.table-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 10px 0 16px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.filter-tabs {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-}
-
-.filter-tab {
-    padding: 7px 13px;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    background: transparent;
-    font-size: 13px;
-}
-
-.filter-tab:hover {
-    background: #f1faf8;
-    color: var(--primary);
-}
-
-.filter-tab.active {
-    background: var(--primary-light);
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.order-search {
-    width: 260px;
-    height: 36px;
-}
-
 .order-table-card .data-table {
     min-width: 980px;
 }
@@ -404,12 +364,8 @@ async function handleDelete() {
     padding: 4px 10px;
 }
 
-.confirm-modal {
-    min-width: 380px;
-}
-
 @media (max-width: 900px) {
-    .page-heading, .table-toolbar {
+    .page-heading {
         align-items: flex-start;
         flex-direction: column;
     }
@@ -420,10 +376,6 @@ async function handleDelete() {
 
     .order-stat-card {
         width: calc(50% - 7px);
-    }
-
-    .order-search {
-        width: 100%;
     }
 }
 </style>

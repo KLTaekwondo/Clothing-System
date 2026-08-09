@@ -42,7 +42,7 @@ public class ProductSkuService {
         Product product = productRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new BusinessException(403, "商品不存在"));
         if(!product.isEnabled()){
-            throw new BusinessException(405, "商品已被禁用，不能新增SKU");
+            throw new BusinessException(405, product.getProductName()+"商品已被禁用，不能新增SKU");
         }
         // 转化为Sku实体
         ProductSku productSku = ProductSkuConverter.toEntity(dto, product);
@@ -133,10 +133,10 @@ public class ProductSkuService {
         ProductSku productSku = productSkuRepository.findBySkuCode(code).orElse(null);
         if (productSku != null) {
             if (!productSku.getProduct().isEnabled()) {
-                throw new BusinessException(405, "商品已禁用");
+                throw new BusinessException(405, productSku.getProduct().getProductName()+"商品已禁用");
             }
             if (!productSku.isEnabled()) {
-                throw new BusinessException(405, "商品SKU已禁用");
+                throw new BusinessException(405, productSku.getSkuName()+"商品SKU已禁用");
             }
             return List.of(ProductSkuConverter.toCheckInfo(productSku));
         }
@@ -146,13 +146,13 @@ public class ProductSkuService {
                 .orElseThrow(() -> new BusinessException(403, "商品不存在"));
 
         if (!product.isEnabled()) {
-            throw new BusinessException(405, "商品已禁用");
+            throw new BusinessException(405, product.getProductName()+"商品已禁用");
         }
 
         // 只返回启用状态的商品SKU列表
         List<ProductSku> productSkus = productSkuRepository.findByProductCodeAndStatus(code, StatusEnum.ENABLE);
         if (productSkus.isEmpty()) {
-            throw new BusinessException("该商品下没有可用SKU");
+            throw new BusinessException(405, product.getProductName()+"该商品下没有可用SKU");
         }
 
         return ProductSkuConverter.toCheckInfoList(productSkus);

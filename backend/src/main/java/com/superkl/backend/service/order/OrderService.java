@@ -6,6 +6,7 @@ import com.superkl.backend.converter.order.OrderConverter;
 import com.superkl.backend.dto.order.OrderCreateDto;
 import com.superkl.backend.dto.stock.StockContext;
 import com.superkl.backend.entity.basic.Employee;
+import com.superkl.backend.entity.basic.Member;
 import com.superkl.backend.entity.order.Order;
 import com.superkl.backend.entity.order.OrderItem;
 import com.superkl.backend.entity.basic.WareHouse;
@@ -20,6 +21,7 @@ import com.superkl.backend.info.order.OrderWithItemsInfo;
 import com.superkl.backend.repository.basic.EmployeeRepository;
 import com.superkl.backend.repository.order.OrderRepository;
 import com.superkl.backend.repository.basic.WareHouseRepository;
+import com.superkl.backend.service.basic.MemberService;
 import com.superkl.backend.service.stock.WareHouseStockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +40,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private final MemberService memberService;
     private final OrderRepository orderRepository;
     private final OrderItemService orderItemService;
     private final EmployeeRepository employeeRepository;
@@ -117,10 +121,28 @@ public class OrderService {
 
         // 6.保存订单
         orderRepository.save(order);
+        // 7.处理用户积分
+        // 如果不是空，才处理会员积分，否则不处理
+        if(order.getMemberPhone() != null){
+            // 先拿取会员信息，避免链式调用过长
+            Member member = memberService.getFromPhone(order.getMemberPhone());
+            Long memberId = member.getMemberId();
+            // 如果订单总价大于0，才处理会员积分
+            if(order.getActualPrice().compareTo(BigDecimal.ZERO) > 0) {
+                Integer points = order.getActualPrice().multiply(BigDecimal.valueOf(100)).intValueExact();
+                memberService.increasePoints(memberId, points);
+            }
+
+            if(order.getActualPrice().compareTo(BigDecimal.ZERO) < 0){
+                Integer points = order.getActualPrice().multiply(BigDecimal.valueOf(-100)).intValueExact();
+                memberService.decreasePoints(memberId, points);
+            }
+        }
+
         // 日志记录
         RequestUser.log();
         log.info("完成订单，订单编号：{} ，订单总价：{} ，数量：{}",
-                order.getOrderNo(),order.getTotalPrice(),order.getOrderItems().size());
+                order.getOrderNo(),order.getActualPrice(),order.getOrderItems().size());
     }
 
     // 3.更新草稿订单
@@ -192,9 +214,12 @@ public class OrderService {
 
     // 8.查询当前仓库的完成订单列表
     @Transactional(readOnly = true)
-    public PageResult<OrderInfo> searchCompletePageByWareHouseId(Pageable pageable) {
+    public PageResult<OrderInfo> searchCompletePageByWareHouseId(LocalDateTime startTime,
+                                                                 LocalDateTime endTime,
+                                                                 Pageable pageable) {
         Long wareHouseId = RequestUser.notNull().getRequestId();
-        Page<Order> orders = orderRepository.findStatusByWareHouseId(wareHouseId,OrderStatusEnum.COMPLETED,pageable);
+        Page<Order> orders = orderRepository.findPageByTimeAndWId(startTime, endTime,
+                OrderStatusEnum.COMPLETED,wareHouseId,pageable);
         return OrderConverter.toInfoPage(orders);
     }
 
@@ -207,10 +232,10 @@ public class OrderService {
                 .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
         // 1.1 检查仓库和销售员状态是否正常
         if(!employee.isEnabled()){
-            throw new BusinessException(405, "员工已禁用！不可创建订单！");
+            throw new BusinessException(405, employee.getEmployeeName()+"员工已禁用！不可创建订单！");
         }
         if(!wareHouse.isEnabled()){
-            throw new BusinessException(405, "仓库已禁用！不可创建订单！");
+            throw new BusinessException(405, wareHouse.getWareHouseName()+"仓库已禁用！不可创建订单！");
         }
 
         // 1.2 检查员工是否属于该仓库
@@ -218,7 +243,7 @@ public class OrderService {
         Long targetWareHouseId = wareHouse.getWareHouseId();
 
         if(!employeeWareHouseId.equals(targetWareHouseId)){
-            throw new BusinessException("员工不属于该仓库！不可创建订单！");
+            throw new BusinessException(405, employee.getEmployeeName()+"员工不属于"+wareHouse.getWareHouseName()+"仓库！不可创建订单！");
         }
 
         // 2.创建商品项
@@ -268,6 +293,7 @@ public class OrderService {
         order.setOrderItems(items);
         order.setEmployee(employee);
         order.setWareHouse(wareHouse);
+        order.setMemberPhone(dto.getMemberPhone());
     }
 
     // 库存管理

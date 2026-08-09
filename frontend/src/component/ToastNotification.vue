@@ -130,4 +130,11 @@ const icons = {
     opacity: 0;
     transform: translateX(80px);
 }
+@media (prefers-reduced-motion: reduce) {
+    .toast-enter-active,
+    .toast-leave-active,
+    .toast-move {
+        transition: none;
+    }
+}
 </style>

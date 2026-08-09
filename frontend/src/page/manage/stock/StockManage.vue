@@ -114,6 +114,7 @@
 import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {onBeforeRouteLeave} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
+import {useConfirmStore} from '../../../stores/confirmStore.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
@@ -121,6 +122,7 @@ import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js
 import OptionValuePicker from '../product/components/OptionValuePicker.vue'
 
 const toast = useToastStore()
+const confirmStore = useConfirmStore()
 const warehouses = ref([])
 const warehouseId = ref('')
 const warehousePickerValue = ref('')
@@ -154,9 +156,14 @@ onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 
-onBeforeRouteLeave(() => {
+onBeforeRouteLeave(async () => {
     if (!hasAnyChanges.value) return true
-    return window.confirm('当前有未保存的库存修改，确定要离开吗？')
+    return await confirmStore.confirm({
+        title: '放弃库存修改？',
+        message: '当前有未保存的库存修改，离开后修改将丢失。',
+        confirmText: '确定离开',
+        danger: true
+    })
 })
 
 function syncWarehouseId(value) {
@@ -317,14 +324,30 @@ async function saveAll() {
     }
 }
 
-function clearAll() {
-    if (hasAnyChanges.value && !window.confirm('当前有未保存的修改，确定要清空全部吗？')) return
+async function clearAll() {
+    if (hasAnyChanges.value) {
+        const confirmed = await confirmStore.confirm({
+            title: '清空库存修改？',
+            message: '当前有未保存的库存修改，清空后修改将丢失。',
+            confirmText: '确定清空',
+            danger: true
+        })
+        if (!confirmed) return
+    }
     formList.value = []
 }
 
-function removeItem(index) {
+async function removeItem(index) {
     const item = formList.value[index]
-    if (item?.hasChanges && !window.confirm(`「${item.product.name}」有未保存的修改，确定要移除吗？`)) return
+    if (item?.hasChanges) {
+        const confirmed = await confirmStore.confirm({
+            title: '移除商品？',
+            message: `「${item.product.name}」有未保存的库存修改。`,
+            confirmText: '确定移除',
+            danger: true
+        })
+        if (!confirmed) return
+    }
     formList.value.splice(index, 1)
 }
 
