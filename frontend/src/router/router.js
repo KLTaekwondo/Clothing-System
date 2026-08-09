@@ -28,6 +28,12 @@ const routes = [
         name: 'DraftOrderManage',
         component: () => import('../page/checkout/DraftOrderManage.vue'),
         meta: {title: '挂单查询'}
+    },
+    {
+        path: '/checkout/orders',
+        name: 'CheckoutOrderManage',
+        component: () => import('../page/checkout/CheckoutOrderManage.vue'),
+        meta: {title: '订单查询'}
     }
 ]
 

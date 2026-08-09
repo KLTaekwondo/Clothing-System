@@ -191,6 +191,14 @@
                     <span class="tool-label">挂单查询</span>
                 </button>
                 <button
+                    :disabled="submitting"
+                    class="tool-bar-item"
+                    @click="openOrderPage"
+                >
+                    <span class="tool-icon"><IconGraphic name="order"/></span>
+                    <span class="tool-label">订单查询</span>
+                </button>
+                <button
                     :class="inputDirection === 'OUT' ? 'tool-bar-item-active' : 'tool-bar-item'"
                     @click="setInputDirection(inputDirection === 'OUT' ? 'IN' : 'OUT')"
                 >
@@ -729,6 +737,22 @@ function openDraftPage() {
         () => {
             allowRouteLeave = true
             router.push('/checkout/drafts')
+        }
+    )
+}
+
+// 进入订单查询页
+function openOrderPage() {
+    if (cart.value.length === 0) {
+        router.push('/checkout/orders')
+        return
+    }
+    openConfirmModal(
+        '打开订单查询',
+        '当前购物车尚未保存，离开后内容会丢失。确定打开订单查询吗？',
+        () => {
+            allowRouteLeave = true
+            router.push('/checkout/orders')
         }
     )
 }

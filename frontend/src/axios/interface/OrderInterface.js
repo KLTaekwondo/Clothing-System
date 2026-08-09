@@ -1,7 +1,15 @@
 import orderAPI from "../api/OrderAPI.js";
 
-const Now = new Date().setHours(0, 0, 0, 0);
-const NowEnd = new Date().setHours(24, 59, 59, 999);
+// 生成 LocalDateTime 可解析的 ISO 字符串（yyyy-MM-ddTHH:mm:ss）
+function formatDateTime(date, endOfDay) {
+    const pad = n => String(n).padStart(2, '0')
+    const datePart = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+    return `${datePart}T${endOfDay ? '23:59:59' : '00:00:00'}`
+}
+
+// 默认查询范围：今天
+const Now = formatDateTime(new Date(), false)
+const NowEnd = formatDateTime(new Date(), true)
 function orderInterface() {
     const complete = async (data) => {
         await orderAPI.completeOrder(data);
