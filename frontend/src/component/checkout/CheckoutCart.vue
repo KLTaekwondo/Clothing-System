@@ -108,7 +108,7 @@
 
 <script setup>
 import {computed} from 'vue'
-import IconGraphic from '../../../component/IconGraphic.vue'
+import IconGraphic from '../IconGraphic.vue'
 
 const props = defineProps({
     items: {

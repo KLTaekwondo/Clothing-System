@@ -155,7 +155,7 @@ import {useRouter} from 'vue-router'
 import orderInterface from '../../axios/interface/OrderInterface.js'
 import {PAY_METHOD_LABELS} from '../../constants/payMethod.js'
 import IconGraphic from '../../component/IconGraphic.vue'
-import TablePagination from '../manage/common/TablePagination.vue'
+import TablePagination from '../../component/common/TablePagination.vue'
 
 const router = useRouter()
 const draftList = ref([])

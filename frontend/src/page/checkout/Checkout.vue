@@ -264,10 +264,10 @@ import bankCardIcon from '../../assets/icons/bank-card.svg'
 import alipayIcon from '../../assets/icons/alipay.svg'
 import wechatIcon from '../../assets/icons/wechat.svg'
 import IconGraphic from '../../component/IconGraphic.vue'
-import CheckoutCart from './components/CheckoutCart.vue'
-import CheckoutConfirmModal from './components/CheckoutConfirmModal.vue'
-import EmployeeSelectModal from './components/EmployeeSelectModal.vue'
-import SkuSelectModal from './components/SkuSelectModal.vue'
+import CheckoutCart from '../../component/checkout/CheckoutCart.vue'
+import CheckoutConfirmModal from '../../component/checkout/CheckoutConfirmModal.vue'
+import EmployeeSelectModal from '../../component/checkout/EmployeeSelectModal.vue'
+import SkuSelectModal from '../../component/checkout/SkuSelectModal.vue'
 
 const toast = useToastStore()
 const userStore = useUserStore()

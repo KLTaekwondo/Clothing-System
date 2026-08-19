@@ -33,7 +33,6 @@ public class WareHouseStockService {
     private final StockRecordRepository stockRecordRepository;
 
     // 修改仓库某一件个SKU的库存
-    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void batchUpdate(List<WarehouseStockUpdateDto> dtos) {
         for (WarehouseStockUpdateDto dto : dtos) {

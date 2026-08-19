@@ -146,7 +146,7 @@ import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
-import StockCheckItemList from './components/StockCheckItemList.vue'
+import StockCheckItemList from '../../../component/stockCheck/StockCheckItemList.vue'
 import {AUDIT_STATUS} from '../../../constants/auditStatus.js'
 
 const route = useRoute()

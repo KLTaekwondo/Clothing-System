@@ -57,23 +57,29 @@ public class SecurityConfig {
                 // anyRequest() 表示其他所有请求，特别是你没有明确指出的路径，都需要登录。
                 // hasRole("role") 表示该路径的全部请求需要登录，且用户角色必须是 role 角色。
                 .authorizeHttpRequests(auth -> auth
-                        // 登录全面放行
+                        // 公开接口
                         .requestMatchers("/api/admin/login", "/api/warehouse/login").permitAll()
-                        // 前端收银员可以访问所有接口
-                        .requestMatchers("/api/employee/verify/**", "/api/order/draft/**",
-                                "/api/order/complete","/api/order/delete/**","/api/order/search/wareHouse/**")
-                        .hasRole("WAREHOUSE")
+                        // 仓库仅有接口
+                        .requestMatchers("/api/order/search/wareHouse/**").hasRole("WAREHOUSE")
+                        // 仓库和管理员可以访问所有接口
+                        .requestMatchers(
+                                "/api/warehouse/logout",// 仓库退出
+                                "/api/employee/verify/**",// 前端收银员验证
+                                "/api/member/register/checkout",// 收银台界面仓库员工注册会员
+                                "/api/member/search/**",// 会员查询
+                                "/api/product/page",// 分页查询商品
+                                "/api/productSku/search/**",// 商品sku查询
+                                "/api/productSku/scan/**",// 商品扫描
+                                "/api/order/complete",// 订单完成
+                                "/api/order/draft/**",// 订单草稿
+                                "/api/order/search/*",// 订单查询
+                                "/api/order/delete/**",// 订单删除
+                                "/api/stock/search/**"// 库存查询
+                        ).hasAnyRole("ADMIN", "WAREHOUSE")
 
-
-                        .requestMatchers( "/api/stock/**",
-                                "/api/product/search/**", "/api/productSku/search/**",
-                                "/api/productSku/scan/**", "/api/warehouse/logout","/api/order/search/**",
-                                "/api/member/search/**")
-                        .hasAnyRole("ADMIN", "WAREHOUSE")
-                        // 管理员可以访问所有接口
-
-
+                        // 剩下的只对管理员开放
                         .requestMatchers("/api/**").hasRole("ADMIN")
+                        // 其他请求都需要登录
                         .anyRequest().authenticated()
                 )
                 // 如果启动，那么Spring boot会提供一个会话管理页面，但是我们不需要，所以我们禁用它。

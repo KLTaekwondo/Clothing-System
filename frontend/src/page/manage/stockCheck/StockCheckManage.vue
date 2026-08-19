@@ -150,8 +150,8 @@ import {useToastStore} from '../../../stores/toastStore.js'
 import {useConfirmStore} from '../../../stores/confirmStore.js'
 import stockCheckInterface from '../../../axios/interface/StockCheckInterface.js'
 import DeleteConfirmDialog from '../../../component/DeleteConfirmDialog.vue'
-import StatusFilterToolbar from '../common/StatusFilterToolbar.vue'
-import TablePagination from '../common/TablePagination.vue'
+import StatusFilterToolbar from '../../../component/common/StatusFilterToolbar.vue'
+import TablePagination from '../../../component/common/TablePagination.vue'
 import {AUDIT_STATUS, AUDIT_STATUS_LABELS, AUDIT_STATUS_TABS} from '../../../constants/auditStatus.js'
 
 const toast = useToastStore()

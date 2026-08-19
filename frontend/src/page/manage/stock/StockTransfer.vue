@@ -176,7 +176,7 @@ import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInte
 import transferOrderInterface from '../../../axios/interface/TransferOrderInterface.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
-import OptionValuePicker from '../product/components/OptionValuePicker.vue'
+import OptionValuePicker from '../../../component/product/OptionValuePicker.vue'
 
 const toast = useToastStore()
 const transferDraftStorageKey = 'clothing_stock_transfer_draft'

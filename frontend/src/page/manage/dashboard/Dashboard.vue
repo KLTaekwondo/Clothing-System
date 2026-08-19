@@ -150,7 +150,7 @@ import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import orderInterface from '../../../axios/interface/OrderInterface.js'
 import {STATUS} from '../../../constants/status.js'
 import IconGraphic from '../../../component/IconGraphic.vue'
-import DashboardChart from './components/DashboardChart.vue'
+import DashboardChart from '../../../component/dashboard/DashboardChart.vue'
 
 const loading = ref(true)
 

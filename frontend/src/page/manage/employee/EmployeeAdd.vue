@@ -78,7 +78,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import employeeInterface from '../../../axios/interface/EmployeeInterface.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
-import OptionValuePicker from '../product/components/OptionValuePicker.vue'
+import OptionValuePicker from '../../../component/product/OptionValuePicker.vue'
 import usePageDraft from '../../../composables/usePageDraft.js'
 
 const router = useRouter()

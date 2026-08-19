@@ -128,8 +128,8 @@ import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
 import importOrderInterface from '../../../axios/interface/ImportOrderInterface.js'
-import ImportOrderItemList from './components/ImportOrderItemList.vue'
-import OptionValuePicker from '../product/components/OptionValuePicker.vue'
+import ImportOrderItemList from '../../../component/importOrder/ImportOrderItemList.vue'
+import OptionValuePicker from '../../../component/product/OptionValuePicker.vue'
 import usePageDraft from '../../../composables/usePageDraft.js'
 
 const router = useRouter()

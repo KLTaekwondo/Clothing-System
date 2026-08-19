@@ -117,8 +117,8 @@ import {useToastStore} from '../../../stores/toastStore.js'
 import {useConfirmStore} from '../../../stores/confirmStore.js'
 import importOrderInterface from '../../../axios/interface/ImportOrderInterface.js'
 import DeleteConfirmDialog from '../../../component/DeleteConfirmDialog.vue'
-import StatusFilterToolbar from '../common/StatusFilterToolbar.vue'
-import TablePagination from '../common/TablePagination.vue'
+import StatusFilterToolbar from '../../../component/common/StatusFilterToolbar.vue'
+import TablePagination from '../../../component/common/TablePagination.vue'
 import {AUDIT_STATUS, AUDIT_STATUS_LABELS, AUDIT_STATUS_TABS, DIRECTION_LABELS} from '../../../constants/auditStatus.js'
 
 const router = useRouter()

@@ -22,6 +22,7 @@ import com.superkl.backend.repository.basic.EmployeeRepository;
 import com.superkl.backend.repository.order.OrderRepository;
 import com.superkl.backend.repository.basic.WareHouseRepository;
 import com.superkl.backend.service.basic.MemberService;
+import com.superkl.backend.service.dash.CacheDashService;
 import com.superkl.backend.service.stock.WareHouseStockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -46,6 +48,7 @@ public class OrderService {
     private final EmployeeRepository employeeRepository;
     private final WareHouseRepository wareHouseRepository;
     private final WareHouseStockService wareHouseStockService;
+    private final CacheDashService cacheDashService;
 
     // 1.挂单操作
     @Transactional
@@ -117,6 +120,8 @@ public class OrderService {
 
             // 5.设置为已完成状态
             order.setStatus(OrderStatusEnum.COMPLETED);
+            // 6.清除缓存
+            clearCache(order.getCreateTime().toLocalDate());
         }
 
         // 6.保存订单
@@ -166,6 +171,8 @@ public class OrderService {
         orderItemService.updateDelete(orderId);
         applyOrder(dto,order);
         orderRepository.save(order);
+        // 8.清除缓存
+        clearCache(order.getCreateTime().toLocalDate());
 
         // 日志记录
         RequestUser.log();
@@ -327,5 +334,10 @@ public class OrderService {
         if(!RequestUser.isAdmin() && !RequestUser.isCurrentWareHouse(wareHouseId)) {
             throw new BusinessException(403, "订单所属仓库与当前用户不一致！");
         }
+    }
+
+    // 清除缓存
+    private void clearCache(LocalDate day) {
+        cacheDashService.clearCache(day);
     }
 }

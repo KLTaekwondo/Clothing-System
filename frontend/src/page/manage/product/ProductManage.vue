@@ -104,7 +104,7 @@ import {useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import DeleteConfirmDialog from '../../../component/DeleteConfirmDialog.vue'
-import TablePagination from '../common/TablePagination.vue'
+import TablePagination from '../../../component/common/TablePagination.vue'
 import {SEASON_LABELS} from '../../../constants/season.js'
 import {STATUS, STATUS_LABELS} from '../../../constants/status.js'
 

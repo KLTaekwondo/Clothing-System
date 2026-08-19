@@ -148,7 +148,7 @@
 <script setup>
 import {computed, onMounted, ref} from 'vue'
 import stockRecordInterface from '../../../axios/interface/StockRecordInterface.js'
-import TablePagination from '../common/TablePagination.vue'
+import TablePagination from '../../../component/common/TablePagination.vue'
 
 const changeTypeLabels = {
     SALE_OUT: '销售出库',

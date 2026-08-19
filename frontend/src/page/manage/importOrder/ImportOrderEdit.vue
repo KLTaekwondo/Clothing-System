@@ -169,8 +169,8 @@ import supplierInterface from '../../../axios/interface/SupplierInterface.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
-import ImportOrderItemList from './components/ImportOrderItemList.vue'
-import OptionValuePicker from '../product/components/OptionValuePicker.vue'
+import ImportOrderItemList from '../../../component/importOrder/ImportOrderItemList.vue'
+import OptionValuePicker from '../../../component/product/OptionValuePicker.vue'
 import {AUDIT_STATUS} from '../../../constants/auditStatus.js'
 
 const route = useRoute()

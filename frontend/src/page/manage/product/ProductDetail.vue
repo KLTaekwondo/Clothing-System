@@ -215,7 +215,7 @@ import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js
 import {SEASON_LABELS, SEASON_OPTIONS} from '../../../constants/season.js'
 import {STATUS, STATUS_LABELS, STATUS_OPTIONS} from '../../../constants/status.js'
 import {useProductOptions} from './composables/useProductOptions.js'
-import OptionValuePicker from './components/OptionValuePicker.vue'
+import OptionValuePicker from '../../../component/product/OptionValuePicker.vue'
 
 const route = useRoute()
 const router = useRouter()

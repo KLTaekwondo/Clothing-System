@@ -119,7 +119,7 @@ import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
-import OptionValuePicker from '../product/components/OptionValuePicker.vue'
+import OptionValuePicker from '../../../component/product/OptionValuePicker.vue'
 
 const toast = useToastStore()
 const confirmStore = useConfirmStore()

@@ -211,7 +211,7 @@ import {SEASON_OPTIONS} from '../../../constants/season.js'
 import {OPTION_TYPE} from '../../../constants/optionType.js'
 import {useProductOptions} from './composables/useProductOptions.js'
 import usePageDraft from '../../../composables/usePageDraft.js'
-import OptionValuePicker from './components/OptionValuePicker.vue'
+import OptionValuePicker from '../../../component/product/OptionValuePicker.vue'
 
 const router = useRouter()
 const toast = useToastStore()

@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import IconGraphic from '../../../component/IconGraphic.vue'
+import IconGraphic from '../IconGraphic.vue'
 
 defineProps({
     visible: Boolean,
