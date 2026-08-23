@@ -12,8 +12,8 @@ const Now = formatDateTime(new Date(), false)
 const NowEnd = formatDateTime(new Date(), true)
 function orderInterface() {
     const complete = async (data) => {
-        await orderAPI.completeOrder(data);
-        return true;
+        const result = await orderAPI.completeOrder(data);
+        return result;
     }
 
     const draft = async (data) => {

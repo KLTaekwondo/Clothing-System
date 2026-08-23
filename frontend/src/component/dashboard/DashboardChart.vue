@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import {onBeforeUnmount, onMounted, ref} from 'vue'
+import {onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import * as echarts from 'echarts'
 
 const props = defineProps({
@@ -21,6 +21,10 @@ onMounted(() => {
     chart.setOption(props.option)
     window.addEventListener('resize', resizeChart)
 })
+
+watch(() => props.option, () => {
+    chart?.setOption(props.option, true)
+}, {deep: true})
 
 onBeforeUnmount(() => {
     window.removeEventListener('resize', resizeChart)

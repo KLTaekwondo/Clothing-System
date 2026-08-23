@@ -1,6 +1,8 @@
 package com.superkl.backend.repository.stock;
 
 import com.superkl.backend.entity.stock.WareHouseStock;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -26,6 +28,12 @@ public interface WareHouseStockRepository extends CrudRepository<WareHouseStock,
             "WHERE sku.skuId = :skuId AND wh.wareHouseId = :warehouseId")
     Optional<WareHouseStock> findBySkuIdAndWarehouseId(@Param("skuId") Long skuId,
                                                        @Param("warehouseId") Long warehouseId);
+
+    // 处理并发，悲观锁，确保查询到的库存记录是最新版本
+    @Query(value = "SELECT * FROM t_ware_house_stock " +
+            "WHERE stock_id = :stockId FOR UPDATE",
+            nativeQuery = true)
+    Optional<WareHouseStock> findByIdForUpdate(@Param("stockId") Long stock);
 
     @Query("SELECT ws FROM WareHouseStock ws " +
             "JOIN FETCH ws.productSku sku " +

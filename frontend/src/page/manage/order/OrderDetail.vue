@@ -3,6 +3,11 @@
         <div class="page-heading">
             <div class="heading-left">
                 <button class="btn-outline" @click="goBack">← 返回订单</button>
+                <button
+                    v-if="order"
+                    class="btn-secondary"
+                    @click="printReceipt"
+                >🖨️ 打印小票</button>
                 <div>
                     <h2 class="page-title">订单详情</h2>
                     <p v-if="order" class="page-desc">{{ order.orderNo }}</p>
@@ -77,14 +82,30 @@
             </div>
         </template>
     </div>
+<ReceiptPreview
+        :visible="showReceipt"
+        :order-no="order?.orderNo || ''"
+        :items="receiptItems"
+        :total-amount="order?.totalPrice || 0"
+        :actual-amount="order?.actualPrice || 0"
+        :discount-amount="receiptDiscount"
+        :employee-name="order?.employeeName || ''"
+        :warehouse-name="order?.warehouseName || ''"
+        :pay-method="receiptPayMethod"
+        :member-phone="order?.memberPhone || ''"
+        :remark="order?.remark || ''"
+        :shop-name="'阳光服装店'"
+        @close="showReceipt = false"
+    />
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue'
+import {computed, nextTick, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import orderInterface from '../../../axios/interface/OrderInterface.js'
 import {ORDER_STATUS_LABELS} from '../../../constants/orderStatus.js'
 import {PAY_METHOD_LABELS} from '../../../constants/payMethod.js'
+import ReceiptPreview from '../../../component/checkout/ReceiptPreview.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -108,6 +129,29 @@ function statusClass(s) {
     if (s === 'DRAFT') return 'status-pending'
     if (s === 'REFUND') return 'status-error'
     return ''
+}
+
+const showReceipt = ref(false)
+const receiptItems = ref([])
+const receiptPayMethod = ref('')
+
+const receiptDiscount = computed(() => {
+    if (!order.value) return 0
+    const total = Number(order.value.totalPrice || 0)
+    const actual = Number(order.value.actualPrice || 0)
+    return Math.max(0, total - actual)
+})
+
+async function printReceipt() {
+    if (!order.value) return
+    receiptPayMethod.value = payMethodLabels[order.value.payMethod] || order.value.payMethod || ''
+    receiptItems.value = (order.value.items || []).map(item => ({
+        ...item,
+        direction: item.direction || 'IN'
+    }))
+    showReceipt.value = true
+    await nextTick()
+    window.print()
 }
 
 function goBack() {
@@ -134,6 +178,25 @@ function goBack() {
 
 .heading-left {
     gap: 12px;
+}
+
+.btn-secondary {
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid #dceae7;
+    border-radius: 8px;
+    background: #fff;
+    color: #0f766e;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-secondary:hover {
+    background: #f0fdfb;
+    border-color: #14b8a6;
 }
 
 .page-title {

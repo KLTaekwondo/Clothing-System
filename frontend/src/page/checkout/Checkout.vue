@@ -124,6 +124,23 @@
             @confirm="confirmPendingAction"
         />
 
+        <ReceiptPreview
+            ref="receiptRef"
+            :visible="showReceipt"
+            :order-no="receiptOrderNo"
+            :items="receiptItems"
+            :total-amount="receiptTotalAmount"
+            :actual-amount="receiptActualAmount"
+            :discount-amount="receiptDiscountAmount"
+            :employee-name="receiptEmployeeName"
+            :warehouse-name="receiptWarehouseName"
+            :pay-method="receiptPayMethod"
+            :member-phone="receiptMemberPhone"
+            :remark="receiptRemark"
+            :shop-name="receiptShopName"
+            @close="closeReceipt"
+        />
+
         <div class="right-container">
             <div class="member-panel">
                 <div class="member-panel-heading">
@@ -268,6 +285,7 @@ import CheckoutCart from '../../component/checkout/CheckoutCart.vue'
 import CheckoutConfirmModal from '../../component/checkout/CheckoutConfirmModal.vue'
 import EmployeeSelectModal from '../../component/checkout/EmployeeSelectModal.vue'
 import SkuSelectModal from '../../component/checkout/SkuSelectModal.vue'
+import ReceiptPreview from '../../component/checkout/ReceiptPreview.vue'
 
 const toast = useToastStore()
 const userStore = useUserStore()
@@ -329,6 +347,27 @@ let pendingConfirmAction = null
 let pendingConfirmCancel = null
 let allowRouteLeave = false
 let restoringDraft = false
+
+// 小票打印
+const showReceipt = ref(false)
+const receiptOrderNo = ref('')
+const receiptItems = ref([])
+const receiptTotalAmount = ref(0)
+const receiptActualAmount = ref(0)
+const receiptDiscountAmount = ref(0)
+const receiptEmployeeName = ref('')
+const receiptWarehouseName = ref('')
+const receiptPayMethod = ref('')
+const receiptMemberPhone = ref('')
+const receiptRemark = ref('')
+const receiptShopName = ref('')
+const receiptShopSlogan = ref('')
+const receiptRef = ref(null)
+
+function closeReceipt() {
+    showReceipt.value = false
+    resetCurrentOrder()
+}
 
 onMounted(async () => {
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -650,7 +689,7 @@ function buildOrderData() {
         refundItems,
         actualAmount: Number(actualTotalAmount.value),
         totalAmount: Number(totalAmount.value),
-        memberPhone: selectedMember.value?.memberPhone || '',
+        memberPhone: selectedMember.value?.memberPhone || null,
         remark: ''
     }
 }
@@ -694,13 +733,38 @@ async function completeOrder() {
     if (submitting.value || cart.value.length === 0) return
     submitting.value = true
     try {
-        await orderInterface.complete(buildOrderData())
-        resetCurrentOrder()
+        const orderNo = await orderInterface.complete(buildOrderData())
+        // 保存小票数据（在清空前保存当前状态）
+        const employeeName = employees.value.find(e => e.id === selectedEmployeeId.value)?.name || ''
+        const warehouseName = userStore.userInfo?.name || ''
+        const payMethodLabel = payMethodOptions.find(o => o.value === payMethod.value)?.label || payMethod.value
+        receiptOrderNo.value = orderNo || ''
+        receiptItems.value = cart.value.map(item => ({...item}))
+        receiptTotalAmount.value = Number(totalAmount.value)
+        receiptActualAmount.value = Number(actualTotalAmount.value)
+        receiptDiscountAmount.value = Number(discountAmount.value)
+        receiptEmployeeName.value = employeeName
+        receiptWarehouseName.value = warehouseName
+        receiptShopName.value = userStore.userInfo?.name || ''
+        receiptPayMethod.value = payMethodLabel
+        receiptMemberPhone.value = selectedMember.value?.memberPhone || null
+        receiptRemark.value = ''
+        // 先让小票渲染出来
+        showReceipt.value = true
+        await nextTick()
+        // 自动调出打印对话框（使用微任务保持执行上下文）
+        receiptRef.value?.print()
+        // 监听打印结束，自动关闭小票并重置
+        window.addEventListener('afterprint', autoResetAfterPrint, { once: true })
     } catch {
         // 拦截器已处理
     } finally {
         submitting.value = false
     }
+}
+
+function autoResetAfterPrint() {
+    closeReceipt()
 }
 
 // 挂单

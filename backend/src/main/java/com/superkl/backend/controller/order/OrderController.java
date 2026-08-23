@@ -22,9 +22,9 @@ public class OrderController {
 
     // 1.完成订单
     @PostMapping("/complete")
-    public Result<Void> complete(@Valid @RequestBody OrderCreateDto dto) {
-        orderService.complete(dto);
-        return Result.successMessage("订单已完成！");
+    public Result<String> complete(@Valid @RequestBody OrderCreateDto dto) {
+        String orderNo = orderService.complete(dto);
+        return Result.success(orderNo);
     }
 
     // 2.挂单订单

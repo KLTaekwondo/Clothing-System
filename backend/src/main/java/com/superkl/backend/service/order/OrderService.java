@@ -69,7 +69,7 @@ public class OrderService {
 
     // 2.完成订单
     @Transactional
-    public void complete(OrderCreateDto dto) {
+    public String complete(OrderCreateDto dto) {
         // 第一步权限校验
         checkPermission(dto.getWareHouseId());
         // 先获取订单是否存在
@@ -120,15 +120,15 @@ public class OrderService {
 
             // 5.设置为已完成状态
             order.setStatus(OrderStatusEnum.COMPLETED);
-            // 6.清除缓存
-            clearCache(order.getCreateTime().toLocalDate());
         }
 
         // 6.保存订单
         orderRepository.save(order);
-        // 7.处理用户积分
+        // 7.清除缓存（在 save 之后，此时 createTime 已自动生成）
+        clearCache(LocalDate.now());
+        // 8.处理用户积分
         // 如果不是空，才处理会员积分，否则不处理
-        if(order.getMemberPhone() != null){
+        if(order.getMemberPhone() != null && !order.getMemberPhone().isBlank()) {
             // 先拿取会员信息，避免链式调用过长
             Member member = memberService.getFromPhone(order.getMemberPhone());
             Long memberId = member.getMemberId();
@@ -148,6 +148,7 @@ public class OrderService {
         RequestUser.log();
         log.info("完成订单，订单编号：{} ，订单总价：{} ，数量：{}",
                 order.getOrderNo(),order.getActualPrice(),order.getOrderItems().size());
+        return order.getOrderNo();
     }
 
     // 3.更新草稿订单
@@ -171,8 +172,6 @@ public class OrderService {
         orderItemService.updateDelete(orderId);
         applyOrder(dto,order);
         orderRepository.save(order);
-        // 8.清除缓存
-        clearCache(order.getCreateTime().toLocalDate());
 
         // 日志记录
         RequestUser.log();

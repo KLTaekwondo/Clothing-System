@@ -26,4 +26,10 @@ public interface OptionValueRepository extends JpaRepository<OptionValue, Long> 
     boolean existsByTypeAndValueNotId(@Param("id") Long id,
                                         @Param("type") OptionTypeEnum type,
                                         @Param("value") String value);
+
+    @Query(value = "SELECT COUNT(*) > 0 FROM t_product_sku " +
+            "WHERE JSON_VALID(spec_attributes) " +
+            "AND JSON_SEARCH(spec_attributes, 'one', :value) IS NOT NULL",
+            nativeQuery = true)
+    boolean existsBySpecExactValue(@Param("value") String value);
 }

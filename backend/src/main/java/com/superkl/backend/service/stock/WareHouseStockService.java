@@ -87,6 +87,10 @@ public class WareHouseStockService {
         WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
                 .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
 
+        // 并发锁定
+        ws = wareHouseStockRepository.findByIdForUpdate(ws.getStockId())
+                .orElseThrow(()-> new BusinessException(403,"该库存记录已锁定"));
+
         // 检查库存是否足够
         Integer beforeQuantity = ws.getStock();
         Integer afterQuantity = beforeQuantity - stock;
@@ -114,8 +118,11 @@ public class WareHouseStockService {
         WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
                 .orElseThrow(() -> new BusinessException(403, "库存记录不存在"));
 
+        // 锁定库存
+        WareHouseStock wsLocked = wareHouseStockRepository.findByIdForUpdate(ws.getStockId())
+                .orElseThrow(() -> new BusinessException(403,"该库存记录已锁定！"));
         // 增加库存
-        Integer beforeQuantity = ws.getStock();
+        Integer beforeQuantity = wsLocked.getStock();
         Integer afterQuantity = beforeQuantity + stock;
         ws.setStock(afterQuantity);
         // 保存库存记录

@@ -142,12 +142,13 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
 import employeeInterface from '../../../axios/interface/EmployeeInterface.js'
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js'
 import orderInterface from '../../../axios/interface/OrderInterface.js'
+import orderDashInterface from '../../../axios/interface/OrderDashInterface.js'
 import {STATUS} from '../../../constants/status.js'
 import IconGraphic from '../../../component/IconGraphic.vue'
 import DashboardChart from '../../../component/dashboard/DashboardChart.vue'
@@ -164,10 +165,10 @@ const finance = ref({
     grossMargin: '0.00%', todayCost: '¥ 0.00', avgOrder: '¥ 0.00'
 })
 
-const salesData = [820, 932, 901, 934, 1290, 1330, 1520]
-const salesDays = ['07-09', '07-10', '07-11', '07-12', '07-13', '07-14', '07-15']
+const salesData = ref([820, 932, 901, 934, 1290, 1330, 1520])
+const salesDays = ref(['07-09', '07-10', '07-11', '07-12', '07-13', '07-14', '07-15'])
 
-const salesChartOption = {
+const salesChartOption = computed(() => ({
     tooltip: {
         trigger: 'axis',
         axisPointer: {
@@ -183,7 +184,7 @@ const salesChartOption = {
     },
     xAxis: {
         type: 'category',
-        data: salesDays,
+        data: salesDays.value,
         axisLine: {
             show: false
         },
@@ -208,7 +209,7 @@ const salesChartOption = {
         }
     },
     series: [{
-        data: salesData,
+        data: salesData.value,
         type: 'line',
         smooth: true,
         symbol: 'circle',
@@ -240,7 +241,7 @@ const salesChartOption = {
             }
         }
     }]
-}
+}))
 
 const categoryChartOption = {
     tooltip: {
@@ -277,14 +278,24 @@ const categoryChartOption = {
     }]
 }
 
+function formatMoney(value) {
+    return '¥ ' + Number(value || 0).toFixed(2)
+}
+
+function formatMargin(value) {
+    return (Number(value || 0) * 100).toFixed(2) + '%'
+}
+
 onMounted(async () => {
     try {
-        const [products, employees, warehouses, orders] = await Promise.all([
+        const [products, employees, warehouses, orderPage] = await Promise.all([
             productInterface.searchPage().then(d => d.content || []).catch(() => []),
             employeeInterface.searchList().catch(() => []),
             wareHouseInterface.searchList().catch(() => []),
-            orderInterface.searchPage().then(data => data.content || []).catch(() => [])
+            orderInterface.searchPage().then(data => data || null).catch(() => null)
         ])
+        const orders = orderPage?.content || []
+        const totalOrders = orderPage?.totalElements || orders.length
         const enabledProducts = products.filter(item => item.status === STATUS.ENABLE)
         const skuLists = await Promise.all(
             enabledProducts.map(item => productSkuInterface.searchListByProductId(item.id).catch(() => []))
@@ -294,9 +305,30 @@ onMounted(async () => {
             skus: skuLists.reduce((total, list) => total + list.length, 0),
             employees: employees.length || 0,
             warehouses: warehouses.length || 0,
-            orders: orders.length || 0,
+            orders: totalOrders,
             lowStock: 0
         }
+
+        // 通过订单报表接口拉取财务数据与近7日销售趋势
+        // 注意：不要调用 /order/search/wareHouse/complete（仓库专用、管理后台会 403），客单价改用全局订单数计算
+        const [daily, monthly, sevenDays] = await Promise.all([
+            orderDashInterface.dailyDash().catch(() => ({})),
+            orderDashInterface.monthlyDash().catch(() => ({})),
+            orderDashInterface.sevenDaysDash().catch(() => [])
+        ])
+        const todaySales = Number(daily.saleAmount || 0)
+        finance.value = {
+            todaySales: formatMoney(daily.saleAmount),
+            monthlySales: formatMoney(monthly.saleAmount),
+            todayProfit: formatMoney(daily.profit),
+            grossMargin: formatMargin(daily.marginRate),
+            todayCost: formatMoney(daily.importAmount),
+            avgOrder: formatMoney(totalOrders > 0 ? todaySales / totalOrders : 0)
+        }
+
+        const trend = Array.isArray(sevenDays) ? sevenDays : []
+        salesData.value = trend.map(d => Number(d.amount || 0))
+        salesDays.value = trend.map(d => String(d.day || '').slice(5))
     } catch {
         // 静默
     } finally {

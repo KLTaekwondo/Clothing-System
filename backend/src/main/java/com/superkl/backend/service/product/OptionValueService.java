@@ -25,14 +25,14 @@ public class OptionValueService {
 
     // 1. 创建选项值
     @Transactional
-    public void create(OptionValueCreateDto optionValueCreateDto) {
+    public void create(OptionValueCreateDto dto) {
         // 1. 检查选项值是否存在
-        if (optionValueRepository.existsByTypeAndValue(optionValueCreateDto.getOptionType(), optionValueCreateDto.getOptionValue())) {
+        if (optionValueRepository.existsByTypeAndValue(dto.getOptionType(), dto.getOptionValue())) {
             throw new BusinessException(403, "选项值已存在");
         }
         // 2. 创建选项值实体
-        OptionValue optionValue = OptionValueConverter.toEntity(optionValueCreateDto);
-        // 2. 保存选项值
+        OptionValue optionValue = OptionValueConverter.toEntity(dto);
+        // 3. 保存选项值
         optionValueRepository.save(optionValue);
         log.info("新增选项值：{}，类型：{}", optionValue.getOptionValue(), optionValue.getOptionType());
         RequestUser.log();
@@ -62,7 +62,11 @@ public class OptionValueService {
         // 1. 从数据库中查询选项值
         OptionValue optionValue = optionValueRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(403, "选项值不存在"));
-        // 2. 删除选项值
+        // 2. 检查是否被引用
+        if(optionValueRepository.existsBySpecExactValue(optionValue.getOptionValue())){
+            throw new BusinessException(403,"选项值被引用，不能删除");
+        }
+        // 3. 删除选项值
         optionValueRepository.deleteById(id);
         log.info("删除选项值：ID={}", id);
         RequestUser.log();
