@@ -49,53 +49,16 @@ defineEmits(['close', 'select'])
 </script>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.35);
-}
-
 .draft-modal {
     width: 520px;
     max-height: 560px;
     display: flex;
     flex-direction: column;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid #e3efed;
-}
-
-.modal-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.modal-close {
-    padding: 0;
-    border: none;
-    background: none;
-    font-size: 24px;
-    color: #94a3b8;
-    cursor: pointer;
-    line-height: 1;
-}
-
-.modal-close:hover {
-    color: #ef4444;
 }
 
 .modal-body {
@@ -109,14 +72,14 @@ defineEmits(['close', 'select'])
     align-items: center;
     justify-content: space-between;
     padding: 13px 14px;
-    border-bottom: 1px solid #edf4f2;
+    border-bottom: 1px solid var(--border-light);
     border-radius: 0;
-    background: #fff;
-    color: #0f172a;
+    background: var(--bg-card);
+    color: var(--text);
 }
 
 .draft-order-item:hover {
-    background: #f0fdfb;
+    background: var(--bg-hover);
 }
 
 .draft-order-main {
@@ -127,19 +90,13 @@ defineEmits(['close', 'select'])
 }
 
 .draft-order-main span {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 12px;
 }
 
 .draft-order-price {
-    color: #0d9488;
+    color: var(--primary);
     font-size: 16px;
     font-weight: 800;
-}
-
-.modal-empty {
-    display: flex;
-    justify-content: center;
-    padding: 40px 0;
 }
 </style>

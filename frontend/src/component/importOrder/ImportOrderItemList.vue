@@ -158,18 +158,6 @@ function calculateSubtotal(item) {
     padding-left: 20px;
 }
 
-.product-list-header {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    color: #47615e;
-    font-size: 12px;
-    font-weight: 700;
-    background: #dcebe8;
-    border: 1px solid #c5ddd8;
-    border-radius: 9px;
-    box-shadow: 0 2px 5px rgba(22, 83, 78, 0.1);
-}
-
 .product-header-name,
 .product-name-cell {
     width: 220px;
@@ -211,14 +199,6 @@ function calculateSubtotal(item) {
     border-right: none;
 }
 
-.product-card {
-    overflow: hidden;
-    background: #fff;
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
-}
-
 .product-row {
     min-height: 58px;
     cursor: pointer;
@@ -227,18 +207,7 @@ function calculateSubtotal(item) {
 }
 
 .product-row:hover {
-    background: #f4fbfa;
-}
-
-.product-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.product-mark {
-    flex-shrink: 0;
-    font-size: 19px;
+    background: var(--bg-hover);
 }
 
 .product-name,
@@ -249,53 +218,6 @@ function calculateSubtotal(item) {
     white-space: nowrap;
 }
 
-.product-code {
-    color: var(--primary);
-    font-family: ui-monospace, 'SF Mono', Consolas, monospace;
-}
-
-.product-sku-count {
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-.product-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.expand-icon {
-    width: 16px;
-    color: var(--text-muted);
-    font-size: 12px;
-    text-align: center;
-}
-
-.sku-wrapper {
-    padding: 10px 14px 12px;
-    background: #f8fcfb;
-    box-shadow: inset 0 3px 8px rgba(22, 83, 78, 0.06);
-}
-
-.sku-expand-enter-active,
-.sku-expand-leave-active {
-    overflow: hidden;
-    transition: max-height 0.24s ease, opacity 0.2s ease;
-}
-
-.sku-expand-enter-from,
-.sku-expand-leave-to {
-    max-height: 0;
-    opacity: 0;
-}
-
-.sku-expand-enter-to,
-.sku-expand-leave-from {
-    max-height: 900px;
-    opacity: 1;
-}
-
 .sku-list-header,
 .sku-row {
     display: flex;
@@ -303,26 +225,6 @@ function calculateSubtotal(item) {
     gap: 10px;
     padding-right: 10px;
     padding-left: 10px;
-}
-
-.sku-list-header {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    color: #47615e;
-    font-size: 12px;
-    font-weight: 700;
-    background: #dcebe8;
-    border: 1px solid #c5ddd8;
-    border-radius: 8px;
-}
-
-.sku-row {
-    min-height: 52px;
-    margin-top: 6px;
-    border: 1px solid #e1eeeb;
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 2px 6px rgba(22, 83, 78, 0.07);
 }
 
 .sku-header-name,
@@ -380,28 +282,6 @@ function calculateSubtotal(item) {
     border-right: none;
 }
 
-.sku-name,
-.sku-code,
-.sku-spec {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.sku-name {
-    font-size: 13px;
-}
-
-.sku-code {
-    color: var(--primary);
-    font-size: 12px;
-}
-
-.sku-spec {
-    color: var(--text-secondary);
-    font-size: 12px;
-}
-
 .sku-price {
     color: var(--text-secondary);
     font-size: 13px;
@@ -410,37 +290,6 @@ function calculateSubtotal(item) {
 .sku-subtotal {
     color: var(--primary);
     font-size: 13px;
-}
-
-.quantity-input {
-    height: 32px;
-    box-sizing: border-box;
-    padding: 0 5px;
-    border: 1px solid #dceae7;
-    border-radius: 7px;
-    background: #fbfefd;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.quantity-input:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
-}
-
-.remove-button {
-    padding: 5px 7px;
-    border: 1px solid #fecaca;
-    border-radius: 7px;
-    color: #dc2626;
-    background: #fff;
-    font-size: 11px;
-    cursor: pointer;
-}
-
-.remove-button:hover {
-    border-color: #f87171;
-    background: #fef2f2;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -507,5 +356,4 @@ function calculateSubtotal(item) {
         padding: 0 5px;
         text-align: center;
     }
-}
-</style>
+}</style>

@@ -52,6 +52,7 @@
                 >{{ checkStatusLabels[warehouse.checkStatus] || warehouse.checkStatus || '-' }}</span></div>
                 <div v-if="editing" class="info-card"><span>新密码</span><input v-model="form.password" class="card-input"
                                                                                 maxlength="12" minlength="6"
+                                                                                placeholder="留空则不修改"
                                                                                 type="password"/></div>
                 <div class="info-card"><span>创建时间</span><strong>{{ warehouse.createTime || '-' }}</strong></div>
                 <div class="info-card"><span>更新时间</span><strong>{{ warehouse.updateTime || '-' }}</strong></div>
@@ -149,17 +150,21 @@ function cancelEdit() {
 }
 
 async function saveEdit() {
-    if (!form.value.code || !form.value.name || !form.value.password) {
+    if (!form.value.code || !form.value.name) {
         toast.warning('请填写完整信息');
         return
     }
     saving.value = true;
-    const res = await wareHouseInterface.update(warehouse.value.id, {
+    const body = {
         code: form.value.code,
         name: form.value.name,
-        status: form.value.status,
-        password: form.value.password
-    });
+        status: form.value.status
+    };
+    // 密码留空表示不修改，不提交该字段
+    if (form.value.password) {
+        body.password = form.value.password;
+    }
+    const res = await wareHouseInterface.update(warehouse.value.id, body);
 
     // 如果成功，则返回仓库列表页
     if(res){
@@ -252,14 +257,8 @@ const goBack = () => {
 }
 
 .detail-tab.active {
-    color: #0d9488;
-    border-bottom-color: #0d9488;
-}
-
-.info-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
+    color: var(--primary);
+    border-bottom-color: var(--primary);
 }
 
 .info-card {
@@ -271,8 +270,8 @@ const goBack = () => {
     justify-content: space-between;
     gap: 12px;
     padding: 20px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
-    border: 1px solid #e3efed;
+    background: linear-gradient(145deg, var(--bg-card), var(--bg-subtle));
+    border: 1px solid var(--border-light);
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
 }
@@ -280,47 +279,6 @@ const goBack = () => {
 .info-card > span:first-child {
     color: var(--text-muted);
     font-size: var(--font-sm);
-}
-
-.code-value {
-    color: var(--primary);
-    font-family: ui-monospace, "SF Mono", Consolas, monospace;
-}
-
-.card-input {
-    width: 100%;
-    height: 38px;
-    padding: 0 10px;
-    border: 1px solid #dceae7;
-    border-radius: 8px;
-    background: #fff;
-    font-size: 14px;
-    outline: none;
-}
-
-.card-input:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
-}
-
-.card-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 24px 0 10px;
-    border: 1px solid #dceae7;
-    border-radius: 8px;
-    background: #fff;
-    font-size: 14px;
-    appearance: none;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364807e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-}
-
-.card-select:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
 
 .edit-actions {
@@ -344,8 +302,8 @@ const goBack = () => {
     height: 40px;
     border-radius: 10px;
     padding: 0 12px;
-    border: 1px solid #dceae7;
-    background: #fbfefd;
+    border: 1px solid var(--border);
+    background: var(--bg-subtle);
 }
 
 .stock-table-card {
@@ -356,5 +314,4 @@ const goBack = () => {
 .stock-low {
     color: var(--error);
     font-weight: 800;
-}
-</style>
+}</style>

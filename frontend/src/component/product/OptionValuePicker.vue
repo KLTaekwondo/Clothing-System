@@ -143,31 +143,31 @@ defineExpose({validate})
     display: flex;
     gap: 0;
     overflow: hidden;
-    border: 1px solid #c8ded9;
-    border-radius: 10px;
-    background: #f2f8f7;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-subtle);
     box-shadow: inset 0 1px 2px rgba(22, 83, 78, 0.05);
     transition: var(--transition);
 }
 
 .picker-controls:hover,
 .picker-controls-error:hover {
-    border-color: #91cec4;
-    background: #f7fbfa;
+    border-color: var(--border-hover);
+    background: var(--bg-subtle);
 }
 
 .picker-controls:focus-within {
-    border-color: #14b8a6;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.12), 0 5px 14px rgba(13, 148, 136, 0.08);
+    border-color: var(--primary);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 4px var(--primary-focus), 0 5px 14px rgba(13, 148, 136, 0.08);
 }
 
 .picker-controls-error,
 .picker-controls-error:hover,
 .picker-controls-error:focus-within {
-    border-color: #ef4444;
-    background: #fff7f7;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    border-color: var(--error);
+    background: var(--error-light);
+    box-shadow: 0 0 0 3px var(--error-focus);
 }
 
 .picker-controls .picker-input,
@@ -195,11 +195,11 @@ defineExpose({validate})
     width: 45%;
     padding: 0 32px 0 14px;
     border: none;
-    border-left: 1px solid #d7e5e2;
+    border-left: 1px solid var(--border);
     border-radius: 0;
-    color: #47615e;
-    background-color: rgba(255, 255, 255, 0.58);
-    background-image: linear-gradient(45deg, transparent 50%, #64807e 50%), linear-gradient(135deg, #64807e 50%, transparent 50%);
+    color: var(--text-header);
+    background-color: color-mix(in srgb, var(--bg-card) 58%, transparent);
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%), linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%);
     background-position: calc(100% - 18px) 17px, calc(100% - 13px) 17px;
     background-repeat: no-repeat;
     background-size: 5px 5px, 5px 5px;
@@ -212,14 +212,14 @@ defineExpose({validate})
 .picker-controls .picker-select:hover,
 .picker-controls-error .picker-select:hover {
     color: var(--primary);
-    background-color: rgba(255, 255, 255, 0.86);
+    background-color: color-mix(in srgb, var(--bg-card) 86%, transparent);
 }
 
 .picker-controls .picker-select:focus,
 .picker-controls-error .picker-select:focus {
-    border-color: #d7e5e2;
+    border-color: var(--border);
     color: var(--primary);
-    background-color: rgba(255, 255, 255, 0.92);
+    background-color: color-mix(in srgb, var(--bg-card) 92%, transparent);
     box-shadow: none;
     outline: none;
 }
@@ -227,21 +227,21 @@ defineExpose({validate})
 .picker-controls .picker-select option,
 .picker-controls-error .picker-select option {
     padding: 10px 12px;
-    color: #47615e;
-    background: #ffffff;
+    color: var(--text-header);
+    background: var(--bg-card);
     font-size: 13px;
 }
 
 .picker-controls .picker-select option:checked,
 .picker-controls-error .picker-select option:checked {
-    color: #0f766e;
-    background: #dff5f1;
+    color: var(--primary-dark);
+    background: var(--primary-light);
 }
 
 .picker-controls .picker-select .picker-placeholder,
 .picker-controls-error .picker-select .picker-placeholder {
-    color: #829895;
-    background: #f2f8f7;
+    color: var(--text-muted);
+    background: var(--bg-subtle);
 }
 
 .picker-error,
@@ -252,11 +252,11 @@ defineExpose({validate})
 }
 
 .picker-error {
-    color: #dc2626;
+    color: var(--error-dark);
 }
 
 .picker-hint {
-    color: #829895;
+    color: var(--text-muted);
 }
 
 @media (max-width: 560px) {
@@ -278,7 +278,7 @@ defineExpose({validate})
     .picker-controls-error .picker-select {
         padding: 0 14px;
         border-left: none;
-        border-top: 1px solid #d7e5e2;
+        border-top: 1px solid var(--border);
         background-position: calc(100% - 16px) 17px, calc(100% - 11px) 17px;
     }
 }

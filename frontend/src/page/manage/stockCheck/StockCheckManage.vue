@@ -1,47 +1,70 @@
 <template>
     <div class="stock-check-manage">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">库存盘点</h2>
-                <p class="page-desc">记录仓库实际库存，审批后按盘点结果更新系统库存</p>
+        
+
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">库存盘点</h2>
+                <p class="page-label-desc">记录仓库实际库存，审批后按盘点结果更新系统库存</p>
+                <hr class="label-hr"/>
             </div>
-            <router-link
-                class="btn-primary"
-                to="/manage/stock-check/add"
-            >+ 新建盘点单</router-link>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+            <div class="search-label">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>盘点单检索</span>
+        </div><div class="search-shell">
+            <div class="search-controls">
+                <StatusFilterToolbar
+                    v-model="statusFilter"
+                    v-model:search="searchQuery"
+                    :tabs="statusTabs"
+                    search-placeholder="搜索盘点单号或仓库"
+                />
+                <router-link
+                    class="btn-primary search-button"
+                    to="/manage/stock-check/add"
+                >+ 新建盘点单</router-link>
+            </div>
+        </div>
+            </div>
         </div>
 
-        <div class="check-stats">
-            <div class="check-stat-card">
-                <span class="stat-icon"><IconGraphic name="document"/></span>
-                <span class="stat-value">{{ pageInfo.totalElements }}</span>
-                <span class="stat-label">全部盘点单</span>
+        <div class="stats-summary">
+            <div class="stats-item">
+                <span class="stats-icon"><IconGraphic name="document"/></span>
+                <span class="stats-body">
+                    <strong>{{ pageInfo.totalElements }}</strong>
+                    <span>全部盘点单</span>
+                </span>
             </div>
-            <div class="check-stat-card">
-                <span class="stat-icon"><IconGraphic name="clock"/></span>
-                <span class="stat-value">{{ draftCount }}</span>
-                <span class="stat-label">当前页草稿</span>
+            <div class="stats-item">
+                <span class="stats-icon"><IconGraphic name="clock"/></span>
+                <span class="stats-body">
+                    <strong>{{ draftCount }}</strong>
+                    <span>当前页草稿</span>
+                </span>
             </div>
-            <div class="check-stat-card">
-                <span class="stat-icon"><IconGraphic name="hourglass"/></span>
-                <span class="stat-value">{{ checkingCount }}</span>
-                <span class="stat-label">当前页审核中</span>
+            <div class="stats-item">
+                <span class="stats-icon"><IconGraphic name="hourglass"/></span>
+                <span class="stats-body">
+                    <strong>{{ checkingCount }}</strong>
+                    <span>当前页审核中</span>
+                </span>
             </div>
-            <div class="check-stat-card">
-                <span class="stat-icon"><IconGraphic name="warning"/></span>
-                <span class="stat-value">{{ activeCount }}</span>
-                <span class="stat-label">当前页进行中</span>
+            <div class="stats-item">
+                <span class="stats-icon"><IconGraphic name="warning"/></span>
+                <span class="stats-body">
+                    <strong>{{ activeCount }}</strong>
+                    <span>当前页进行中</span>
+                </span>
             </div>
         </div>
 
         <div class="check-table-card">
-            <StatusFilterToolbar
-                v-model="statusFilter"
-                v-model:search="searchQuery"
-                :tabs="statusTabs"
-                search-placeholder="搜索盘点单号或仓库"
-            />
-
             <div
                 v-if="loading"
                 class="loading-overlay"
@@ -286,77 +309,14 @@ async function handleDelete() {
     min-width: 0;
 }
 
-.page-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 26px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
-.check-stats {
-    display: flex;
-    gap: 14px;
-    margin-bottom: 18px;
-    flex-wrap: wrap;
-}
-
-.check-stat-card {
-    width: calc(25% - 11px);
-    min-width: 180px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 17px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
-    border: 1px solid #e3efed;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
-}
-
-.stat-icon {
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 11px;
-    background: #e8f7f3;
-}
-
-.stat-icon :deep(img) {
-    width: 22px;
-    height: 22px;
-}
-
-.stat-value {
-    color: var(--text);
-    font-size: 20px;
-    font-weight: 800;
-}
-
-.stat-label {
-    margin-left: -4px;
-    color: var(--text-muted);
-    font-size: 12px;
-}
+/* 统计使用全局 stats-summary */
 
 .check-table-card {
     padding: 8px 20px 20px;
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border-light);
     border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
+    box-shadow: var(--shadow);
     overflow-x: auto;
 }
 
@@ -392,16 +352,5 @@ async function handleDelete() {
 .actions .btn-danger {
     padding: 4px 10px;
     font-size: 12px;
-}
-
-@media (max-width: 900px) {
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .check-stat-card {
-        width: calc(50% - 7px);
-    }
 }
 </style>

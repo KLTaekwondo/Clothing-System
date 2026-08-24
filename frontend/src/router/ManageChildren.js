@@ -226,6 +226,12 @@ const ManageChildren = [
         name: 'OptionManage',
         component: () => import('../page/manage/option/OptionManage.vue'),
         meta: {title: '选项管理', icon: 'option'}
+    },
+    {
+        path: 'setting',
+        name: 'SystemSetting',
+        component: () => import('../page/manage/setting/SystemSetting.vue'),
+        meta: {title: '系统设置', icon: 'settings'}
     }
 ]
 

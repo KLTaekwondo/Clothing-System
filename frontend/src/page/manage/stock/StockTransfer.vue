@@ -497,10 +497,10 @@ function formatSpec(spec) {
 .empty-form-card {
     padding: 20px;
     margin-bottom: 16px;
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border-light);
-    border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(15, 118, 110, 0.06);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
 }
 
 .search-row {
@@ -539,9 +539,9 @@ function formatSpec(spec) {
     height: 40px;
     box-sizing: border-box;
     padding: 0 12px;
-    border: 1px solid #dceae7;
+    border: 1px solid var(--border);
     border-radius: 10px;
-    background: #fbfefd;
+    background: var(--bg-subtle);
 }
 
 .search-button,
@@ -549,8 +549,8 @@ function formatSpec(spec) {
     height: 40px;
     padding: 0 16px;
     border: 1px solid var(--primary);
-    border-radius: 9px;
-    color: #fff;
+    border-radius: 999px;
+    color: var(--text-invert);
     background: var(--primary);
     font-weight: 600;
     cursor: pointer;
@@ -568,7 +568,7 @@ function formatSpec(spec) {
 
 .warning-text {
     margin-top: 8px;
-    color: #dc2626;
+    color: var(--error-dark);
     font-size: 13px;
 }
 
@@ -578,10 +578,10 @@ function formatSpec(spec) {
     gap: 12px;
     padding: 14px 20px;
     margin-bottom: 14px;
-    background: #fff;
-    border: 1px solid #e3efed;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
     border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
+    box-shadow: var(--shadow);
 }
 
 .total-hint {
@@ -591,7 +591,7 @@ function formatSpec(spec) {
 }
 
 .changed-hint {
-    color: #d97706;
+    color: var(--warning-dark);
     font-size: 13px;
     font-weight: 700;
 }
@@ -600,16 +600,16 @@ function formatSpec(spec) {
     height: 40px;
     padding: 0 14px;
     border: 1px solid #c8ded9;
-    border-radius: 9px;
+    border-radius: 999px;
     color: var(--text-secondary);
-    background: #fff;
+    background: var(--bg-card);
     cursor: pointer;
 }
 
 .clear-button:hover {
     border-color: var(--primary);
     color: var(--primary);
-    background: #f1faf8;
+    background: var(--bg-hover);
 }
 
 .transfer-item-list {
@@ -627,18 +627,6 @@ function formatSpec(spec) {
     gap: 12px;
     padding-right: 20px;
     padding-left: 20px;
-}
-
-.item-list-header {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    color: #47615e;
-    font-size: 12px;
-    font-weight: 700;
-    background: #dcebe8;
-    border: 1px solid #c5ddd8;
-    border-radius: 9px;
-    box-shadow: 0 2px 5px rgba(22, 83, 78, 0.1);
 }
 
 .header-product,
@@ -674,20 +662,12 @@ function formatSpec(spec) {
     box-sizing: border-box;
     min-width: 0;
     padding: 0 10px;
-    border-right: 1px solid #b8d2cd;
+    border-right: 1px solid var(--border-cell);
 }
 
 .header-action,
 .product-actions {
     border-right: none;
-}
-
-.product-card {
-    overflow: hidden;
-    background: #fff;
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
 }
 
 .product-header {
@@ -698,13 +678,7 @@ function formatSpec(spec) {
 }
 
 .product-header:hover {
-    background: #f4fbfa;
-}
-
-.product-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    background: var(--bg-hover);
 }
 
 .product-name-cell strong,
@@ -715,21 +689,6 @@ function formatSpec(spec) {
     white-space: nowrap;
 }
 
-.product-mark {
-    flex-shrink: 0;
-    font-size: 19px;
-}
-
-.product-code {
-    color: var(--primary);
-    font-family: ui-monospace, 'SF Mono', Consolas, monospace;
-}
-
-.sku-count {
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
 .product-actions {
     display: flex;
     align-items: center;
@@ -737,19 +696,12 @@ function formatSpec(spec) {
     gap: 8px;
 }
 
-.expand-icon {
-    width: 16px;
-    color: var(--text-muted);
-    font-size: 12px;
-    text-align: center;
-}
-
 .remove-product-button,
 .remove-sku-button {
     border: 1px solid #fecaca;
-    border-radius: 7px;
-    color: #dc2626;
-    background: #fff;
+    border-radius: 999px;
+    color: var(--error-dark);
+    background: var(--bg-card);
     cursor: pointer;
 }
 
@@ -765,18 +717,6 @@ function formatSpec(spec) {
     text-align: center;
 }
 
-.remove-product-button:hover,
-.remove-sku-button:hover {
-    border-color: #f87171;
-    background: #fef2f2;
-}
-
-.sku-wrapper {
-    padding: 10px 14px 12px;
-    background: #f8fcfb;
-    box-shadow: inset 0 3px 8px rgba(22, 83, 78, 0.06);
-}
-
 .sku-list-header,
 .sku-row {
     display: flex;
@@ -784,26 +724,6 @@ function formatSpec(spec) {
     gap: 10px;
     padding-right: 10px;
     padding-left: 10px;
-}
-
-.sku-list-header {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    color: #47615e;
-    font-size: 12px;
-    font-weight: 700;
-    background: #dcebe8;
-    border: 1px solid #c5ddd8;
-    border-radius: 8px;
-}
-
-.sku-row {
-    min-height: 52px;
-    margin-top: 6px;
-    border: 1px solid #e1eeeb;
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 2px 6px rgba(22, 83, 78, 0.07);
 }
 
 .sku-header-name,
@@ -849,7 +769,7 @@ function formatSpec(spec) {
     box-sizing: border-box;
     min-width: 0;
     padding: 0 7px;
-    border-right: 1px solid #c5ddd8;
+    border-right: 1px solid var(--border-cell);
 }
 
 .sku-header-action,
@@ -857,54 +777,20 @@ function formatSpec(spec) {
     border-right: none;
 }
 
-.sku-name,
-.sku-code,
-.sku-spec {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.sku-name {
-    font-size: 13px;
-}
-
-.sku-code {
-    color: var(--primary);
-    font-size: 12px;
-}
-
-.sku-spec {
-    color: var(--text-secondary);
-    font-size: 12px;
-}
-
 .available-stock {
     color: var(--text);
     font-size: 13px;
 }
 
-.transfer-quantity,
 .transfer-quantity-filled {
-    height: 32px;
-    box-sizing: border-box;
-    padding: 0 5px;
-    border: 1px solid #dceae7;
-    border-radius: 7px;
-    background: #fbfefd;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.transfer-quantity-filled {
-    border-color: #f59e0b;
-    background: #fef3c7;
+    border-color: var(--warning);
+    background: var(--warning-light);
 }
 
 .transfer-quantity:focus,
 .transfer-quantity-filled:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-focus);
 }
 
 @media (max-width: 900px) {
@@ -988,5 +874,4 @@ function formatSpec(spec) {
     .total-hint {
         width: 100%;
     }
-}
-</style>
+}</style>

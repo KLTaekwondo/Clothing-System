@@ -61,3 +61,108 @@
 - [ ] **Spring AI 模块尝试**:用于处理用户的问题，如订单查询、库存查询等
 - [ ] **一键导入商品，并生成sku和库存**: 从Excel文件导入商品，自动生成SKU和库存，减少工作量的关键
 - [ ] **一键导入进货商品，减少重复性工作**: 从Excel文件导入进货商品，减少重复性工作，提高效率
+
+---
+
+# 数据流转缺失分析（全模块扫查）
+
+> 分析范围：16 Controller / 20 Service / 18 Repository。标记每个模块"数据流断点"—数据存在但无接口输出，或查询链路不完整。
+> 不涉及现有 CRUD 本身的好坏，只关注"数据是否流通到前端可看可用"。
+
+## 🔴 最优先（数据存在但完全无入口，每天经营都要看）
+
+### 1️⃣ 分页库存列表
+
+**现状**：`GET /api/stock/search/{warehouseId}/{productId}` 只能查**单个商品**某个仓库的库存，没法一次看"整个仓库所有SKU的库存"。
+
+**需要**：`GET /api/stock/page?warehouseId=&page=&size=`
+- WareHouseStockRepository: `findByWarehouseId(warehouseId, pageable)` 分页查某仓库所有库存
+- WareHouseStockService: `findPageByWarehouseId(warehouseId, pageable)`
+- WareHouseStockController: `GET /api/stock/page`
+- 前端即可展示"库存清单"页面，也可复用为导出库存CSV
+
+### 2️⃣ 会员消费记录
+
+**现状**：`GET /api/member/search/{phone}` 只能查会员基本信息（手机号、积分），**看不到这个会员买过什么、买了多少、花了多少钱**。服装店熟客来了问"上次那条裤子还有吗"，查不到。
+
+**需要**：`GET /api/member/{memberPhone}/orders?page=&size=`
+- OrderRepository: 按手机号查已完成的订单列表
+- MemberService: `searchOrders(memberPhone, pageable)` 或 MemberController 新增
+- 返回订单号、时间、商品列表、金额。现有数据完整，只需一个查询
+
+## 🟡 第二优先（数据存在但缺少聚合缺口，管理决策用）
+
+### 3️⃣ 进货统计（按状态汇总成本）
+
+**现状**：进货单 CRUD 全了，但无法一眼看到"本月草稿/待审核/通过/拒绝的各有多少单，总成本是多少"。
+
+**需要**：`GET /api/import-order/summary?start=&end=`
+- ImportOrderRepository: `GROUP BY status, SUM(totalPrice)` 按状态聚合
+- ImportOrderService: 新增统计方法
+- ImportOrderController: 新增端点
+- 已有 TODO (L16)，但优先度应高于"自定义"类报表
+
+### 4️⃣ 销售统计（按状态汇总金额）
+
+**现状**：订单有 DRAFT 和 COMPLETED 两种状态，目前只做了已完成订单的报表（销售额/成本/毛利），**没有区分挂单 vs 完成订单各自的合计金额和成本**。
+
+**需要**：`GET /api/order/summary?start=&end=`
+- OrderRepository: `GROUP BY status, SUM(actualPrice/totalPrice), COUNT(*)`
+- OrderService: 新增统计方法
+- OrderController: 新增端点
+- 已有 TODO (L15)，补充明确
+
+### 5️⃣ 调拨统计
+
+**现状**：调拨单走完审核流程就结束了，没有调拨量/频率的统计。
+
+**需要**：`GET /api/transfer-order/summary?start=&end=`
+- 按状态汇总调拨单数、总调拨商品数、总金额
+- 如果商品数在 TransferOrderItem 里，要 SUM(quantity)
+
+### 6️⃣ 盘点统计
+
+**现状**：盘点后差异情况（盘盈/盘亏）仅记录在每行明细中，没有汇总口径。
+
+**需要**：`GET /api/stockCheck/summary?start=&end=`
+- 按状态汇总盘点单数、总盘盈量、总盘亏量、已处理/未处理
+
+## 🟢 第三优先（基础数据没有详情查看链）
+
+### 7️⃣ 库存流水按来源过滤
+
+**现状**：`GET /api/stock-record/page` 不分来源全部列出，无法筛选只看"销售扣减"或"进货入库"。
+
+**需要**：`GET /api/stock-record/page?sourceType=&start=&end=`
+- StockRecordRepository: 加条件查询（sourceType, changeType, 时间范围）
+- 改动小，但查看流水时高效得多
+
+### 8️⃣ 供应商进货历史
+
+**现状**：`GET /api/supplier/search/{code}` 只看供应商信息，没法看到"这个供应商供过哪些货、多少钱"。
+
+**需要**：`GET /api/supplier/{id}/import-orders?page=&size=`
+- ImportOrderRepository: 按供应商ID查进货单
+- 复用已有 ImportOrderInfo，只加一个查询
+
+### 9️⃣ 员工销售业绩
+
+**现状**：员工 CRUD + 核验都有，但不能看"这个员工做了多少单、卖了多少钱"。
+
+**需要**：`GET /api/employee/{id}/sales-summary?start=&end=`
+- OrderRepository: `COUNT(*) + SUM(actualPrice) WHERE employeeId`
+- 统计某员工在时间范围内的完成订单数和总销售额
+
+## 缺失汇总表
+
+| 模块 | 缺失接口 | 数据来源 | TODO已有 |
+|------|---------|---------|---------|
+| **库存** | 分页库存列表 | WareHouseStock | ❌ 未列入 |
+| **会员** | 会员购买记录 | Order | ❌ 未列入 |
+| **进货** | 按状态汇总成本 | ImportOrder | ✅ L16 |
+| **订单** | 按状态汇总金额 | Order | ✅ L15 |
+| **调拨** | 调拨统计 | TransferOrder | ❌ 未列入 |
+| **盘点** | 盘点差异统计 | StockCheck | ❌ 未列入 |
+| **库存流水** | 按来源筛选 | StockRecord | ❌ 未列入 |
+| **供应商** | 供应商进货历史 | ImportOrder | ❌ 未列入 |
+| **员工** | 员工销售业绩 | Order | ❌ 未列入 |

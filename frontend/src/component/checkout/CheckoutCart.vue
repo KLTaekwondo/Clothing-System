@@ -186,7 +186,7 @@ defineEmits([
     gap: 12px;
     min-height: 42px;
     padding: 0 4px 2px;
-    background: #f5faf9;
+    background: var(--bg-body);
 }
 
 .cart-title-area,
@@ -197,13 +197,13 @@ defineEmits([
 }
 
 .cart-title {
-    color: #285f5a;
+    color: var(--primary-dark);
     font-size: 16px;
     font-weight: 800;
 }
 
 .cart-count {
-    color: #78908d;
+    color: var(--text-secondary);
     font-size: 12px;
 }
 
@@ -216,15 +216,14 @@ defineEmits([
 }
 
 .sale-summary {
-    color: #0f766e;
-    background: #ccfbf1;
+    color: var(--primary-dark);
+    background: var(--bg-active);
 }
 
 .refund-summary {
-    color: #dc2626;
-    background: #fee2e2;
+    color: var(--error-dark);
+    background: var(--error-light);
 }
-
 
 .cart-empty {
     display: flex;
@@ -235,7 +234,7 @@ defineEmits([
     height: calc(100% - 4px);
     min-height: 260px;
     margin-top: 4px;
-    color: #94a3b8;
+    color: var(--text-muted);
     background: rgba(255, 255, 255, 0.56);
     border: 1px dashed #bfe4dd;
     border-radius: 14px;
@@ -259,7 +258,7 @@ defineEmits([
     border: 1px solid #bfe4dd;
     border-radius: 10px;
     background: #dff3ef;
-    color: #285f5a;
+    color: var(--primary-dark);
     font-size: 14px;
     font-weight: 800;
     box-shadow: 0 3px 10px rgba(13, 148, 136, 0.08);
@@ -329,9 +328,9 @@ defineEmits([
     gap: 12px;
     min-height: 68px;
     padding: 10px 14px;
-    background: #fff;
+    background: var(--bg-card);
     border-radius: 10px;
-    border: 1px solid #e3efed;
+    border: 1px solid var(--border-light);
     box-shadow: 0 3px 10px rgba(22, 83, 78, 0.025);
     transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
@@ -379,13 +378,13 @@ defineEmits([
 }
 
 .cart-row-sku-info strong {
-    color: #0f766e;
+    color: var(--primary-dark);
     font-size: 13px;
 }
 
 .cart-row-product-info span,
 .cart-row-sku-info span {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-family: monospace;
     font-size: 11px;
 }
@@ -400,13 +399,13 @@ defineEmits([
 }
 
 .direction-sale {
-    background: #ccfbf1;
-    color: #0f766e;
+    background: var(--bg-active);
+    color: var(--primary-dark);
 }
 
 .direction-refund {
-    background: #fee2e2;
-    color: #dc2626;
+    background: var(--error-light);
+    color: var(--error-dark);
 }
 
 .cart-row-product-info,
@@ -438,27 +437,27 @@ defineEmits([
 }
 
 .special-badge {
-    background: #fef3c7;
-    color: #b45309;
+    background: var(--warning-light);
+    color: var(--warning-dark);
 }
 
 .regular-badge {
     background: #f1f5f9;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .cart-unit-price,
 .cart-actual-price {
     width: 110px;
     padding-left: 12px;
-    color: #475569;
+    color: var(--text-secondary);
     font-size: 13px;
     font-variant-numeric: tabular-nums;
     text-align: center;
 }
 
 .cart-actual-price {
-    color: #0f766e;
+    color: var(--primary-dark);
     font-weight: 700;
 }
 
@@ -475,34 +474,34 @@ defineEmits([
     width: 28px;
     height: 28px;
     padding: 0;
-    border: 1px solid #dceae7;
+    border: 1px solid var(--border);
     border-radius: 6px;
-    background: #fbfefd;
+    background: var(--bg-subtle);
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #475569;
+    color: var(--text-secondary);
 }
 
 .qty-btn:hover {
     background: #e2f5f2;
-    border-color: #14b8a6;
-    color: #0d9488;
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .qty-input {
     width: 48px;
     height: 28px;
     padding: 0;
-    border: 1px solid #dceae7;
+    border: 1px solid var(--border);
     border-radius: 6px;
     text-align: center;
     font-size: 14px;
     font-weight: 700;
-    background: #fff;
+    background: var(--bg-card);
 }
 
 .cart-row-discount {
@@ -516,9 +515,9 @@ defineEmits([
     width: 64px;
     height: 30px;
     padding: 0 6px;
-    border: 1px solid #dceae7;
+    border: 1px solid var(--border);
     border-radius: 6px;
-    background: #fff;
+    background: var(--bg-card);
     font-size: 13px;
     font-weight: 700;
     text-align: center;
@@ -527,12 +526,12 @@ defineEmits([
 .discount-input:disabled {
     border-color: #fde68a;
     background: #fffbeb;
-    color: #b45309;
+    color: var(--warning-dark);
     cursor: not-allowed;
 }
 
 .discount-input:focus {
-    border-color: #14b8a6;
+    border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
 
@@ -541,7 +540,7 @@ defineEmits([
     padding-left: 12px;
     font-size: 15px;
     font-weight: 800;
-    color: #0d9488;
+    color: var(--primary);
     font-variant-numeric: tabular-nums;
     text-align: center;
 }
@@ -562,15 +561,15 @@ defineEmits([
     border-radius: 7px;
     background: #fff1f2;
     font-size: 20px;
-    color: #dc2626;
+    color: var(--error-dark);
     cursor: pointer;
     line-height: 1;
 }
 
 .cart-row-remove:hover {
-    border-color: #ef4444;
+    border-color: var(--error);
     background: #ef4444;
-    color: #fff;
+    color: var(--text-invert);
     box-shadow: 0 4px 10px rgba(239, 68, 68, 0.22);
 }
 </style>

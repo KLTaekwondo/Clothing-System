@@ -46,25 +46,23 @@ const emit = defineEmits(['update:modelValue', 'update:search'])
 .status-filter-toolbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
-    padding: 10px 0 16px;
-    border-bottom: 1px solid var(--border-light);
+    flex-wrap: wrap;
 }
 
 .status-filter-tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 6px;
 }
 
 .status-filter-tab,
 .status-filter-tab-active {
-    padding: 7px 13px;
-    border-radius: 8px;
+    padding: 7px 15px;
+    border-radius: 999px;
     color: var(--text-secondary);
     background: transparent;
-    font-size: 13px;
+    font-size: var(--font-sm);
 }
 
 .status-filter-tab:hover,
@@ -78,13 +76,29 @@ const emit = defineEmits(['update:modelValue', 'update:search'])
 }
 
 .status-filter-search {
-    width: 280px;
-    height: 36px;
+    width: 240px;
+    height: 40px;
+    padding: 0 18px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-card);
+    font-size: 13px;
+    outline: none;
+    transition: var(--transition);
+}
+
+.status-filter-search:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-focus);
+}
+
+.status-filter-search::placeholder {
+    color: var(--text-muted);
 }
 
 @media (max-width: 900px) {
     .status-filter-toolbar {
-        align-items: flex-start;
+        align-items: stretch;
         flex-direction: column;
     }
 

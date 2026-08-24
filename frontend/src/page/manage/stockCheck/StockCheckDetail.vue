@@ -313,21 +313,6 @@ function goBack() {
     flex-wrap: wrap;
 }
 
-.info-card {
-    width: calc(33.33% - 10px);
-    min-width: 210px;
-    min-height: 96px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 18px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
-    border: 1px solid #e3efed;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
-}
-
 .info-card span,
 .info-card small {
     color: var(--text-muted);
@@ -338,39 +323,34 @@ function goBack() {
     font-size: 15px;
 }
 
-.code-value {
-    color: var(--primary);
-    font-family: ui-monospace, "SF Mono", Consolas, monospace;
-}
-
 .difference-value {
-    color: #d97706;
+    color: var(--warning-dark);
 }
 
 .status-pending {
-    color: #d97706;
+    color: var(--warning-dark);
 }
 
 .status-warn {
-    color: #2563eb;
+    color: var(--info-dark);
 }
 
 .status-ok {
-    color: #16a34a;
+    color: var(--success-dark);
 }
 
 .status-error {
-    color: #dc2626;
+    color: var(--error-dark);
 }
 
 .remark-card,
 .detail-card {
     padding: 20px;
     margin-bottom: 16px;
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border-light);
-    border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(15, 118, 110, 0.06);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
 }
 
 .remark-card {
@@ -409,18 +389,6 @@ function goBack() {
     font-size: 12px;
 }
 
-.diff-positive {
-    color: #16a34a;
-}
-
-.diff-negative {
-    color: #dc2626;
-}
-
-.diff-zero {
-    color: var(--text-secondary);
-}
-
 @media (max-width: 900px) {
     .page-heading,
     .remark-card {
@@ -431,5 +399,4 @@ function goBack() {
     .info-card {
         width: calc(50% - 7px);
     }
-}
-</style>
+}</style>

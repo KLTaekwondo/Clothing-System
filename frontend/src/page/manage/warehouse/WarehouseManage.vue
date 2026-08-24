@@ -1,26 +1,41 @@
 <template>
     <div class="warehouse-manage">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">仓库管理</h2>
-                <p class="page-desc">管理仓库信息、查看和调拨库存</p>
-            </div>
-            <router-link class="btn-primary" to="/manage/warehouse/add">+ 添加仓库</router-link>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">仓库列表</span>
-                <div class="header-actions">
-                    <div class="search-bar">
-                        <input
-                            v-model="searchQuery"
-                            placeholder="搜索仓库名称或编码"
-                            type="text"
-                        />
-                    </div>
-                </div>
-            </div>
+        
 
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">仓库管理</h2>
+                <p class="page-label-desc">管理仓库信息、查看和调拨库存</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+            <div class="search-label">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>仓库检索</span>
+        </div><div class="search-shell">
+            <div class="search-controls">
+                <input
+                    v-model="searchQuery"
+                    class="search-code-input"
+                    placeholder="搜索仓库名称或编码"
+                    type="text"
+                />
+                <router-link
+                    class="btn-primary search-button"
+                    to="/manage/warehouse/add"
+                >
+                    + 添加仓库
+                </router-link>
+            </div>
+        </div>
+            </div>
+        </div>
+
+        <div class="card">
             <div v-if="loading" class="loading-overlay">
                 <div class="loading-spinner"></div>
             </div>
@@ -168,27 +183,9 @@ async function handleDelete() {
     min-width: 0;
 }
 
-.page-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 24px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
 .warehouse-manage > .card {
     border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
+    box-shadow: var(--shadow);
 }
 
 .data-table th,
@@ -200,45 +197,13 @@ async function handleDelete() {
     justify-content: center;
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.search-bar {
-    width: 300px;
-}
-
-.search-bar input {
-    width: 100%;
-}
-
 @media (max-width: 760px) {
-    .page-heading,
-    .card-header {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
-    }
-
     .warehouse-manage > .card {
         overflow-x: auto;
     }
 
     .data-table {
         min-width: 760px;
-    }
-
-    .header-actions {
-        align-items: stretch;
-        flex-direction: column;
-        gap: 12px;
-        width: 100%;
-    }
-
-    .search-bar {
-        width: 100%;
     }
 }
 </style>

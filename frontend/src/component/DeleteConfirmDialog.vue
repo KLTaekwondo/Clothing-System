@@ -76,17 +76,21 @@ const emit = defineEmits(['cancel', 'confirm'])
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: rgba(15, 23, 42, 0.42);
+    background: rgba(0, 0, 0, 0.42);
     backdrop-filter: blur(2px);
+}
+
+[data-theme="dark"] .delete-confirm-overlay {
+    background: rgba(0, 0, 0, 0.62);
 }
 
 .delete-confirm-dialog {
     width: min(400px, 100%);
     overflow: hidden;
-    background: #fff;
-    border: 1px solid #dceae7;
-    border-radius: 16px;
-    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.2);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
 }
 
 .delete-confirm-body {
@@ -119,7 +123,7 @@ const emit = defineEmits(['cancel', 'confirm'])
     justify-content: flex-end;
     gap: 8px;
     padding: 14px 20px;
-    background: #f8fbfa;
+    background: var(--bg-subtle);
     border-top: 1px solid var(--border-light);
 }
 
@@ -128,31 +132,31 @@ const emit = defineEmits(['cancel', 'confirm'])
     min-width: 92px;
     height: 38px;
     padding: 0 16px;
-    border-radius: 8px;
+    border-radius: 999px;
     font-weight: 700;
     cursor: pointer;
 }
 
 .delete-confirm-cancel {
-    border: 1px solid #dceae7;
-    color: #475569;
-    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    background: var(--bg-card);
 }
 
 .delete-confirm-submit {
-    border: 1px solid #dc2626;
-    color: #fff;
-    background: #dc2626;
+    border: 1px solid var(--error-dark);
+    color: var(--text-invert);
+    background: var(--error-dark);
 }
 
 .delete-confirm-cancel:hover:not(:disabled) {
-    border-color: #91cec4;
-    background: #f7fbfa;
+    border-color: var(--border-hover);
+    background: var(--bg-hover);
 }
 
 .delete-confirm-submit:hover:not(:disabled) {
-    border-color: #b91c1c;
-    background: #b91c1c;
+    border-color: var(--error);
+    background: var(--error);
 }
 
 .delete-confirm-cancel:disabled,

@@ -175,27 +175,6 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading {
-    margin-bottom: 28px;
-}
-
-.heading-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
 .form-card {
     max-width: 780px;
     margin: 0 auto;
@@ -212,7 +191,7 @@ function goBack() {
 
 .edit-form input {
     border-radius: 10px;
-    background: #fbfdfd;
+    background: var(--bg-subtle);
 }
 
 .spec-options {
@@ -223,15 +202,15 @@ function goBack() {
 
 .spec-option-group {
     padding: 14px;
-    border: 1px solid #e3efed;
+    border: 1px solid var(--border-light);
     border-radius: 10px;
-    background: #fbfdfd;
+    background: var(--bg-subtle);
 }
 
 .spec-option-label {
     display: block;
     margin-bottom: 10px;
-    color: #475569;
+    color: var(--text-secondary);
     font-size: 13px;
     font-weight: 700;
 }
@@ -254,26 +233,26 @@ function goBack() {
 }
 
 .option-tag {
-    border: 1px solid #dceae7;
-    background: #fff;
-    color: #475569;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
 }
 
 .option-tag:hover {
     border-color: #5eead4;
     background: #f0fdfa;
-    color: #0f766e;
+    color: var(--primary-dark);
 }
 
 .option-tag-active {
-    border: 1px solid #0d9488;
-    background: #ccfbf1;
-    color: #0f766e;
+    border: 1px solid var(--primary);
+    background: var(--bg-active);
+    color: var(--primary-dark);
     box-shadow: 0 3px 8px rgba(13, 148, 136, 0.14);
 }
 
 .option-empty {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 13px;
 }
 
@@ -286,23 +265,14 @@ function goBack() {
 }
 
 .spec-preview {
-    background: #ecfdf5;
-    color: #0f766e;
+    background: var(--success-light);
+    color: var(--primary-dark);
     font-weight: 700;
 }
 
 .spec-hint {
-    background: #f8fafc;
-    color: #64748b;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 16px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-light);
+    background: var(--bg-subtle);
+    color: var(--text-muted);
 }
 
 @media (max-width: 640px) {
@@ -312,8 +282,5 @@ function goBack() {
         padding: 8px 10px;
     }
 
-    .form-actions {
-        flex-direction: column-reverse;
-    }
 }
 </style>

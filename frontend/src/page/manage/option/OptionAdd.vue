@@ -124,26 +124,6 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading {
-    margin-bottom: 28px;
-}
-
-.heading-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
 .standalone-form-card {
     width: 86%;
     max-width: 920px;
@@ -151,7 +131,7 @@ function goBack() {
     padding: 28px;
     border: 1px solid var(--border-light);
     border-radius: 16px;
-    background: #fff;
+    background: var(--bg-card);
     box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
 }
 
@@ -160,9 +140,9 @@ function goBack() {
     flex-wrap: wrap;
     gap: 10px;
     padding: 14px;
-    border: 1px solid #e3efed;
+    border: 1px solid var(--border-light);
     border-radius: 10px;
-    background: #fbfdfd;
+    background: var(--bg-subtle);
 }
 
 .type-option,
@@ -177,36 +157,27 @@ function goBack() {
 }
 
 .type-option {
-    border: 1px solid #dceae7;
-    background: #fff;
-    color: #475569;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
 }
 
 .type-option:hover {
     border-color: #5eead4;
     background: #f0fdfa;
-    color: #0f766e;
+    color: var(--primary-dark);
 }
 
 .type-option-active {
-    border: 1px solid #0d9488;
-    background: #ccfbf1;
-    color: #0f766e;
+    border: 1px solid var(--primary);
+    background: var(--bg-active);
+    color: var(--primary-dark);
     box-shadow: 0 3px 8px rgba(13, 148, 136, 0.14);
 }
 
 .form-group input {
     border-radius: 10px;
-    background: #fbfdfd;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 18px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-light);
+    background: var(--bg-subtle);
 }
 
 @media (max-width: 640px) {
@@ -216,8 +187,5 @@ function goBack() {
         padding: 8px 10px;
     }
 
-    .form-actions {
-        flex-direction: column-reverse;
-    }
 }
 </style>

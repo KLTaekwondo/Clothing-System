@@ -1,55 +1,97 @@
 <template>
     <div class="order-manage">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">订单管理</h2>
-                <p class="page-desc">查看订单状态、支付方式和交易金额</p>
+        
+
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">订单管理</h2>
+                <p class="page-label-desc">查看订单状态、支付方式和交易金额</p>
+                <hr class="label-hr"/>
             </div>
-            <button class="btn-outline" @click="fetchOrders">↻ 刷新订单</button>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+            <div class="search-label">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>订单检索</span>
+        </div><div class="search-shell">
+            <div class="search-controls">
+                <div class="filter-tabs">
+                    <button
+                        :class="statusFilter === '' ? 'filter-tab-active' : 'filter-tab'"
+                        type="button"
+                        @click="statusFilter = ''"
+                    >全部</button>
+                    <button
+                        :class="statusFilter === ORDER_STATUS.COMPLETED ? 'filter-tab-active' : 'filter-tab'"
+                        type="button"
+                        @click="statusFilter = ORDER_STATUS.COMPLETED"
+                    >已完成</button>
+                    <button
+                        :class="statusFilter === ORDER_STATUS.DRAFT ? 'filter-tab-active' : 'filter-tab'"
+                        type="button"
+                        @click="statusFilter = ORDER_STATUS.DRAFT"
+                    >挂单</button>
+                    <button
+                        :class="statusFilter === ORDER_STATUS.REFUND ? 'filter-tab-active' : 'filter-tab'"
+                        type="button"
+                        @click="statusFilter = ORDER_STATUS.REFUND"
+                    >已退款</button>
+                </div>
+                <input
+                    v-model="searchQuery"
+                    class="search-code-input"
+                    placeholder="搜索订单号、员工或仓库"
+                    type="text"
+                />
+                <button
+                    class="btn-outline search-button"
+                    type="button"
+                    @click="fetchOrders"
+                >↻ 刷新订单</button>
+            </div>
+        </div>
+            </div>
         </div>
 
         <div class="order-stats">
             <div class="order-stat-card">
                 <span class="order-stat-icon"><IconGraphic name="order"/></span>
-                <span class="order-stat-value">{{ pageInfo.totalElements }}</span>
+                <span class="stats-body">
+<span class="order-stat-value">{{ pageInfo.totalElements }}</span>
+
                 <span class="order-stat-label">全部订单</span>
+</span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon completed-icon"><IconGraphic name="check"/></span>
-                <span class="order-stat-value">{{ completedCount }}</span>
+                <span class="stats-body">
+<span class="order-stat-value">{{ completedCount }}</span>
+
                 <span class="order-stat-label">当前页已完成</span>
+</span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon draft-icon"><IconGraphic name="clock"/></span>
-                <span class="order-stat-value">{{ draftCount }}</span>
+                <span class="stats-body">
+<span class="order-stat-value">{{ draftCount }}</span>
+
                 <span class="order-stat-label">当前页挂单</span>
+</span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon amount-icon">¥</span>
-                <span class="order-stat-value">¥{{ totalAmount.toFixed(2) }}</span>
+                <span class="stats-body">
+<span class="order-stat-value">¥{{ totalAmount.toFixed(2) }}</span>
+
                 <span class="order-stat-label">当前页金额</span>
+</span>
             </div>
         </div>
 
         <div class="order-table-card">
-            <div class="table-toolbar">
-                <div class="filter-tabs">
-                    <button :class="{ active: statusFilter === '' }" class="filter-tab" @click="statusFilter = ''">
-                        全部
-                    </button>
-                    <button :class="{ active: statusFilter === ORDER_STATUS.COMPLETED }" class="filter-tab"
-                            @click="statusFilter = ORDER_STATUS.COMPLETED">已完成
-                    </button>
-                    <button :class="{ active: statusFilter === ORDER_STATUS.DRAFT }" class="filter-tab"
-                            @click="statusFilter = ORDER_STATUS.DRAFT">挂单
-                    </button>
-                    <button :class="{ active: statusFilter === ORDER_STATUS.REFUND }" class="filter-tab"
-                            @click="statusFilter = ORDER_STATUS.REFUND">已退款
-                    </button>
-                </div>
-                <input v-model="searchQuery" class="order-search" placeholder="搜索订单号、员工或仓库" type="text"/>
-            </div>
-
             <div v-if="loading" class="loading-overlay">
                 <div class="loading-spinner"></div>
             </div>
@@ -92,27 +134,13 @@
                 </tbody>
             </table>
 
-            <div class="pagination-bar">
-                <span class="page-info">
-                    第 {{ pageInfo.page + 1 }} / {{ totalPages }} 页，共 {{ pageInfo.totalElements }} 条
-                </span>
-                <div class="page-actions">
-                    <button
-                        :disabled="loading || pageInfo.page <= 0"
-                        class="btn-outline btn-sm"
-                        @click="changePage(pageInfo.page - 1)"
-                    >
-                        上一页
-                    </button>
-                    <button
-                        :disabled="loading || pageInfo.page >= totalPages - 1"
-                        class="btn-outline btn-sm"
-                        @click="changePage(pageInfo.page + 1)"
-                    >
-                        下一页
-                    </button>
-                </div>
-            </div>
+            <TablePagination
+                :loading="loading"
+                :page="pageInfo.page"
+                :total-elements="pageInfo.totalElements"
+                :total-pages="totalPages"
+                @change="changePage"
+            />
         </div>
     </div>
 </template>
@@ -121,6 +149,7 @@
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import orderInterface from '../../../axios/interface/OrderInterface.js'
+import TablePagination from '../../../component/common/TablePagination.vue'
 import {ORDER_STATUS, ORDER_STATUS_LABELS} from '../../../constants/orderStatus.js'
 import {PAY_METHOD_LABELS} from '../../../constants/payMethod.js'
 
@@ -197,129 +226,106 @@ function statusClass(status) {
     min-width: 0;
 }
 
-.page-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 26px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
 .order-stats {
     display: flex;
-    gap: 14px;
+    align-items: stretch;
     margin-bottom: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--bg-card);
+    box-shadow: var(--shadow);
+    overflow: hidden;
 }
 
 .order-stat-card {
-    width: calc(25% - 11px);
-    min-width: 180px;
+    width: 25%;
+    min-width: 0;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 17px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
-    border: 1px solid #e3efed;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-light);
+    transition: background 0.2s;
+}
+
+.order-stat-card:last-child {
+    border-right: none;
+    background: linear-gradient(145deg, var(--bg-card), var(--bg-subtle));
+}
+
+.order-stat-card:last-child .order-stat-value {
+    color: var(--primary-dark);
+    font-size: 26px;
+}
+
+.order-stat-card:hover {
+    background: var(--bg-hover);
+}
+
+.order-stat-card:last-child:hover {
+    background: linear-gradient(145deg, var(--bg-hover), var(--bg-subtle));
 }
 
 .order-stat-icon {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 11px;
-    background: #e8f7f3;
-    color: var(--primary);
-    font-size: 21px;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 16px;
     font-weight: 800;
 }
 
 .completed-icon {
-    background: #dcfce7;
-    color: #16a34a;
+    background: var(--success-light);
+    color: var(--success-dark);
 }
 
 .draft-icon {
-    background: #fef3c7;
-    color: #d97706;
+    background: var(--warning-light);
+    color: var(--warning-dark);
+}
+
+.checking-icon {
+    background: var(--info-light);
+    color: var(--info-dark);
 }
 
 .amount-icon {
-    background: #e8f0fe;
-    color: #3b82f6;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 15px;
 }
 
 .order-stat-value {
     color: var(--text);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.15;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
 .order-stat-label {
-    margin-left: -4px;
+    margin-top: 3px;
     color: var(--text-muted);
     font-size: 12px;
+    white-space: nowrap;
 }
 
 .order-table-card {
     padding: 8px 20px 20px;
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border-light);
     border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
+    box-shadow: var(--shadow);
     overflow-x: auto;
-}
-
-.table-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 10px 0 16px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.filter-tabs {
-    display: flex;
-    gap: 4px;
-}
-
-.filter-tab {
-    padding: 7px 13px;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    background: transparent;
-    font-size: 13px;
-}
-
-.filter-tab:hover {
-    background: #f1faf8;
-    color: var(--primary);
-}
-
-.filter-tab.active {
-    background: var(--primary-light);
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.order-search {
-    width: 260px;
-    height: 36px;
 }
 
 .order-table-card .data-table {
@@ -333,6 +339,8 @@ function statusClass(status) {
 .actual-price {
     color: var(--primary);
     font-weight: 700;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
 }
 
 .remark-cell {
@@ -343,44 +351,41 @@ function statusClass(status) {
     color: var(--text-secondary);
 }
 
-.pagination-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border-light);
-}
-
-.page-info {
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.page-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 @media (max-width: 900px) {
-    .page-heading,
-    .table-toolbar,
-    .pagination-bar {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
     .order-stats {
         flex-wrap: wrap;
     }
 
     .order-stat-card {
-        width: calc(50% - 7px);
+        width: 50%;
+        border-right: none;
     }
 
-    .order-search {
+    .order-stat-card:nth-child(odd) {
+        border-right: 1px solid var(--border-light);
+    }
+
+    .order-stat-card:nth-child(-n+2) {
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .order-stat-card:nth-child(n+3) {
+        border-bottom: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .order-stat-card {
         width: 100%;
+        border-right: none;
+    }
+
+    .order-stat-card:nth-child(-n+3) {
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .order-stat-card:last-child {
+        border-bottom: none;
     }
 }
 </style>

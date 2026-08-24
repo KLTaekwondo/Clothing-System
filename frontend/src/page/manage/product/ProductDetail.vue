@@ -406,14 +406,8 @@ function goBack() {
 }
 
 .detail-tab.active {
-    color: #0d9488;
-    border-bottom-color: #0d9488;
-}
-
-.info-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
+    color: var(--primary);
+    border-bottom-color: var(--primary);
 }
 
 .info-card {
@@ -425,24 +419,14 @@ function goBack() {
     justify-content: space-between;
     gap: 12px;
     padding: 18px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
-    border: 1px solid #e6f0ef;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(15, 118, 110, 0.06);
+    background: linear-gradient(145deg, var(--bg-card), var(--bg-subtle));
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
 }
 
 .info-card:nth-child(4n+1) {
-    border-top: 3px solid #0d9488;
-}
-
-.info-label {
-    color: var(--text-muted);
-    font-size: var(--font-sm);
-}
-
-.code-value {
-    color: var(--primary);
-    font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+    border-top: 3px solid var(--primary);
 }
 
 .price-value {
@@ -455,46 +439,10 @@ function goBack() {
     font-size: 13px;
 }
 
-.card-input {
-    width: 100%;
-    height: 38px;
-    padding: 0 10px;
-    border: 1px solid #dceae7;
-    border-radius: 8px;
-    background: #fff;
-    font-size: 14px;
-    outline: none;
-}
-
-.card-input:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
-}
-
 .price-input {
     font-size: 18px;
     font-weight: 700;
-    color: #0d9488;
-}
-
-.card-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 24px 0 10px;
-    border: 1px solid #dceae7;
-    border-radius: 8px;
-    background: #fff;
-    font-size: 14px;
-    appearance: none;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364807e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-}
-
-.card-select:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+    color: var(--primary);
 }
 
 .card-toggle {
@@ -503,15 +451,15 @@ function goBack() {
     border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
-    border: 1px solid #dceae7;
-    background: #fff;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
     color: var(--text-secondary);
     cursor: pointer;
 }
 
 .card-toggle.active {
     background: linear-gradient(135deg, #0f766e, #14b8a6);
-    color: #fff;
+    color: var(--text-invert);
     border-color: transparent;
 }
 
@@ -538,7 +486,7 @@ function goBack() {
 
 .table-card {
     padding: 8px 20px 20px;
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
 }
 
 .data-table td {
@@ -561,5 +509,4 @@ function goBack() {
     .info-card {
         width: 100%;
     }
-}
-</style>
+}</style>

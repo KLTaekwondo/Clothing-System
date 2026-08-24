@@ -919,7 +919,7 @@ function handleBeforeUnload(event) {
     flex-direction: column;
     padding: 20px 20px 0 20px;
     overflow: hidden;
-    background: #f5faf9;
+    background: var(--bg-body);
 }
 
 .left-container > .order-item-list {
@@ -945,14 +945,14 @@ function handleBeforeUnload(event) {
     padding: 0 12px;
     border: none;
     border-radius: 18px;
-    color: #fff;
+    color: var(--text-invert);
     font-size: 13px;
     font-weight: 800;
     cursor: pointer;
 }
 
 .mode-sale {
-    background: #0d9488;
+    background: var(--primary);
 }
 
 .mode-refund {
@@ -968,18 +968,17 @@ function handleBeforeUnload(event) {
     width: 100%;
     height: 42px;
     padding: 0 14px;
-    border: 1px solid #dceae7;
+    border: 1px solid var(--border);
     border-radius: 10px;
-    background: #fff;
+    background: var(--bg-card);
     font-size: 15px;
     outline: none;
 }
 
 .search-field:focus {
-    border-color: #14b8a6;
+    border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
-
 
 .employee-name {
     flex-shrink: 0;
@@ -989,7 +988,7 @@ function handleBeforeUnload(event) {
     min-height: 42px;
     padding: 4px 5px 4px 12px;
     background: rgba(255, 255, 255, 0.82);
-    border: 1px solid #c9e5e0;
+    border: 1px solid var(--border-hover);
     border-radius: 12px;
     box-shadow: 0 4px 14px rgba(22, 83, 78, 0.08);
 }
@@ -997,7 +996,7 @@ function handleBeforeUnload(event) {
 .employee-label {
     position: relative;
     padding-left: 10px;
-    color: #64807e;
+    color: var(--text-secondary);
     font-size: 12px;
     font-weight: 700;
     white-space: nowrap;
@@ -1010,7 +1009,7 @@ function handleBeforeUnload(event) {
     left: 0;
     width: 5px;
     height: 5px;
-    background: #14b8a6;
+    background: var(--primary-hover);
     border-radius: 50%;
     transform: translateY(-50%);
     box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
@@ -1018,10 +1017,10 @@ function handleBeforeUnload(event) {
 
 .selected-employee {
     padding: 6px 10px;
-    border: 1px solid #b9ded7;
+    border: 1px solid var(--border-hover);
     border-radius: 8px;
-    background: #e9f8f5;
-    color: #0f766e;
+    background: var(--bg-hover);
+    color: var(--primary-dark);
     font-size: 13px;
     font-weight: 800;
     white-space: nowrap;
@@ -1029,8 +1028,8 @@ function handleBeforeUnload(event) {
 
 .employee-empty {
     padding: 6px 10px;
-    color: #94a3b8;
-    background: #f8fbfa;
+    color: var(--text-muted);
+    background: var(--bg-subtle);
     border: 1px dashed #cbdedb;
     border-radius: 8px;
     font-size: 12px;
@@ -1040,18 +1039,18 @@ function handleBeforeUnload(event) {
 .employee-add-button {
     height: 32px;
     padding: 0 12px;
-    border: 1px solid #0d9488;
+    border: 1px solid var(--primary);
     border-radius: 8px;
-    background: #0d9488;
-    color: #fff;
+    background: var(--primary);
+    color: var(--text-invert);
     font-size: 12px;
     font-weight: 700;
     box-shadow: 0 3px 9px rgba(13, 148, 136, 0.2);
 }
 
 .employee-add-button:hover {
-    background: #0f766e;
-    border-color: #0f766e;
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
     transform: translateY(-1px);
     box-shadow: 0 5px 12px rgba(13, 148, 136, 0.28);
 }
@@ -1067,8 +1066,8 @@ function handleBeforeUnload(event) {
     gap: 8px;
     align-items: flex-end;
     padding: 8px;
-    background: #ffffff;
-    border: 1px solid #b9ded7;
+    background: var(--bg-card);
+    border: 1px solid var(--border-hover);
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(22, 83, 78, 0.14);
 }
@@ -1085,9 +1084,9 @@ function handleBeforeUnload(event) {
     justify-content: center;
     gap: 5px;
     padding: 0 10px;
-    color: #fff;
-    background: #0f766e;
-    border: 1px solid #b9ded7;
+    color: var(--text-invert);
+    background: var(--primary-dark);
+    border: 1px solid var(--border-hover);
     border-bottom: none;
     border-radius: 10px 10px 0 0;
     box-shadow: 0 -3px 10px rgba(15, 118, 110, 0.14);
@@ -1099,8 +1098,8 @@ function handleBeforeUnload(event) {
 }
 
 .total-collapse-button:hover {
-    color: #fff;
-    background: #115e59;
+    color: var(--text-invert);
+    background: var(--primary-dark);
     border-color: #9fd8cf;
 }
 
@@ -1116,7 +1115,7 @@ function handleBeforeUnload(event) {
     justify-content: center;
     gap: 10px;
     padding: 0 14px 0 18px;
-    color: #fff;
+    color: var(--text-invert);
     background: linear-gradient(135deg, #fbbf24, #d97706);
     border: 1px solid #f5b536;
     border-radius: 26px;
@@ -1124,9 +1123,9 @@ function handleBeforeUnload(event) {
 }
 
 .order-total-collapsed:hover {
-    color: #fff;
+    color: var(--text-invert);
     background: linear-gradient(135deg, #f59e0b, #b45309);
-    border-color: #d97706;
+    border-color: var(--warning-dark);
     transform: translateY(-1px);
     box-shadow: 0 8px 22px rgba(217, 119, 6, 0.32);
 }
@@ -1143,14 +1142,14 @@ function handleBeforeUnload(event) {
 
 .order-total-collapsed .expand-label {
     padding: 4px 8px;
-    color: #fff;
+    color: var(--text-invert);
     background: rgba(255, 255, 255, 0.18);
     border-radius: 10px;
     font-size: 11px;
 }
 
 .order-total-collapsed:hover .expand-label {
-    color: #fff;
+    color: var(--text-invert);
     background: rgba(255, 255, 255, 0.16);
 }
 
@@ -1185,19 +1184,19 @@ function handleBeforeUnload(event) {
     border: 1px solid #e1efec;
     border-radius: 10px;
     min-width: 100px;
-    background: #f7fbfa;
+    background: var(--bg-subtle);
 }
 
 .info-card .info-label {
     font-size: 11px;
-    color: #64807e;
+    color: var(--text-secondary);
     font-weight: 600;
 }
 
 .info-card .info-value {
     font-size: 20px;
     font-weight: 800;
-    color: #285f5a;
+    color: var(--primary-dark);
 }
 
 .info-value-discount {
@@ -1228,7 +1227,7 @@ function handleBeforeUnload(event) {
 .actual-total .info-value {
     font-size: 24px;
     font-weight: 800;
-    color: #fff;
+    color: var(--text-invert);
 }
 
 /* ── 右侧容器 ── */
@@ -1237,7 +1236,7 @@ function handleBeforeUnload(event) {
     display: flex;
     flex-direction: column;
     padding: 20px;
-    background: #fff;
+    background: var(--bg-card);
     border-left: 1px solid #e3efed;
 }
 
@@ -1245,9 +1244,9 @@ function handleBeforeUnload(event) {
     width: 100%;
     margin-bottom: 16px;
     padding: 14px;
-    color: #fff;
+    color: var(--text-invert);
     background: linear-gradient(145deg, #0f766e, #14b8a6);
-    border: 1px solid #0d9488;
+    border: 1px solid var(--primary);
     border-radius: 12px;
     box-shadow: 0 8px 22px rgba(13, 148, 136, 0.2);
 }
@@ -1284,7 +1283,7 @@ function handleBeforeUnload(event) {
 .member-clear-button {
     margin-left: auto;
     padding: 5px 9px;
-    color: #fff;
+    color: var(--text-invert);
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.55);
     border-radius: 6px;
@@ -1316,21 +1315,21 @@ function handleBeforeUnload(event) {
 .member-selected-main span {
     flex-shrink: 0;
     padding: 3px 7px;
-    color: #0f766e;
-    background: #ccfbf1;
+    color: var(--primary-dark);
+    background: var(--bg-active);
     border-radius: 6px;
     font-size: 13px;
     font-weight: 800;
 }
 
 .member-selected code {
-    color: #fff;
+    color: var(--text-invert);
     font-size: 14px;
     font-weight: 700;
 }
 
 .member-selected-meta {
-    color: #fff;
+    color: var(--text-invert);
     font-size: 14px;
     font-weight: 600;
 }
@@ -1344,8 +1343,8 @@ function handleBeforeUnload(event) {
     width: 100%;
     height: 36px;
     margin-top: 2px;
-    color: #0f766e;
-    background: #fff;
+    color: var(--primary-dark);
+    background: var(--bg-card);
     border: none;
     border-radius: 7px;
     font-size: 14px;
@@ -1359,7 +1358,7 @@ function handleBeforeUnload(event) {
 }
 
 .member-empty-text {
-    color: #fff;
+    color: var(--text-invert);
     font-size: 14px;
     font-weight: 600;
 }
@@ -1374,7 +1373,7 @@ function handleBeforeUnload(event) {
     height: 40px;
     padding: 0 10px;
     color: #134e4a;
-    background: #fff;
+    background: var(--bg-card);
     border: none;
     border-radius: 8px 0 0 8px;
     font-size: 14px;
@@ -1383,7 +1382,7 @@ function handleBeforeUnload(event) {
 .member-search-row button {
     width: 66px;
     border: none;
-    color: #fff;
+    color: var(--text-invert);
     background: #134e4a;
     border-radius: 0 8px 8px 0;
     font-size: 14px;
@@ -1409,9 +1408,9 @@ function handleBeforeUnload(event) {
     align-items: center;
     gap: 6px;
     padding: 16px 8px;
-    border: 1px solid #e3efed;
+    border: 1px solid var(--border-light);
     border-radius: 12px;
-    background: #fbfefd;
+    background: var(--bg-subtle);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -1425,7 +1424,7 @@ function handleBeforeUnload(event) {
     padding: 16px 8px;
     border: 1px solid #ef4444;
     border-radius: 12px;
-    background: #fee2e2;
+    background: var(--error-light);
     cursor: pointer;
 }
 
@@ -1435,13 +1434,13 @@ function handleBeforeUnload(event) {
 }
 
 .tool-bar-item:hover {
-    background: #f0fdfb;
-    border-color: #14b8a6;
+    background: var(--bg-hover);
+    border-color: var(--primary);
 }
 
 .tool-bar-item-danger:hover {
-    background: #fef2f2;
-    border-color: #ef4444;
+    background: var(--error-light);
+    border-color: var(--error);
 }
 
 .tool-icon {
@@ -1451,7 +1450,7 @@ function handleBeforeUnload(event) {
 .tool-label {
     font-size: 13px;
     font-weight: 600;
-    color: #475569;
+    color: var(--text-secondary);
 }
 
 .tool-bar-item-active .tool-label {
@@ -1463,8 +1462,8 @@ function handleBeforeUnload(event) {
     padding: 13px;
     margin-top: auto;
     margin-bottom: 8px;
-    background: #f7fbfa;
-    border: 1px solid #dceae7;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
     border-radius: 10px;
 }
 
@@ -1491,14 +1490,14 @@ function handleBeforeUnload(event) {
 }
 
 .payment-title {
-    color: #475569;
+    color: var(--text-secondary);
     font-size: 12px;
     font-weight: 700;
 }
 
 .payment-amount {
     margin-left: auto;
-    color: #d97706;
+    color: var(--warning-dark);
     font-size: 13px;
     font-variant-numeric: tabular-nums;
 }
@@ -1517,12 +1516,12 @@ function handleBeforeUnload(event) {
     justify-content: flex-start;
     gap: 8px;
     padding: 7px 10px;
-    border: 1px solid #dceae7;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    background: #fff;
+    background: var(--bg-card);
     font-size: 13px;
     font-weight: 600;
-    color: #475569;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -1535,14 +1534,14 @@ function handleBeforeUnload(event) {
 }
 
 .pay-method-btn:hover {
-    border-color: #14b8a6;
-    color: #0d9488;
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .pay-method-btn.active {
-    background: #ccfbf1;
-    border-color: #0d9488;
-    color: #0d9488;
+    background: var(--bg-active);
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 /* 结账按钮 */
@@ -1558,7 +1557,7 @@ function handleBeforeUnload(event) {
     border: none;
     border-radius: 12px;
     background: linear-gradient(135deg, #0d9488, #14b8a6);
-    color: #fff;
+    color: var(--text-invert);
     font-size: 18px;
     font-weight: 800;
     letter-spacing: 2px;

@@ -1,54 +1,79 @@
 <template>
     <div class="member-manage">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">会员管理</h2>
-                <p class="page-desc">管理会员资料、等级、积分与折扣</p>
-            </div>
-            <router-link
-                class="btn-primary"
-                to="/manage/member/add"
-            >+ 添加会员</router-link>
-        </div>
+        
 
-        <div class="member-summary">
-            <div class="summary-item">
-                <span>会员总数</span>
-                <strong>{{ memberList.length }}</strong>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">会员管理</h2>
+                <p class="page-label-desc">管理会员资料、等级、积分与折扣</p>
+                <hr class="label-hr"/>
             </div>
-            <div class="summary-item">
-                <span>VIP 会员</span>
-                <strong>{{ vipCount }}</strong>
-            </div>
-            <div class="summary-item">
-                <span>高级会员</span>
-                <strong>{{ mvpCount }}</strong>
-            </div>
-            <div class="summary-item">
-                <span>累计积分</span>
-                <strong>{{ totalPoints }}</strong>
-            </div>
-        </div>
-
-        <div class="member-card">
-            <div class="member-toolbar">
-                <div class="level-tabs">
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+            <div class="search-label">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>会员检索</span>
+        </div><div class="search-shell">
+            <div class="search-controls">
+                <div class="filter-tabs">
                     <button
                         v-for="option in filterOptions"
                         :key="option.value"
-                        :class="levelFilter === option.value ? 'level-tab-active' : 'level-tab'"
+                        :class="levelFilter === option.value ? 'filter-tab-active' : 'filter-tab'"
                         type="button"
                         @click="levelFilter = option.value"
                     >{{ option.label }}</button>
                 </div>
                 <input
                     v-model="searchQuery"
-                    class="member-search"
+                    class="search-code-input"
                     placeholder="搜索会员姓名或手机号"
                     type="text"
                 />
+                <router-link
+                    class="btn-primary search-button"
+                    to="/manage/member/add"
+                >+ 添加会员</router-link>
             </div>
+        </div>
+            </div>
+        </div>
 
+        <div class="stats-summary">
+            <div class="stats-item">
+                <span class="stats-icon"><IconGraphic name="user"/></span>
+                <span class="stats-body">
+                    <strong>{{ memberList.length }}</strong>
+                    <span>会员总数</span>
+                </span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-icon"><IconGraphic name="user"/></span>
+                <span class="stats-body">
+                    <strong>{{ vipCount }}</strong>
+                    <span>VIP 会员</span>
+                </span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-icon"><IconGraphic name="user"/></span>
+                <span class="stats-body">
+                    <strong>{{ mvpCount }}</strong>
+                    <span>高级会员</span>
+                </span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-icon"><IconGraphic name="tag"/></span>
+                <span class="stats-body">
+                    <strong>{{ customCount }}</strong>
+                    <span>自定义会员</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="member-card">
             <div
                 v-if="loading"
                 class="loading-overlay"
@@ -141,7 +166,7 @@ const filteredList = computed(() => {
 
 const vipCount = computed(() => memberList.value.filter(item => item.memberLevel === MEMBER_LEVEL.VIP).length)
 const mvpCount = computed(() => memberList.value.filter(item => item.memberLevel === MEMBER_LEVEL.MVP).length)
-const totalPoints = computed(() => memberList.value.reduce((sum, item) => sum + Number(item.memberPoints || 0), 0))
+const customCount = computed(() => memberList.value.filter(item => item.memberLevel === MEMBER_LEVEL.CUSTOMER).length)
 
 onMounted(fetchList)
 
@@ -180,100 +205,15 @@ function formatDiscount(value) {
     min-width: 0;
 }
 
-.page-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 22px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
-.member-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-bottom: 18px;
-}
-
-.summary-item {
-    width: calc(25% - 11px);
-    min-width: 160px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 17px;
-    background: #fff;
-    border: 1px solid #e3efed;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
-}
-
-.summary-item span {
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.summary-item strong {
-    color: var(--primary);
-    font-size: 21px;
-}
+/* ── 会员总览条（使用全局 stats-summary） ── */
 
 .member-card {
     padding: 8px 20px 20px;
     overflow-x: auto;
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border-light);
     border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
-}
-
-.member-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 10px 0 16px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.level-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.level-tab,
-.level-tab-active {
-    padding: 7px 13px;
-    color: var(--text-secondary);
-    background: transparent;
-    border-radius: 8px;
-    font-size: 13px;
-}
-
-.level-tab:hover,
-.level-tab-active {
-    color: var(--primary);
-    background: var(--primary-light);
-}
-
-.level-tab-active {
-    font-weight: 700;
-}
-
-.member-search {
-    width: 280px;
-    height: 36px;
+    box-shadow: var(--shadow);
 }
 
 .data-table {
@@ -302,44 +242,33 @@ function formatDiscount(value) {
 }
 
 .member-level-common {
-    color: #475569;
+    color: var(--text-secondary);
     background: #f1f5f9;
 }
 
 .member-level-vip {
-    color: #0f766e;
-    background: #e8f7f3;
+    color: var(--primary-dark);
+    background: var(--bg-hover);
 }
 
 .member-level-mvp {
-    color: #b45309;
-    background: #fef3c7;
+    color: var(--warning-dark);
+    background: var(--warning-light);
 }
 
 .member-level-customer {
     color: #7e22ce;
-    background: #f3e8ff;
+    background: color-mix(in srgb, var(--info) 12%, transparent);
 }
 
 @media (max-width: 900px) {
-    .page-heading,
-    .member-toolbar {
+    .page-heading {
         align-items: flex-start;
         flex-direction: column;
-    }
-
-    .summary-item {
-        width: calc(50% - 7px);
-    }
-
-    .member-search {
-        width: 100%;
+        gap: 14px;
     }
 }
 
 @media (max-width: 560px) {
-    .summary-item {
-        width: 100%;
-    }
 }
 </style>

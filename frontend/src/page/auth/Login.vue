@@ -121,7 +121,11 @@ async function handleLogin() {
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: radial-gradient(circle at 12% 16%, rgba(20, 184, 166, 0.18), transparent 30%), #eef7f5;
+    background: radial-gradient(circle at 12% 16%, var(--primary-focus), transparent 30%), var(--bg-body);
+}
+
+[data-theme="dark"] .auth-page {
+    background: radial-gradient(circle at 12% 16%, var(--primary-focus), transparent 30%), var(--bg-body);
 }
 
 .auth-card {
@@ -131,9 +135,9 @@ async function handleLogin() {
     min-height: 520px;
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 24px 70px rgba(22, 83, 78, 0.16);
-    background: rgba(255, 255, 255, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shadow-lg);
+    background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
     animation: cardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -175,7 +179,7 @@ async function handleLogin() {
     position: relative;
     z-index: 1;
     text-align: center;
-    color: #fff;
+    color: var(--text-invert);
 }
 
 .brand-icon {
@@ -239,13 +243,13 @@ async function handleLogin() {
 .form-title {
     font-size: 24px;
     font-weight: 800;
-    color: #2c3e50;
+    color: var(--text);
     margin-bottom: 4px;
 }
 
 .form-subtitle {
     font-size: 14px;
-    color: #636e72;
+    color: var(--text-secondary);
     margin-bottom: 24px;
 }
 
@@ -259,10 +263,10 @@ async function handleLogin() {
 .role-btn {
     flex: 1;
     padding: 9px 0;
-    border: 1px solid #e8e8e8;
-    border-radius: 8px;
-    background: #fff;
-    color: #636e72;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -270,14 +274,14 @@ async function handleLogin() {
 }
 
 .role-btn:hover {
-    border-color: #b2bec3;
-    color: #2c3e50;
+    border-color: var(--text-muted);
+    color: var(--text);
 }
 
 .role-btn.active {
-    background: rgb(204 251 241 / 0.8);
-    border-color: #0d9488;
-    color: #0d9488;
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 /* ── 表单字段 ── */
@@ -296,41 +300,41 @@ async function handleLogin() {
 .field-group label {
     font-size: 13px;
     font-weight: 600;
-    color: #636e72;
+    color: var(--text-secondary);
 }
 
 .field-group input {
     padding: 12px 14px;
-    border: 1px solid #e8e8e8;
+    border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 14px;
-    color: #2c3e50;
-    background: #fff;
+    color: var(--text);
+    background: var(--bg-card);
     outline: none;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .field-group input::placeholder {
-    color: #b2bec3;
+    color: var(--text-muted);
 }
 
 .field-group input:focus {
-    border-color: #0d9488;
-    box-shadow: 0 0 0 3px rgb(204 251 241 / 0.8);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-focus);
 }
 
 .submit-btn {
     width: 100%;
     padding: 12px;
     border: none;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #0d9488, #14b8a6);
-    color: #fff;
+    border-radius: 999px;
+    background: var(--primary-gradient);
+    color: var(--text-invert);
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+    box-shadow: var(--shadow-primary);
     letter-spacing: 3px;
     margin-top: 2px;
 }

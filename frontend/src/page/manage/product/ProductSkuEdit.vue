@@ -106,27 +106,6 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading {
-    margin-bottom: 28px;
-}
-
-.heading-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
 .form-card {
     max-width: 780px;
     padding: 28px;
@@ -142,25 +121,11 @@ function goBack() {
 
 .edit-form input, .edit-form select, .edit-form textarea {
     border-radius: 10px;
-    background: #fbfdfd;
+    background: var(--bg-subtle);
 }
 
 .edit-form textarea {
     min-height: 120px;
 }
 
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 16px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-light);
-}
-
-@media (max-width: 640px) {
-    .form-actions {
-        flex-direction: column-reverse;
-    }
-}
 </style>

@@ -1,83 +1,98 @@
 <template>
     <div class="stock-record-manage">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">库存记录</h2>
-                <p class="page-desc">查看库存变动来源、商品 SKU、仓库和操作人</p>
+        
+
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">库存记录</h2>
+                <p class="page-label-desc">查看库存变动来源、商品 SKU、仓库和操作人</p>
+                <hr class="label-hr"/>
             </div>
-            <button class="btn-outline" @click="fetchRecords">↻ 刷新记录</button>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+            <div class="search-label">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>记录检索</span>
+        </div><div class="search-shell">
+            <div class="search-controls">
+                <div class="filter-tabs">
+                    <button
+                        :class="changeTypeFilter === '' ? 'filter-tab-active' : 'filter-tab'"
+                        type="button"
+                        @click="changeTypeFilter = ''"
+                    >全部</button>
+                    <button
+                        :class="changeTypeFilter === 'in' ? 'filter-tab-active' : 'filter-tab'"
+                        type="button"
+                        @click="changeTypeFilter = 'in'"
+                    >入库</button>
+                    <button
+                        :class="changeTypeFilter === 'out' ? 'filter-tab-active' : 'filter-tab'"
+                        type="button"
+                        @click="changeTypeFilter = 'out'"
+                    >出库</button>
+                    <button
+                        :class="changeTypeFilter === 'adjust' ? 'filter-tab-active' : 'filter-tab'"
+                        type="button"
+                        @click="changeTypeFilter = 'adjust'"
+                    >调整</button>
+                    <button
+                        :class="changeTypeFilter === 'check' ? 'filter-tab-active' : 'filter-tab'"
+                        type="button"
+                        @click="changeTypeFilter = 'check'"
+                    >盘点</button>
+                </div>
+                <input
+                    v-model="searchQuery"
+                    class="search-code-input"
+                    placeholder="搜索单号、商品、SKU、仓库、操作人"
+                    type="text"
+                />
+                <button
+                    class="btn-outline search-button"
+                    type="button"
+                    @click="fetchRecords"
+                >↻ 刷新记录</button>
+            </div>
+        </div>
+            </div>
         </div>
 
-        <div class="record-stats">
-            <div class="record-stat-card">
-                <span class="record-stat-icon"><IconGraphic name="document"/></span>
-                <span class="record-stat-value">{{ pageInfo.totalElements }}</span>
-                <span class="record-stat-label">全部记录</span>
+        <div class="stats-summary">
+            <div class="stats-item">
+                <span class="stats-icon"><IconGraphic name="document"/></span>
+                <span class="stats-body">
+                    <strong>{{ pageInfo.totalElements }}</strong>
+                    <span>全部记录</span>
+                </span>
             </div>
-            <div class="record-stat-card">
-                <span class="record-stat-icon in-icon">入</span>
-                <span class="record-stat-value">{{ inCount }}</span>
-                <span class="record-stat-label">当前页入库</span>
+            <div class="stats-item">
+                <span class="stats-icon stats-icon-success"><IconGraphic name="check"/></span>
+                <span class="stats-body">
+                    <strong>{{ inCount }}</strong>
+                    <span>当前页入库</span>
+                </span>
             </div>
-            <div class="record-stat-card">
-                <span class="record-stat-icon out-icon">出</span>
-                <span class="record-stat-value">{{ outCount }}</span>
-                <span class="record-stat-label">当前页出库</span>
+            <div class="stats-item">
+                <span class="stats-icon stats-icon-error"><IconGraphic name="trash"/></span>
+                <span class="stats-body">
+                    <strong>{{ outCount }}</strong>
+                    <span>当前页出库</span>
+                </span>
             </div>
-            <div class="record-stat-card">
-                <span class="record-stat-icon adjust-icon">调</span>
-                <span class="record-stat-value">{{ adjustCount }}</span>
-                <span class="record-stat-label">当前页调整</span>
+            <div class="stats-item">
+                <span class="stats-icon stats-icon-warning"><IconGraphic name="transfer"/></span>
+                <span class="stats-body">
+                    <strong>{{ adjustCount }}</strong>
+                    <span>当前页调整</span>
+                </span>
             </div>
         </div>
 
         <div class="record-table-card">
-            <div class="table-toolbar">
-                <div class="filter-tabs">
-                    <button
-                        :class="{ active: changeTypeFilter === '' }"
-                        class="filter-tab"
-                        @click="changeTypeFilter = ''"
-                    >
-                        全部
-                    </button>
-                    <button
-                        :class="{ active: changeTypeFilter === 'in' }"
-                        class="filter-tab"
-                        @click="changeTypeFilter = 'in'"
-                    >
-                        入库
-                    </button>
-                    <button
-                        :class="{ active: changeTypeFilter === 'out' }"
-                        class="filter-tab"
-                        @click="changeTypeFilter = 'out'"
-                    >
-                        出库
-                    </button>
-                    <button
-                        :class="{ active: changeTypeFilter === 'adjust' }"
-                        class="filter-tab"
-                        @click="changeTypeFilter = 'adjust'"
-                    >
-                        调整
-                    </button>
-                    <button
-                        :class="{ active: changeTypeFilter === 'check' }"
-                        class="filter-tab"
-                        @click="changeTypeFilter = 'check'"
-                    >
-                        盘点
-                    </button>
-                </div>
-                <input
-                    v-model="searchQuery"
-                    class="record-search"
-                    placeholder="搜索单号、商品、SKU、仓库、操作人"
-                    type="text"
-                />
-            </div>
-
             <div v-if="loading" class="loading-overlay">
                 <div class="loading-spinner"></div>
             </div>
@@ -266,131 +281,13 @@ function formatQuantity(quantity) {
     min-width: 0;
 }
 
-.page-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 26px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
-.record-stats {
-    display: flex;
-    gap: 14px;
-    margin-bottom: 18px;
-    flex-wrap: wrap;
-}
-
-.record-stat-card {
-    width: calc(25% - 11px);
-    min-width: 180px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 17px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
-    border: 1px solid #e3efed;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
-}
-
-.record-stat-icon {
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 11px;
-    background: #e8f7f3;
-    color: var(--primary);
-    font-size: 19px;
-    font-weight: 800;
-}
-
-.in-icon {
-    background: #dcfce7;
-    color: #16a34a;
-}
-
-.out-icon {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.adjust-icon {
-    background: #fef3c7;
-    color: #d97706;
-}
-
-.record-stat-value {
-    color: var(--text);
-    font-size: 20px;
-    font-weight: 800;
-    line-height: 1.1;
-}
-
-.record-stat-label {
-    margin-left: -4px;
-    color: var(--text-muted);
-    font-size: 12px;
-}
-
 .record-table-card {
     padding: 8px 20px 20px;
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border-light);
     border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
+    box-shadow: var(--shadow);
     overflow-x: auto;
-}
-
-.table-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 10px 0 16px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.filter-tabs {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-}
-
-.filter-tab {
-    padding: 7px 13px;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    background: transparent;
-    font-size: 13px;
-}
-
-.filter-tab:hover {
-    background: #f1faf8;
-    color: var(--primary);
-}
-
-.filter-tab.active {
-    background: var(--primary-light);
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.record-search {
-    width: 320px;
-    height: 36px;
 }
 
 .record-table-card .data-table {
@@ -414,12 +311,12 @@ function formatQuantity(quantity) {
 }
 
 .quantity-in {
-    color: #16a34a;
+    color: var(--success-dark);
     font-weight: 800;
 }
 
 .quantity-out {
-    color: #dc2626;
+    color: var(--error-dark);
     font-weight: 800;
 }
 
@@ -429,18 +326,10 @@ function formatQuantity(quantity) {
 }
 
 @media (max-width: 900px) {
-    .page-heading,
-    .table-toolbar {
+    .page-heading {
         align-items: flex-start;
         flex-direction: column;
-    }
-
-    .record-stat-card {
-        width: calc(50% - 7px);
-    }
-
-    .record-search {
-        width: 100%;
+        gap: 14px;
     }
 }
 </style>

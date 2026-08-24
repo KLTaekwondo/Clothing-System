@@ -12,5 +12,4 @@ import ConfirmDialog from './component/ConfirmDialog.vue'
 </script>
 
 <style scoped>
-
 </style>

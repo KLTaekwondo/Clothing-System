@@ -309,12 +309,6 @@ function confirmLeave() {
     font-size: var(--font-sm);
 }
 
-.detail-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-}
-
 .detail-card {
     width: calc(33.33% - 10px);
     min-width: 220px;
@@ -324,8 +318,8 @@ function confirmLeave() {
     justify-content: space-between;
     gap: 12px;
     padding: 20px;
-    background: #fff;
-    border: 1px solid #e3efed;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
 }
@@ -335,22 +329,6 @@ function confirmLeave() {
     font-size: 13px;
 }
 
-.code-value {
-    color: #0d9488;
-    font-family: ui-monospace, "SF Mono", Consolas, monospace;
-}
-
-.card-input,
-.card-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 10px;
-    border: 1px solid #dceae7;
-    border-radius: 8px;
-    background: #fff;
-}
-
 .confirm-modal {
     width: 380px;
-}
-</style>
+}</style>

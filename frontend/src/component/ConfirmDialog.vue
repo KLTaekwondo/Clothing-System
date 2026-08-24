@@ -79,8 +79,12 @@ function handleKeydown(event) {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: rgba(15, 23, 42, 0.42);
+    background: rgba(0, 0, 0, 0.42);
     backdrop-filter: blur(2px);
+}
+
+[data-theme="dark"] .confirm-overlay {
+    background: rgba(0, 0, 0, 0.62);
 }
 
 .confirm-enter-active,
@@ -107,10 +111,10 @@ function handleKeydown(event) {
 .confirm-dialog {
     width: min(420px, 100%);
     overflow: hidden;
-    background: #fff;
-    border: 1px solid #dceae7;
-    border-radius: 16px;
-    box-shadow: 0 20px 55px rgba(15, 23, 42, 0.2);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
 }
 
 .confirm-header {
@@ -119,14 +123,14 @@ function handleKeydown(event) {
     justify-content: space-between;
     gap: 16px;
     padding: 18px 20px;
-    border-bottom: 1px solid #e3efed;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .confirm-heading {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #0f172a;
+    color: var(--text);
     font-size: 16px;
 }
 
@@ -138,11 +142,11 @@ function handleKeydown(event) {
     align-items: center;
     justify-content: center;
     border-radius: 9px;
-    background: #e8f5f2;
+    background: var(--primary-light);
 }
 
 .confirm-icon-danger {
-    background: #fff1f2;
+    background: var(--error-light);
 }
 
 .confirm-icon :deep(img),
@@ -155,7 +159,7 @@ function handleKeydown(event) {
     width: 28px;
     height: 28px;
     border: none;
-    color: #94a3b8;
+    color: var(--text-muted);
     background: transparent;
     font-size: 24px;
     line-height: 1;
@@ -163,12 +167,12 @@ function handleKeydown(event) {
 }
 
 .confirm-close:hover {
-    color: #ef4444;
+    color: var(--error);
 }
 
 .confirm-message {
     padding: 22px 20px 12px;
-    color: #475569;
+    color: var(--text-secondary);
     font-size: 14px;
     line-height: 1.7;
 }
@@ -186,39 +190,39 @@ function handleKeydown(event) {
     min-width: 92px;
     height: 38px;
     padding: 0 16px;
-    border-radius: 8px;
+    border-radius: 999px;
     font-weight: 700;
     cursor: pointer;
 }
 
 .confirm-cancel {
-    border: 1px solid #dceae7;
-    color: #475569;
-    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    background: var(--bg-card);
 }
 
 .confirm-cancel:hover {
-    border-color: #91cec4;
-    background: #f7fbfa;
+    border-color: var(--border-hover);
+    background: var(--bg-hover);
 }
 
 .confirm-submit,
 .confirm-submit-danger {
     border: none;
-    color: #fff;
-    background: #0f766e;
+    color: var(--text-invert);
+    background: var(--primary-dark);
 }
 
 .confirm-submit-danger {
-    background: #dc2626;
+    background: var(--error-dark);
 }
 
 .confirm-submit:hover {
-    background: #0d9488;
+    background: var(--primary);
 }
 
 .confirm-submit-danger:hover {
-    background: #b91c1c;
+    background: var(--error);
 }
 @media (prefers-reduced-motion: reduce) {
     .confirm-enter-active,

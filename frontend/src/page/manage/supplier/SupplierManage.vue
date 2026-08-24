@@ -1,30 +1,39 @@
 <template>
     <div class="supplier-manage">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">供应商管理</h2>
-                <p class="page-desc">维护采购供应商的基础资料和联系方式</p>
+        
+
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">供应商管理</h2>
+                <p class="page-label-desc">维护采购供应商的基础资料和联系方式</p>
+                <hr class="label-hr"/>
             </div>
-            <router-link
-                class="btn-primary"
-                to="/manage/supplier/add"
-            >+ 添加供应商</router-link>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+            <div class="search-label">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>供应商检索</span>
+        </div><div class="search-shell">
+            <div class="search-controls">
+                <input
+                    v-model="searchQuery"
+                    class="search-code-input"
+                    placeholder="搜索供应商编码、名称或电话"
+                    type="text"
+                />
+                <router-link
+                    class="btn-primary search-button"
+                    to="/manage/supplier/add"
+                >+ 添加供应商</router-link>
+            </div>
+        </div>
+            </div>
         </div>
 
         <div class="card">
-            <div class="card-header">
-                <span class="card-title">供应商列表</span>
-                <div class="header-actions">
-                    <div class="search-bar">
-                        <input
-                            v-model="searchQuery"
-                            placeholder="搜索供应商编码、名称或电话"
-                            type="text"
-                        />
-                    </div>
-                </div>
-            </div>
-
             <div
                 v-if="loading"
                 class="loading-overlay"
@@ -197,37 +206,6 @@ async function handleDisable() {
     min-width: 0;
 }
 
-.page-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 28px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-}
-
-.search-bar {
-    width: 360px;
-}
-
-.search-bar input {
-    width: 100%;
-}
-
 .data-table th,
 .data-table td {
     text-align: center;
@@ -253,15 +231,6 @@ async function handleDisable() {
 }
 
 @media (max-width: 760px) {
-    .page-heading,
-    .card-header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .search-bar {
-        width: 100%;
-    }
 
     .supplier-manage > .card {
         overflow-x: auto;

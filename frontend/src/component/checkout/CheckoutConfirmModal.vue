@@ -89,32 +89,15 @@ defineEmits(['cancel', 'confirm'])
 </script>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.35);
-}
-
 .confirm-modal {
     width: 400px;
     display: flex;
     flex-direction: column;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid #e3efed;
 }
 
 .modal-heading {
@@ -130,7 +113,7 @@ defineEmits(['cancel', 'confirm'])
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    background: #e8f5f2;
+    background: var(--primary-light);
 }
 
 .modal-title-icon :deep(img) {
@@ -138,29 +121,9 @@ defineEmits(['cancel', 'confirm'])
     height: 20px;
 }
 
-.modal-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.modal-close {
-    padding: 0;
-    border: none;
-    background: none;
-    font-size: 24px;
-    color: #94a3b8;
-    cursor: pointer;
-    line-height: 1;
-}
-
-.modal-close:hover {
-    color: #ef4444;
-}
-
 .confirm-body {
     padding: 22px 20px 10px;
-    color: #475569;
+    color: var(--text-secondary);
     font-size: 14px;
     line-height: 1.7;
 }
@@ -175,9 +138,9 @@ defineEmits(['cancel', 'confirm'])
     flex-direction: column;
     gap: 2px;
     padding: 6px 0;
-    border: 1px solid #dceae7;
-    border-radius: 10px;
-    background: #f8fbfa;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-subtle);
 }
 
 .confirm-detail {
@@ -190,17 +153,17 @@ defineEmits(['cancel', 'confirm'])
 }
 
 .detail-label {
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .detail-value,
 .detail-value-emphasis {
-    color: #0f172a;
+    color: var(--text);
     font-size: 15px;
 }
 
 .detail-value-emphasis {
-    color: #d97706;
+    color: var(--warning-dark);
     font-size: 20px;
 }
 
@@ -215,20 +178,20 @@ defineEmits(['cancel', 'confirm'])
 .confirm-submit {
     min-width: 96px;
     height: 38px;
-    border-radius: 8px;
+    border-radius: 999px;
     font-weight: 700;
     cursor: pointer;
 }
 
 .confirm-cancel {
-    border: 1px solid #dceae7;
-    background: #fff;
-    color: #475569;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
 }
 
 .confirm-submit {
     border: none;
-    background: #0f766e;
-    color: #fff;
+    background: var(--primary-dark);
+    color: var(--text-invert);
 }
 </style>

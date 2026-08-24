@@ -1,16 +1,24 @@
 <template>
     <div class="stock-manage">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">人工库存调整</h2>
-                <p class="page-desc">直接调整指定仓库中商品 SKU 的库存数量</p>
-            </div>
-        </div>
+        
 
-        <div class="card search-panel">
-            <div class="search-row">
-                <div class="field">
-                    <label>仓库</label>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">人工库存调整</h2>
+                <p class="page-label-desc">直接调整指定仓库中商品 SKU 的库存数量</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+            <div class="search-label">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>库存检索</span>
+        </div><div class="search-shell">
+            <div class="search-controls">
+                <div class="search-warehouse">
                     <OptionValuePicker
                         v-model="warehousePickerValue"
                         :disabled="warehouseLoading"
@@ -21,14 +29,22 @@
                         @update:model-value="syncWarehouseId"
                     />
                 </div>
-                <div class="field field-product">
-                    <label>商品编码</label>
-                    <input v-model="searchCode" placeholder="输入商品编码" type="text" @keyup.enter="searchProduct"/>
-                </div>
-                <button :disabled="loading || !warehouseId || !searchCode" class="btn-primary search-button"
-                        @click="searchProduct">
+                <input
+                    v-model="searchCode"
+                    class="search-code-input"
+                    placeholder="商品编码"
+                    type="text"
+                    @keyup.enter="searchProduct"
+                />
+                <button
+                    :disabled="loading || !warehouseId || !searchCode"
+                    class="btn-primary search-button"
+                    @click="searchProduct"
+                >
                     {{ loading ? '查询中...' : '查询并添加' }}
                 </button>
+            </div>
+        </div>
             </div>
         </div>
 
@@ -379,60 +395,8 @@ function handleBeforeUnload(event) {
     font-size: var(--font-sm);
 }
 
-.search-panel {
-    padding: 20px;
-    margin-bottom: 16px;
-    border-radius: 16px;
-}
-
-.search-row {
-    display: flex;
-    gap: 16px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-}
-
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.field label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.wh-select {
-    width: 220px;
-    height: 40px;
-    padding: 0 28px 0 12px;
-    border: 1px solid #dceae7;
-    border-radius: 10px;
-    background: #fbfefd;
-    appearance: none;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364807e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-}
-
-.search-row input {
-    width: 320px;
-    height: 40px;
-    padding: 0 12px;
-    border: 1px solid #dceae7;
-    border-radius: 10px;
-    background: #fbfefd;
-}
-
-.search-button {
-    height: 40px;
-}
-
 .empty-form-card {
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
 }
 
 .stock-form-actions-bar {
@@ -441,10 +405,10 @@ function handleBeforeUnload(event) {
     gap: 12px;
     padding: 14px 20px;
     margin-bottom: 14px;
-    background: #fff;
-    border: 1px solid #e3efed;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
     border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
+    box-shadow: var(--shadow);
 }
 
 .total-hint {
@@ -466,18 +430,6 @@ function handleBeforeUnload(event) {
     gap: 12px;
     padding-right: 20px;
     padding-left: 20px;
-}
-
-.product-list-header {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    color: #47615e;
-    font-size: 12px;
-    font-weight: 700;
-    background: #dcebe8;
-    border: 1px solid #c5ddd8;
-    border-radius: 9px;
-    box-shadow: 0 2px 5px rgba(22, 83, 78, 0.1);
 }
 
 .product-form-header {
@@ -530,7 +482,7 @@ function handleBeforeUnload(event) {
     box-sizing: border-box;
     min-width: 0;
     padding: 0 10px;
-    border-right: 1px solid #b8d2cd;
+    border-right: 1px solid var(--border-cell);
 }
 
 .product-header-action,
@@ -541,17 +493,11 @@ function handleBeforeUnload(event) {
 .stock-product-card {
     padding: 0;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: var(--radius-xl);
 }
 
 .product-form-header:hover {
-    background: #f4fbfa;
-}
-
-.product-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    background: var(--bg-hover);
 }
 
 .product-mark {
@@ -581,11 +527,6 @@ function handleBeforeUnload(event) {
     font-weight: 700;
 }
 
-.product-sku-count {
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
 .product-special {
     display: inline-block;
     padding: 3px 8px;
@@ -595,13 +536,13 @@ function handleBeforeUnload(event) {
 }
 
 .special-status {
-    background: #dcfce7;
-    color: #15803d;
+    background: var(--success-light);
+    color: var(--success-dark);
 }
 
 .regular-status {
     background: #f1f5f9;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .product-form-actions {
@@ -620,20 +561,14 @@ function handleBeforeUnload(event) {
 
 .changed-hint {
     font-size: 11px;
-    color: #d97706;
+    color: var(--warning-dark);
     font-weight: 600;
-}
-
-.sku-list-wrapper {
-    padding: 10px 14px 12px;
-    background: #f8fcfb;
-    box-shadow: inset 0 3px 8px rgba(22, 83, 78, 0.06);
 }
 
 .sku-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 0;
 }
 
 .sku-list-header,
@@ -648,22 +583,25 @@ function handleBeforeUnload(event) {
 .sku-list-header {
     padding-top: 8px;
     padding-bottom: 8px;
-    color: #47615e;
+    color: var(--text-header);
     font-size: 12px;
     font-weight: 700;
-    background: #dcebe8;
-    border: 1px solid #c5ddd8;
+    background: var(--bg-header-strong);
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(22, 83, 78, 0.1);
 }
 
 .sku-row {
     padding-top: 9px;
     padding-bottom: 9px;
-    border: 1px solid #e1eeeb;
-    border-radius: 8px;
-    background: #ffffff;
-    box-shadow: 0 2px 6px rgba(22, 83, 78, 0.07);
+    border: none;
+    border-bottom: 1px solid var(--border-light);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.sku-row:last-child {
+    border-bottom: none;
 }
 
 .sku-header-name,
@@ -704,7 +642,7 @@ function handleBeforeUnload(event) {
     box-sizing: border-box;
     min-width: 0;
     padding: 0 8px;
-    border-right: 1px solid #c5ddd8;
+    border-right: 1px solid var(--border-cell);
 }
 
 .sku-header-target,
@@ -717,28 +655,6 @@ function handleBeforeUnload(event) {
     border-right: none;
 }
 
-.sku-name,
-.sku-code,
-.sku-spec {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.sku-name {
-    font-size: 13px;
-}
-
-.sku-code {
-    color: var(--primary);
-    font-size: 12px;
-}
-
-.sku-spec {
-    color: var(--text-secondary);
-    font-size: 12px;
-}
-
 .current-stock {
     color: var(--text-secondary);
     font-size: 12px;
@@ -749,38 +665,26 @@ function handleBeforeUnload(event) {
     height: 32px;
     box-sizing: border-box;
     padding: 0 6px;
-    border: 1px solid #dceae7;
+    border: 1px solid var(--border);
     border-radius: 7px;
     text-align: center;
     font-weight: 700;
     font-size: 14px;
-    background: #fbfefd;
+    background: var(--bg-subtle);
     transition: border-color 0.2s, background 0.2s;
 }
 
 .stock-input:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-focus);
 }
 
 .stock-input.changed {
-    background: #fffbeb;
-    border-color: #f59e0b;
+    background: var(--warning-light);
+    border-color: var(--warning);
 }
 
 @media (max-width: 900px) {
-    .search-row {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .field,
-    .wh-select,
-    .search-row input,
-    .search-button {
-        width: 100%;
-    }
-
     .product-form-header {
         align-items: flex-start;
         flex-wrap: wrap;
@@ -844,7 +748,6 @@ function handleBeforeUnload(event) {
 }
 
 @media (max-width: 560px) {
-    .search-panel,
     .sku-list-wrapper {
         padding: 14px;
     }
@@ -862,5 +765,4 @@ function handleBeforeUnload(event) {
         flex-direction: column;
         gap: 4px;
     }
-}
-</style>
+}</style>

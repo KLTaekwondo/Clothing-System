@@ -108,6 +108,7 @@ import orderIcon from '../../assets/icons/navigation/order.svg'
 import importOrderIcon from '../../assets/icons/navigation/import-order.svg'
 import transferOrderIcon from '../../assets/icons/navigation/transfer-order.svg'
 import optionIcon from '../../assets/icons/navigation/option.svg'
+import settingsIcon from '../../assets/icons/navigation/settings.svg'
 import logoutIcon from '../../assets/icons/navigation/logout.svg'
 import brandMark from '../../assets/brand-mark.svg'
 
@@ -133,7 +134,8 @@ const navItems = [
     {path: '/manage/transfer-order', label: '调拨订单', icon: transferOrderIcon},
     {path: '/manage/stock', label: '人工库存调整', icon: stockIcon},
     {path: '/manage/order', label: '订单管理', icon: orderIcon},
-    {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon}
+    {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon},
+    {path: '/manage/setting', label: '系统设置', icon: settingsIcon}
 ]
 
 function loadSavedTabs() {
@@ -225,14 +227,15 @@ async function handleLogout() {
 .sidebar {
     position: relative;
     width: 236px;
-    background: rgba(255, 255, 255, .88);
+    background: color-mix(in srgb, var(--bg-card) 88%, transparent);
     backdrop-filter: blur(18px);
     display: flex;
     flex-direction: column;
+    flex-grow: 0;
     flex-shrink: 0;
-    border-right: 1px solid #dfece9;
-    box-shadow: 8px 0 28px rgba(22, 83, 78, .04);
-    transition: width .3s;
+    border-right: 1px solid var(--border-light);
+    box-shadow: 8px 0 28px rgba(22, 83, 78, 0.04);
+    transition: width 0.3s;
     overflow: hidden;
 }
 
@@ -246,7 +249,7 @@ async function handleLogout() {
     align-items: center;
     gap: 10px;
     padding: 20px 16px 18px;
-    border-bottom: 1px solid #edf4f2;
+    border-bottom: 1px solid var(--border-light);
     min-height: 64px;
 }
 
@@ -266,16 +269,16 @@ async function handleLogout() {
 }
 
 .logo-toggle:hover {
-    background: #effbf9;
+    background: var(--bg-hover);
     transform: scale(1.06);
 }
 
 .logo-text {
     font-size: 18px;
     font-weight: 800;
-    color: #2c3e50;
+    color: var(--text);
     white-space: nowrap;
-    transition: opacity .2s;
+    transition: opacity 0.2s;
 }
 
 .sidebar.collapsed .sidebar-logo {
@@ -295,10 +298,10 @@ async function handleLogout() {
     width: 24px;
     height: 42px;
     border-radius: 0 10px 10px 0;
-    background: #ffffff;
-    border: 1px solid #dceae7;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-left: none;
-    color: #64807e;
+    color: var(--text-secondary);
     font-size: 22px;
     font-weight: 400;
     line-height: 1;
@@ -312,21 +315,21 @@ async function handleLogout() {
 }
 
 .collapse-btn:hover {
-    background: #effbf9;
-    border-color: #9fd8cf;
-    color: #0d9488;
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+    color: var(--primary);
     box-shadow: 4px 2px 12px rgba(13, 148, 136, 0.16);
 }
 
 .sidebar-nav {
-    flex: 1;
+    flex-grow: 1;
     padding: 16px 8px;
     display: flex;
     flex-direction: column;
     gap: 4px;
     box-shadow: 0 2px 7px rgba(22, 83, 78, 0.06) inset;
-    border-top: 2px solid #dfece9;
-    border-bottom: 2px solid #dfece9;
+    border-top: 2px solid var(--border-light);
+    border-bottom: 2px solid var(--border-light);
 }
 
 .nav-item {
@@ -335,10 +338,10 @@ async function handleLogout() {
     gap: 11px;
     padding: 11px 14px;
     border-radius: 10px;
-    color: #64807e;
+    color: var(--text-secondary);
     font-size: 14px;
     cursor: pointer;
-    transition: all .2s;
+    transition: all 0.2s;
     text-decoration: none;
     width: 100%;
     text-align: left;
@@ -354,24 +357,24 @@ async function handleLogout() {
 }
 
 .nav-item:hover {
-    background: #fff;
-    border-color: #cce4df;
-    color: #2c3e50;
+    background: var(--bg-card);
+    border-color: var(--border-light);
+    color: var(--text);
     box-shadow: 0 5px 12px rgba(22, 83, 78, 0.1);
     transform: translateY(-1px);
 }
 
 .nav-item-active {
     position: relative;
-    background: linear-gradient(90deg, #d9f6f1, #effbf9) !important;
-    border-color: #b9ded7 !important;
-    color: #0f766e !important;
+    background: linear-gradient(90deg, var(--primary-light), var(--bg-hover)) !important;
+    border-color: var(--border-hover) !important;
+    color: var(--primary-dark) !important;
     font-weight: 700;
-    box-shadow: inset 3px 0 0 #0d9488, 0 4px 12px rgba(13, 148, 136, 0.12);
+    box-shadow: inset 3px 0 0 var(--primary), 0 4px 12px rgba(13, 148, 136, 0.12);
 }
 
 .sidebar.collapsed .nav-item-active {
-    background: #effbf9 !important;
+    background: var(--bg-hover) !important;
     border-color: transparent !important;
     box-shadow: none;
 }
@@ -384,7 +387,7 @@ async function handleLogout() {
     bottom: 3px;
     height: 3px;
     border-radius: 3px;
-    background: #0d9488;
+    background: var(--primary);
     box-shadow: 0 1px 5px rgba(13, 148, 136, 0.35);
 }
 
@@ -450,6 +453,10 @@ async function handleLogout() {
     filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
 }
 
+.sidebar-nav .nav-item:nth-child(13) .nav-icon {
+    filter: invert(54%) sepia(11%) saturate(578%) hue-rotate(124deg) brightness(91%) contrast(88%);
+}
+
 .nav-item-active .nav-icon {
     opacity: 1;
 }
@@ -475,34 +482,65 @@ async function handleLogout() {
 
 .sidebar-footer {
     padding: 8px 8px 16px;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--border-light);
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
 .nav-logout:hover {
-    background: rgb(254 226 226 / .8);
-    color: #dc2626;
+    background: var(--error-light);
+    color: var(--error-dark);
+}
+
+/* 深色模式适配 */
+[data-theme="dark"] .sidebar {
+    background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+    border-right-color: var(--border);
+    box-shadow: 8px 0 28px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .tab-bar {
+    background: var(--bg-body);
+    border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .mobile-header {
+    background: color-mix(in srgb, var(--bg-card) 96%, transparent);
+    border-bottom-color: var(--border);
+}
+
+[data-theme="dark"] .mobile-sidebar-mask {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="dark"] .collapse-btn {
+    background: var(--bg-card);
+    border-color: var(--border);
 }
 
 /* ── 右侧区域 ── */
 .right-area {
-    flex: 1;
+    width: calc(100% - var(--sidebar-width));
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     min-width: 0;
 }
 
+.manage-container:has(.sidebar.collapsed) .right-area {
+    width: calc(100% - 60px);
+}
+
 /* ── 标签栏 ── */
 .tab-bar {
     display: flex;
     align-items: center;
-    height: 40px;
+    height: var(--tab-height);
     flex-shrink: 0;
-    background: #f2f8f6;
-    border-bottom: 1px solid #dfece9;
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border);
     padding: 0 8px;
 }
 
@@ -527,11 +565,11 @@ async function handleLogout() {
     padding: 0 10px 0 14px;
     border-radius: 6px 6px 0 0;
     background: transparent;
-    color: #64807e;
+    color: var(--text-secondary);
     font-size: 13px;
     cursor: pointer;
     white-space: nowrap;
-    transition: all .15s;
+    transition: all 0.15s;
     user-select: none;
     border: 1px solid transparent;
     border-bottom: none;
@@ -540,15 +578,15 @@ async function handleLogout() {
 }
 
 .tab-item:hover {
-    background: rgba(13, 148, 136, .06);
-    color: #0d9488;
+    background: var(--bg-hover);
+    color: var(--primary);
 }
 
 .tab-active {
-    background: #fff !important;
-    color: #0d9488 !important;
+    background: var(--bg-card) !important;
+    color: var(--primary) !important;
     font-weight: 700;
-    border-color: #dfece9;
+    border-color: var(--border);
 }
 
 .tab-close {
@@ -557,7 +595,7 @@ async function handleLogout() {
     border-radius: 4px;
     border: none;
     background: none;
-    color: #9ab0ad;
+    color: var(--text-muted);
     font-size: 14px;
     cursor: pointer;
     display: flex;
@@ -568,23 +606,24 @@ async function handleLogout() {
 }
 
 .tab-close:hover {
-    background: rgba(239, 68, 68, .12);
-    color: #dc2626;
+    background: var(--error-light);
+    color: var(--error-dark);
 }
 
 /* ── 主内容区 ── */
 .main-area {
-    flex: 1;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
 .main-area.has-tabs {
+    height: calc(100dvh - var(--tab-height));
 }
 
 .content-body {
-    flex: 1;
+    height: 100%;
     padding: 30px 34px;
     overflow-y: auto;
 }
@@ -607,8 +646,8 @@ async function handleLogout() {
         align-items: center;
         gap: 12px;
         padding: 0 16px;
-        border-bottom: 1px solid #dfece9;
-        background: rgba(255, 255, 255, 0.96);
+        border-bottom: 1px solid var(--border);
+        background: color-mix(in srgb, var(--bg-card) 96%, transparent);
         backdrop-filter: blur(18px);
         box-shadow: 0 4px 16px rgba(22, 83, 78, 0.08);
     }
@@ -621,22 +660,22 @@ async function handleLogout() {
         flex-direction: column;
         gap: 4px;
         padding: 9px;
-        border: 1px solid #dceae7;
-        background: #f8fcfb;
+        border: 1px solid var(--border);
+        background: var(--bg-subtle);
     }
 
     .mobile-menu-button span {
         width: 18px;
         height: 2px;
         border-radius: 2px;
-        background: #0f766e;
+        background: var(--primary-dark);
     }
 
     .mobile-brand {
         display: flex;
         align-items: center;
         gap: 7px;
-        color: #173b3a;
+        color: var(--text);
         font-size: 14px;
         font-weight: 800;
         white-space: nowrap;
@@ -651,7 +690,7 @@ async function handleLogout() {
         min-width: 0;
         margin-left: auto;
         overflow: hidden;
-        color: #64807e;
+        color: var(--text-secondary);
         font-size: 13px;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -723,6 +762,14 @@ async function handleLogout() {
     .right-area {
         width: 100%;
         height: calc(100dvh - 56px);
+    }
+
+    .main-area {
+        height: calc(100dvh - 56px);
+    }
+
+    .main-area.has-tabs {
+        height: calc(100dvh - 94px);
     }
 
     .tab-bar {

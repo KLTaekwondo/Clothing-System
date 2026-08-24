@@ -89,30 +89,6 @@ function goBack() {
     min-width: 0
 }
 
-.page-heading, .heading-left {
-    display: flex;
-    align-items: center
-}
-
-.page-heading {
-    justify-content: space-between;
-    margin-bottom: 28px
-}
-
-.heading-left {
-    gap: 12px
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm)
-}
-
 .search-card {
     margin-bottom: 16px;
     border-radius: 16px
@@ -138,16 +114,8 @@ function goBack() {
 }
 
 @media (max-width: 760px) {
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
-    }
 
     .stock-search,
-    .heading-left {
-        width: 100%;
-    }
 
     .stock-search input {
         width: 100%;

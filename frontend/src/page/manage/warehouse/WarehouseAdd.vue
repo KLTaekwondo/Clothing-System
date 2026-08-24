@@ -136,30 +136,6 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading {
-    margin-bottom: 24px;
-}
-
-.heading-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.heading-content {
-    min-width: 0;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
 .warehouse-form-card {
     width: 100%;
     max-width: 620px;
@@ -167,16 +143,10 @@ function goBack() {
     padding: 28px;
     margin-right: auto;
     margin-left: auto;
-    background: #fff;
-    border: 1px solid #e3efed;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
     border-radius: 16px;
     box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
-}
-
-.form-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
 }
 
 .form-group {
@@ -195,34 +165,10 @@ function goBack() {
     width: 100%;
 }
 
-.field-hint {
-    display: block;
-    margin-top: 6px;
-    color: #829895;
-    font-size: 12px;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-light);
-}
-
 @media (max-width: 640px) {
-    .heading-left {
-        align-items: flex-start;
-        flex-direction: column;
-    }
 
     .warehouse-form-card {
         padding: 18px;
-    }
-
-    .form-actions {
-        flex-direction: column-reverse;
     }
 
     .form-actions button {

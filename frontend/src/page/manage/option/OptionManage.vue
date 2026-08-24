@@ -1,45 +1,51 @@
-﻿<template>
+<template>
     <div class="option-manage">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">选项管理</h2>
-                <p class="page-desc">按类型管理颜色、尺码和其他商品选项值</p>
-            </div>
-            <router-link
-                :to="addOptionPath"
-                class="btn-primary"
-            >
-                {{ selectedType ? `+ 添加${selectedTypeLabel}` : '+ 添加选项值' }}
-            </router-link>
-        </div>
+        
 
-        <div class="capsule-toolbox">
-            <div class="toolbox-header">
-                <svg class="toolbox-icon" viewBox="0 0 20 20" fill="none" width="16" height="16">
-                    <rect x="2" y="7" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M6 7V5a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                <span class="toolbox-title">分类筛选</span>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">选项管理</h2>
+                <p class="page-label-desc">按类型管理颜色、尺码和其他商品选项值</p>
+                <hr class="label-hr"/>
             </div>
-            <div class="toolbox-body">
-                <button
-                    :class="['capsule', selectedType === '' ? 'capsule-active' : '']"
-                    type="button"
-                    @click="selectType('')"
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+            <div class="search-label">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                <rect x="2" y="7" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M6 7V5a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>分类筛选</span>
+        </div><div class="search-shell">
+            <div class="search-controls">
+                <div class="filter-capsules">
+                    <button
+                        :class="selectedType === '' ? 'capsule-active' : 'capsule'"
+                        type="button"
+                        @click="selectType('')"
+                    >
+                        <i class="capsule-dot"></i>
+                        <span class="capsule-label">全部选项</span>
+                    </button>
+                    <button
+                        v-for="item in typeOptions"
+                        :key="item.value"
+                        :class="selectedType === item.value ? 'capsule-active' : 'capsule'"
+                        type="button"
+                        @click="selectType(item.value)"
+                    >
+                        <i class="capsule-dot"></i>
+                        <span class="capsule-label">{{ item.label }}</span>
+                    </button>
+                </div>
+                <router-link
+                    :to="addOptionPath"
+                    class="btn-primary search-button"
                 >
-                    <span class="capsule-icon">📋</span>
-                    <span class="capsule-label">全部选项</span>
-                </button>
-                <button
-                    v-for="item in typeOptions"
-                    :key="item.value"
-                    :class="['capsule', selectedType === item.value ? 'capsule-active' : '']"
-                    type="button"
-                    @click="selectType(item.value)"
-                >
-                    <span class="capsule-icon">{{ typeIcons[item.value] || '🏷️' }}</span>
-                    <span class="capsule-label">{{ item.label }}</span>
-                </button>
+                    {{ selectedType ? `+ 添加${selectedTypeLabel}` : '+ 添加选项值' }}
+                </router-link>
+            </div>
+        </div>
             </div>
         </div>
 
@@ -81,7 +87,7 @@
                 </thead>
                 <tbody>
                 <tr
-                    v-for="item in optionList"
+                    v-for="item in pagedList"
                     :key="item.id"
                 >
                     <td>{{ item.id }}</td>
@@ -118,33 +124,40 @@
                                 @click="confirmDelete(item)"
                             >
                                 删除
-                        </button>
-                    </div>
-                    <div
-                        v-else
-                        class="actions"
-                    >
-                        <button
-                            :disabled="saving"
-                            class="btn-success"
-                            type="button"
-                            @click="saveEdit"
+                            </button>
+                        </div>
+                        <div
+                            v-else
+                            class="actions"
                         >
-                            {{ saving ? '保存中...' : '保存' }}
-                        </button>
-                        <button
-                            class="btn-outline"
-                            type="button"
-                            @click="cancelEdit"
-                        >
-                            取消
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                            <button
+                                :disabled="saving"
+                                class="btn-success"
+                                type="button"
+                                @click="saveEdit"
+                            >
+                                {{ saving ? '保存中...' : '保存' }}
+                            </button>
+                            <button
+                                class="btn-outline"
+                                type="button"
+                                @click="cancelEdit"
+                            >
+                                取消
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
+            <TablePagination
+                :loading="loading"
+                :page="safePage"
+                :total-elements="optionList.length"
+                :total-pages="totalPages"
+                @change="changePage"
+            />
         </div>
 
         <div
@@ -152,7 +165,7 @@
             class="modal-overlay"
             @click.self="showDelete = false"
         >
-            <div class="delete-modal">
+            <div class="modal-content delete-modal">
                 <div class="modal-body">
                     <div class="confirm-box">
                         <div class="confirm-icon">
@@ -189,6 +202,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import optionValueInterface from '../../../axios/interface/OptionValueInterface.js'
+import TablePagination from '../../../component/common/TablePagination.vue'
 import {OPTION_TYPE_LABELS, OPTION_TYPE_OPTIONS} from '../../../constants/optionType.js'
 
 const route = useRoute()
@@ -196,15 +210,6 @@ const router = useRouter()
 const toast = useToastStore()
 const typeOptions = OPTION_TYPE_OPTIONS
 const typeLabels = OPTION_TYPE_LABELS
-const typeIcons = {
-    COLOR: '🎨',
-    SIZE: '📏',
-    TYPE: '🔖',
-    CATEGORY: '📂',
-    UNIT: '⚖️',
-    COMPOSITION: '🧵',
-    YEAR: '📅'
-}
 const initialType = typeof route.query.type === 'string' && typeOptions.some(item => item.value === route.query.type)
     ? route.query.type
     : ''
@@ -218,6 +223,20 @@ const saving = ref(false)
 const showDelete = ref(false)
 const deleteTarget = ref(null)
 const deleting = ref(false)
+const page = ref(0)
+const pageSize = 10
+
+// 前端分页（接口返回全量列表，本地切片）
+const totalPages = computed(() => Math.max(1, Math.ceil(optionList.value.length / pageSize)))
+const safePage = computed(() => Math.min(page.value, totalPages.value - 1))
+const pagedList = computed(() => {
+    const start = safePage.value * pageSize
+    return optionList.value.slice(start, start + pageSize)
+})
+
+function changePage(index) {
+    page.value = index
+}
 
 const selectedTypeLabel = computed(() => {
     return selectedType.value
@@ -238,6 +257,7 @@ async function selectType(type) {
     if (selectedType.value === type) return
     selectedType.value = type
     cancelEdit()
+    page.value = 0
     await router.replace({
         path: '/manage/option',
         query: type
@@ -317,101 +337,67 @@ async function handleDelete() {
     min-width: 0;
 }
 
-.page-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 24px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
-/* ============ 胶囊工具箱 ============ */
-.capsule-toolbox {
-    margin-bottom: 24px;
-    border: 1px solid #dceae7;
-    border-radius: 14px;
-    background: #fff;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.toolbox-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 18px 0;
-    font-size: 12px;
-    font-weight: 700;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.toolbox-icon {
-    flex-shrink: 0;
-    color: #94a3b8;
-}
-
-.toolbox-title {
-    color: #64748b;
-}
-
-.toolbox-body {
+/* ============ 分类筛选（使用全局 search-shell 工具盒） ============ */
+.filter-capsules {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 8px;
-    padding: 10px 18px 14px;
 }
 
-.capsule {
-    height: 38px;
-    padding: 0 16px 0 12px;
+.capsule,
+.capsule-active {
+    height: 34px;
+    padding: 0 15px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    border: 1px solid #e2e8f0;
+    gap: 7px;
+    border: 1.5px solid var(--border-strong);
     border-radius: 999px;
-    background: #f8fafc;
-    color: #475569;
-    font-size: 13px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition);
     white-space: nowrap;
 }
 
 .capsule:hover {
-    border-color: #14b8a6;
-    color: #0d9488;
-    background: #f0fdfa;
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+    transform: translateY(-1px);
 }
 
 .capsule-active {
-    border-color: #0d9488;
-    background: #0d9488;
-    color: #fff;
-    box-shadow: 0 3px 10px rgba(13, 148, 136, 0.25);
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--text-invert);
+    box-shadow: var(--shadow-primary);
 }
 
 .capsule-active:hover {
-    background: #0f766e;
-    border-color: #0f766e;
-    color: #fff;
+    border-color: var(--primary-dark);
+    background: var(--primary-dark);
+    color: var(--text-invert);
+    transform: translateY(-1px);
 }
 
-.capsule-icon {
-    font-size: 15px;
-    line-height: 1;
+.capsule-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--primary) 55%, transparent);
+    transition: var(--transition);
+}
+
+.capsule:hover .capsule-dot {
+    background: var(--primary);
+}
+
+.capsule-active .capsule-dot {
+    background: var(--text-invert);
 }
 
 .capsule-label {
@@ -432,9 +418,9 @@ async function handleDelete() {
     display: inline-block;
     min-width: 70px;
     padding: 4px 10px;
-    border-radius: 10px;
-    background: #e8f5f2;
-    color: #0f766e;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
     font-size: 12px;
     font-weight: 700;
 }
@@ -443,16 +429,16 @@ async function handleDelete() {
     width: 220px;
     height: 34px;
     padding: 0 10px;
-    border: 1px solid #dceae7;
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
     font-size: 13px;
     text-align: center;
     outline: none;
 }
 
 .inline-input:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-focus);
 }
 
 .actions {
@@ -463,30 +449,18 @@ async function handleDelete() {
 
 .delete-modal {
     min-width: 360px;
-    border-radius: 14px;
-    background: #fff;
-    overflow: hidden;
 }
 
 @media (max-width: 760px) {
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
-    }
 
-    .capsule-toolbox {
-        border-radius: 12px;
-    }
-
-    .toolbox-body {
+    .filter-capsules {
         gap: 6px;
-        padding: 8px 14px 12px;
     }
 
-    .capsule {
-        height: 34px;
-        padding: 0 12px 0 10px;
+    .capsule,
+    .capsule-active {
+        height: 32px;
+        padding: 0 12px;
         font-size: 12px;
     }
 }

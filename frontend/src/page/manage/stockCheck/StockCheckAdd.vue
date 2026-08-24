@@ -427,40 +427,15 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading,
-.heading-left {
-    display: flex;
-    align-items: center;
-}
-
-.page-heading {
-    margin-bottom: 26px;
-}
-
-.heading-left {
-    gap: 12px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
 .form-card,
 .search-card,
 .empty-card {
     padding: 20px;
     margin-bottom: 16px;
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border-light);
-    border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(15, 118, 110, 0.06);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
 }
 
 .form-row {
@@ -487,16 +462,16 @@ function goBack() {
 }
 
 .required {
-    color: #dc2626;
+    color: var(--error-dark);
 }
 
 .remark-field input,
 .search-control input {
     height: 40px;
     padding: 0 12px;
-    border: 1px solid #dceae7;
+    border: 1px solid var(--border);
     border-radius: 10px;
-    background: #fbfefd;
+    background: var(--bg-subtle);
 }
 
 .remark-field {
@@ -530,7 +505,7 @@ function goBack() {
     padding: 0 14px;
     border: 1px solid var(--primary);
     border-radius: 0 10px 10px 0;
-    color: #fff;
+    color: var(--text-invert);
     background: var(--primary);
     font-weight: 600;
     cursor: pointer;
@@ -557,7 +532,7 @@ function goBack() {
     padding: 12px 14px;
     color: var(--text);
     background: #f7fcfb;
-    border: 1px solid #dceae7;
+    border: 1px solid var(--border);
     border-radius: 10px;
     text-align: left;
 }
@@ -582,8 +557,8 @@ function goBack() {
     gap: 12px;
     padding: 14px 20px;
     margin-bottom: 14px;
-    background: #fff;
-    border: 1px solid #e3efed;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
     border-radius: 14px;
     box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
 }
@@ -595,11 +570,11 @@ function goBack() {
 .action-bar strong {
     width: 35%;
     margin-right: auto;
-    color: #16a34a;
+    color: var(--success-dark);
 }
 
 .action-bar .has-difference {
-    color: #d97706;
+    color: var(--warning-dark);
 }
 
 .item-list {

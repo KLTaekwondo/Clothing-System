@@ -503,15 +503,15 @@ function goBack() {
     padding: 0 15px;
     border: 1px solid #d5e3e0;
     border-radius: 8px;
-    background: #fff;
-    color: #64807e;
+    background: var(--bg-card);
+    color: var(--text-secondary);
     font-size: 13px;
     font-weight: 600;
 }
 
 .season-btn:hover {
     border-color: #9ebbb6;
-    background: #f7fbfa;
+    background: var(--bg-subtle);
     color: #315d59;
 }
 
@@ -545,7 +545,7 @@ function goBack() {
 
 .season-all.season-active {
     border-color: #7eb9af;
-    background: #e8f5f2;
+    background: var(--primary-light);
     color: #315d59;
     box-shadow: 0 0 0 3px rgba(126, 185, 175, 0.18), 0 5px 12px rgba(49, 93, 89, 0.12);
 }
@@ -662,7 +662,7 @@ function goBack() {
     border-radius: 6px;
     font-size: 13px;
     color: var(--text-secondary);
-    background: #fafafa;
+    background: var(--bg-subtle);
 }
 
 .sku-spec {
@@ -675,7 +675,7 @@ function goBack() {
     height: 44px;
     border-radius: 10px;
     background: var(--primary-gradient);
-    color: #fff;
+    color: var(--text-invert);
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
@@ -720,7 +720,7 @@ function goBack() {
     .basic-info-column + .basic-info-column {
         padding-top: 22px;
         padding-left: 0;
-        border-top: 1px solid #e3efed;
+        border-top: 1px solid var(--border-light);
         border-left: none;
     }
 }

@@ -154,95 +154,22 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading, .heading-left, .heading-actions {
-    display: flex;
-    align-items: center;
-}
 
-.page-heading {
-    justify-content: space-between;
-    margin-bottom: 28px;
-}
 
-.heading-left, .heading-actions {
-    gap: 12px;
-}
 
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
-.detail-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-}
-
-.detail-card {
-    width: calc(33.33% - 10px);
-    min-width: 210px;
-    min-height: 112px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 20px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
-    border: 1px solid #e3efed;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
-}
 
 .detail-card > span:first-child {
     color: var(--text-muted);
     font-size: var(--font-sm);
 }
 
-.code-value {
-    color: var(--primary);
-    font-family: ui-monospace, 'SF Mono', Consolas, monospace;
-}
 
-.card-input {
-    width: 100%;
-    height: 38px;
-    padding: 0 10px;
-    border: 1px solid #dceae7;
-    border-radius: 8px;
-    background: #fff;
-    font-size: 14px;
-    outline: none;
-}
 
-.card-input:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
-}
 
-.card-select {
-    width: 100%;
-    height: 38px;
-    padding: 0 24px 0 10px;
-    border: 1px solid #dceae7;
-    border-radius: 8px;
-    background: #fff;
-    font-size: 14px;
-    appearance: none;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364807e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-}
 
-.card-select:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
-}
+
+
+
+
+
 </style>

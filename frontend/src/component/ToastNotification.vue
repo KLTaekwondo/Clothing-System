@@ -55,7 +55,7 @@ const icons = {
     border-radius: 12px;
     font-size: 14px;
     line-height: 1.4;
-    color: #fff;
+    color: var(--text-invert);
     cursor: pointer;
     pointer-events: auto;
     box-shadow: 0 12px 28px rgba(22, 83, 78, 0.18);

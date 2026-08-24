@@ -1,27 +1,40 @@
 <template>
     <div class="product-manage">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">商品管理</h2>
-                <p class="page-desc">管理商品基础信息、价格和 SKU</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">商品管理</h2>
+                <p class="page-label-desc">管理商品基础信息、价格和 SKU</p>
+                <hr class="label-hr"/>
             </div>
-            <router-link class="btn-primary" to="/manage/product/add">+ 添加商品</router-link>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">商品列表</span>
-                <div class="header-actions">
-                    <div class="search-bar">
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-label">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                        <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span>商品检索</span>
+                </div>
+                <div class="search-shell">
+                    <div class="search-controls">
                         <input
                             v-model="searchQuery"
+                            class="search-code-input"
                             placeholder="搜索商品名称或编码"
                             type="text"
                         />
+                        <router-link
+                            class="btn-primary search-button"
+                            to="/manage/product/add"
+                        >
+                            + 添加商品
+                        </router-link>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div class="card">
             <div v-if="loading" class="loading-overlay">
                 <div class="loading-spinner"></div>
             </div>
@@ -194,44 +207,9 @@ async function handleDelete() {
     min-width: 0;
 }
 
-.page-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 28px;
-}
-
-.page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
-.page-heading .btn-primary {
-    min-width: 120px;
-    border-radius: 10px;
-}
-
 .card {
     border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(15, 118, 110, 0.06);
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-}
-
-.search-bar input {
-    width: 300px;
-    height: 42px;
-    border-radius: 10px;
-    background: #f8fafc;
+    box-shadow: var(--shadow);
 }
 
 .data-table th,
@@ -241,7 +219,7 @@ async function handleDelete() {
 
 .data-table th {
     height: 46px;
-    background: #fbfdfd;
+    background: var(--bg-subtle);
 }
 
 .data-table td {
@@ -253,7 +231,7 @@ async function handleDelete() {
 }
 
 .data-table tbody tr:hover td {
-    background: #f2fbfa;
+    background: var(--bg-hover);
 }
 
 .special-status,
@@ -268,13 +246,13 @@ async function handleDelete() {
 }
 
 .special-status {
-    background: #fef3c7;
-    color: #b45309;
+    background: var(--warning-light);
+    color: var(--warning-dark);
 }
 
 .regular-status {
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--bg-muted);
+    color: var(--text-muted);
 }
 
 .actions {
@@ -287,16 +265,10 @@ tr:hover .actions {
 }
 
 @media (max-width: 900px) {
-    .page-heading,
-    .card-header {
+    .page-heading {
         align-items: flex-start;
         flex-direction: column;
         gap: 14px;
-    }
-
-    .search-bar,
-    .search-bar input {
-        width: 100%;
     }
 
     .data-table {

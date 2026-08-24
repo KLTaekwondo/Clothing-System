@@ -152,6 +152,7 @@ import orderDashInterface from '../../../axios/interface/OrderDashInterface.js'
 import {STATUS} from '../../../constants/status.js'
 import IconGraphic from '../../../component/IconGraphic.vue'
 import DashboardChart from '../../../component/dashboard/DashboardChart.vue'
+import {theme, accent} from '../../../stores/theme.js'
 
 const loading = ref(true)
 
@@ -167,6 +168,36 @@ const finance = ref({
 
 const salesData = ref([820, 932, 901, 934, 1290, 1330, 1520])
 const salesDays = ref(['07-09', '07-10', '07-11', '07-12', '07-13', '07-14', '07-15'])
+
+// ── 图表主题色板（跟随深色模式与强调色） ──
+const chartPalette = computed(() => {
+    const dark = theme.value === 'dark'
+    return {
+        axisLabel: dark ? '#8f8f8f' : '#94a3b8',
+        splitLine: dark ? '#262626' : '#f1f5f9',
+        pieLabel: dark ? '#b0b0b0' : '#636e72',
+        pieLine: dark ? '#333333' : '#e8e8e8',
+        pieBorder: dark ? '#1e1e1e' : '#ffffff'
+    }
+})
+
+const ACCENT_HEX = {
+    teal: '#0d9488',
+    blue: '#3b82f6',
+    orange: '#ea580c',
+    purple: '#8b5cf6',
+    rose: '#e11d48'
+}
+
+const primaryHex = computed(() => ACCENT_HEX[accent.value] || '#0d9488')
+
+function hexToRgba(hex, alpha) {
+    const value = parseInt(hex.slice(1), 16)
+    const r = (value >> 16) & 255
+    const g = (value >> 8) & 255
+    const b = value & 255
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
 const salesChartOption = computed(() => ({
     tooltip: {
@@ -192,7 +223,7 @@ const salesChartOption = computed(() => ({
             show: false
         },
         axisLabel: {
-            color: '#94a3b8',
+            color: chartPalette.value.axisLabel,
             fontSize: 11
         }
     },
@@ -200,11 +231,11 @@ const salesChartOption = computed(() => ({
         type: 'value',
         splitLine: {
             lineStyle: {
-                color: '#f1f5f9'
+                color: chartPalette.value.splitLine
             }
         },
         axisLabel: {
-            color: '#94a3b8',
+            color: chartPalette.value.axisLabel,
             fontSize: 11
         }
     },
@@ -215,11 +246,11 @@ const salesChartOption = computed(() => ({
         symbol: 'circle',
         symbolSize: 6,
         lineStyle: {
-            color: '#0d9488',
+            color: primaryHex.value,
             width: 2
         },
         itemStyle: {
-            color: '#0d9488'
+            color: primaryHex.value
         },
         areaStyle: {
             color: {
@@ -231,11 +262,11 @@ const salesChartOption = computed(() => ({
                 colorStops: [
                     {
                         offset: 0,
-                        color: 'rgba(13,148,136,0.25)'
+                        color: hexToRgba(primaryHex.value, 0.25)
                     },
                     {
                         offset: 1,
-                        color: 'rgba(13,148,136,0.02)'
+                        color: hexToRgba(primaryHex.value, 0.02)
                     }
                 ]
             }
@@ -243,7 +274,7 @@ const salesChartOption = computed(() => ({
     }]
 }))
 
-const categoryChartOption = {
+const categoryChartOption = computed(() => ({
     tooltip: {
         trigger: 'item'
     },
@@ -254,29 +285,29 @@ const categoryChartOption = {
         avoidLabelOverlap: true,
         itemStyle: {
             borderRadius: 4,
-            borderColor: '#fff',
+            borderColor: chartPalette.value.pieBorder,
             borderWidth: 2
         },
         label: {
             show: true,
-            color: '#636e72',
+            color: chartPalette.value.pieLabel,
             fontSize: 12,
             formatter: '{b}'
         },
         labelLine: {
             lineStyle: {
-                color: '#e8e8e8'
+                color: chartPalette.value.pieLine
             }
         },
         data: [
-            {value: 38, name: '上衣', itemStyle: {color: '#0d9488'}},
+            {value: 38, name: '上衣', itemStyle: {color: primaryHex.value}},
             {value: 22, name: '裤装', itemStyle: {color: '#3b82f6'}},
             {value: 15, name: '裙装', itemStyle: {color: '#f59e0b'}},
             {value: 10, name: '配饰', itemStyle: {color: '#8b5cf6'}},
             {value: 6, name: '鞋履', itemStyle: {color: '#ec4899'}}
         ]
     }]
-}
+}))
 
 function formatMoney(value) {
     return '¥ ' + Number(value || 0).toFixed(2)
@@ -370,10 +401,10 @@ onMounted(async () => {
 .overview-card,
 .shortcut-card {
     padding: 20px;
-    background: #fff;
-    border: 1px solid #e3efed;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
+    box-shadow: var(--shadow);
 }
 
 .overview-card {
@@ -400,7 +431,7 @@ onMounted(async () => {
 .workspace-hint {
     padding: 4px 9px;
     border-radius: 999px;
-    background: #eef9f7;
+    background: var(--primary-light);
     color: var(--primary);
     font-size: 11px;
     font-weight: 600;
@@ -418,12 +449,12 @@ onMounted(async () => {
     gap: 11px;
     border-radius: 12px;
     box-shadow: none;
-    background: #f9fcfb;
+    background: var(--bg-subtle);
 }
 
 .overview-card .stat-card:hover {
     transform: none;
-    background: #f1faf8;
+    background: var(--bg-hover);
     box-shadow: none;
 }
 
@@ -451,7 +482,7 @@ onMounted(async () => {
 }
 
 .shortcut-card .quick-card:hover {
-    box-shadow: 0 8px 18px rgba(22, 83, 78, 0.1);
+    box-shadow: var(--shadow-hover);
 }
 
 .shortcut-card .quick-icon-box {
@@ -478,17 +509,18 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 16px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
+    background: linear-gradient(145deg, var(--bg-card), var(--bg-subtle));
     border-radius: 16px;
     padding: 20px;
-    border: 1px solid #e3efed;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
-    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
 }
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(22, 83, 78, 0.1);
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-hover);
 }
 
 .stat-icon {
@@ -503,27 +535,27 @@ onMounted(async () => {
 }
 
 .stat-teal {
-    background: rgb(204 251 241 / 0.8);
+    background: var(--primary-light);
 }
 
 .stat-blue {
-    background: #e8f0fe;
+    background: var(--info-light);
 }
 
 .stat-green {
-    background: #dcfce7;
+    background: var(--success-light);
 }
 
 .stat-orange {
-    background: #fef3c7;
+    background: var(--warning-light);
 }
 
 .stat-purple {
-    background: #f3e8ff;
+    background: color-mix(in srgb, var(--info) 12%, transparent);
 }
 
 .stat-red {
-    background: #fee2e2;
+    background: var(--error-light);
 }
 
 .stat-body {
@@ -558,10 +590,10 @@ onMounted(async () => {
 
 .chart-card {
     width: calc(50% - 7px);
-    background: #fff;
+    background: var(--bg-card);
     border-radius: 16px;
-    border: 1px solid #e3efed;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
     padding: 20px 18px 12px;
 }
 
@@ -587,10 +619,10 @@ onMounted(async () => {
     flex-direction: column;
     gap: 6px;
     padding: 20px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
+    background: linear-gradient(145deg, var(--bg-card), var(--bg-subtle));
     border-radius: 16px;
-    border: 1px solid #e3efed;
-    box-shadow: 0 8px 24px rgba(22, 83, 78, 0.06);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
     text-decoration: none;
     transition: var(--transition);
     cursor: pointer;
@@ -598,8 +630,8 @@ onMounted(async () => {
 
 .quick-card:hover {
     transform: translateY(-3px);
-    border-color: #bfe4df;
-    box-shadow: 0 14px 28px rgba(22, 83, 78, 0.11);
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-hover);
 }
 
 .quick-disabled {

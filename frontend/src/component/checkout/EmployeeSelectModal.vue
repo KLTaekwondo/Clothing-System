@@ -91,53 +91,16 @@ function selectOnlyEmployee() {
 </script>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.35);
-}
-
 .employee-modal {
     width: 440px;
     max-height: 520px;
     display: flex;
     flex-direction: column;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid #e3efed;
-}
-
-.modal-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.modal-close {
-    padding: 0;
-    border: none;
-    background: none;
-    font-size: 24px;
-    color: #94a3b8;
-    cursor: pointer;
-    line-height: 1;
-}
-
-.modal-close:hover {
-    color: #ef4444;
 }
 
 .employee-list {
@@ -152,7 +115,7 @@ function selectOnlyEmployee() {
     width: 100%;
     height: 40px;
     margin-bottom: 6px;
-    background: #fbfefd;
+    background: var(--bg-subtle);
 }
 
 .employee-option {
@@ -161,21 +124,21 @@ function selectOnlyEmployee() {
     align-items: center;
     justify-content: space-between;
     padding: 12px 14px;
-    border: 1px solid #e3efed;
-    border-radius: 10px;
-    background: #fff;
-    color: #0f172a;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text);
 }
 
 .employee-option:hover {
-    border-color: #8bd5ca;
-    background: #f0fdfb;
+    border-color: var(--border-hover);
+    background: var(--bg-hover);
 }
 
 .employee-option.active {
-    border-color: #0d9488;
-    background: #ccfbf1;
-    color: #0f766e;
+    border-color: var(--primary);
+    background: var(--bg-active);
+    color: var(--primary-dark);
 }
 
 .employee-option-name {
@@ -185,22 +148,16 @@ function selectOnlyEmployee() {
 
 .employee-option-code {
     padding: 5px 9px;
-    border-radius: 6px;
-    background: #e8f5f2;
-    color: #0f766e;
-    font-family: monospace;
+    border-radius: var(--radius-sm);
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-family: var(--mono);
     font-size: 15px;
     font-weight: 700;
 }
 
 .employee-option.active .employee-option-code {
-    background: #99f6e4;
-    color: #115e59;
-}
-
-.modal-empty {
-    display: flex;
-    justify-content: center;
-    padding: 40px 0;
+    background: var(--bg-active);
+    color: var(--primary-dark);
 }
 </style>

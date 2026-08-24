@@ -181,24 +181,14 @@ function goBack() {
     justify-content: space-between;
     gap: 10px;
     padding: 18px;
-    background: linear-gradient(145deg, #fff, #fbfefd);
-    border: 1px solid #e6f0ef;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(15, 118, 110, 0.06);
+    background: linear-gradient(145deg, var(--bg-card), var(--bg-subtle));
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
 }
 
 .info-card:nth-child(4n+1) {
-    border-top: 3px solid #0d9488;
-}
-
-.info-label {
-    color: var(--text-muted);
-    font-size: var(--font-sm);
-}
-
-.code-value {
-    color: var(--primary);
-    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    border-top: 3px solid var(--primary);
 }
 
 .price-value {
@@ -213,10 +203,10 @@ function goBack() {
 
 .card {
     padding: 20px;
-    background: #fff;
+    background: var(--bg-card);
     border: 1px solid var(--border-light);
-    border-radius: 16px;
-    box-shadow: 0 8px 26px rgba(15, 118, 110, 0.06);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
 }
 
 .card-header {
@@ -266,5 +256,4 @@ function goBack() {
         width: 100%;
         min-width: 0;
     }
-}
-</style>
+}</style>
