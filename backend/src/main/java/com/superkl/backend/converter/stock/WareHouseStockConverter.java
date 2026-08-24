@@ -1,8 +1,10 @@
 package com.superkl.backend.converter.stock;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.entity.stock.WareHouseStock;
 import com.superkl.backend.info.stock.WareHouseStockInfo;
 import com.superkl.backend.utils.JsonUtil;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -27,4 +29,10 @@ public class WareHouseStockConverter {
                 .map(WareHouseStockConverter::toInfo)
                 .toList();
     }
+
+    // 实体列表转化为Info分页
+    public static PageResult<WareHouseStockInfo> toInfoPage(Page<WareHouseStock> wareHouseStockPage) {
+        Page<WareHouseStockInfo> page = wareHouseStockPage.map(WareHouseStockConverter::toInfo);
+        return new PageResult<>(page);
+       }
 }

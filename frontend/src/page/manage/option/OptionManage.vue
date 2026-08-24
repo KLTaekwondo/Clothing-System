@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="option-manage">
         <div class="page-heading">
             <div>
@@ -13,145 +13,138 @@
             </router-link>
         </div>
 
-        <div class="option-layout">
-            <aside class="type-panel">
-                <div class="type-panel-title">选项类型</div>
+        <div class="capsule-toolbox">
+            <div class="toolbox-header">
+                <svg class="toolbox-icon" viewBox="0 0 20 20" fill="none" width="16" height="16">
+                    <rect x="2" y="7" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M6 7V5a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span class="toolbox-title">分类筛选</span>
+            </div>
+            <div class="toolbox-body">
                 <button
-                    :class="selectedType === '' ? 'type-item-active' : 'type-item'"
+                    :class="['capsule', selectedType === '' ? 'capsule-active' : '']"
                     type="button"
                     @click="selectType('')"
                 >
-                    <span>全部选项</span>
-                    <span class="type-arrow">›</span>
+                    <span class="capsule-icon">📋</span>
+                    <span class="capsule-label">全部选项</span>
                 </button>
                 <button
                     v-for="item in typeOptions"
                     :key="item.value"
-                    :class="selectedType === item.value ? 'type-item-active' : 'type-item'"
+                    :class="['capsule', selectedType === item.value ? 'capsule-active' : '']"
                     type="button"
                     @click="selectType(item.value)"
                 >
-                    <span>{{ item.label }}</span>
-                    <span class="type-arrow">›</span>
+                    <span class="capsule-icon">{{ typeIcons[item.value] || '🏷️' }}</span>
+                    <span class="capsule-label">{{ item.label }}</span>
                 </button>
-            </aside>
+            </div>
+        </div>
 
-            <section class="value-panel">
-                <div class="value-panel-header">
-                    <div>
-                        <h3 class="value-panel-title">
-                            {{ selectedType ? `${selectedTypeLabel}选项` : '全部选项' }}
-                        </h3>
-                        <p class="value-panel-desc">
-                            共 {{ optionList.length }} 个{{ selectedType ? `${selectedTypeLabel}值` : '选项值' }}
-                        </p>
-                    </div>
-                    <button
-                        class="btn-outline"
-                        type="button"
-                        @click="fetchList"
-                    >
-                        刷新
-                    </button>
+            <div class="card">
+            <div class="card-header">
+                <span class="card-title">选项列表</span>
+            </div>
+
+            <div
+                v-if="loading"
+                class="loading-overlay"
+            >
+                <div class="loading-spinner"></div>
+            </div>
+
+            <div
+                v-else-if="optionList.length === 0"
+                class="empty-state"
+            >
+                <div class="empty-icon">
+                    <IconGraphic name="tag"/>
                 </div>
-
-                <div
-                    v-if="loading"
-                    class="loading-overlay"
-                >
-                    <div class="loading-spinner"></div>
+                <div class="empty-text">
+                    {{ selectedType ? `暂无${selectedTypeLabel}选项` : '暂无选项数据' }}
                 </div>
+            </div>
 
-                <div
-                    v-else-if="optionList.length === 0"
-                    class="empty-state"
+            <table
+                v-else
+                class="data-table"
+            >
+                <thead>
+                <tr>
+                    <th>编号</th>
+                    <th v-if="selectedType === ''">选项类型</th>
+                    <th>{{ selectedType === '' ? '选项值' : `${selectedTypeLabel}值` }}</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr
+                    v-for="item in optionList"
+                    :key="item.id"
                 >
-                    <div class="empty-icon">
-                        <IconGraphic name="tag"/>
-                    </div>
-                    <div class="empty-text">
-                        {{ selectedType ? `暂无${selectedTypeLabel}选项` : '暂无选项数据' }}
-                    </div>
-                </div>
-
-                <table
-                    v-else
-                    class="data-table"
-                >
-                    <thead>
-                    <tr>
-                        <th>编号</th>
-                        <th v-if="selectedType === ''">选项类型</th>
-                        <th>{{ selectedType === '' ? '选项值' : `${selectedTypeLabel}值` }}</th>
-                        <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr
-                        v-for="item in optionList"
-                        :key="item.id"
-                    >
-                        <td>{{ item.id }}</td>
-                        <td v-if="selectedType === ''">
-                            <span class="option-type-badge">
-                                {{ typeLabels[item.optionType] || item.optionType || '-' }}
-                            </span>
-                        </td>
-                        <td v-if="editingId !== item.id">
-                            <strong>{{ item.optionValue || '-' }}</strong>
-                        </td>
-                        <td v-else>
-                            <input
-                                v-model="editValue"
-                                class="inline-input"
-                                maxlength="8"
-                            />
-                        </td>
-                        <td>
-                            <div
-                                v-if="editingId !== item.id"
-                                class="actions"
+                    <td>{{ item.id }}</td>
+                    <td v-if="selectedType === ''">
+                        <span class="option-type-badge">
+                            {{ typeLabels[item.optionType] || item.optionType || '-' }}
+                        </span>
+                    </td>
+                    <td v-if="editingId !== item.id">
+                        <strong>{{ item.optionValue || '-' }}</strong>
+                    </td>
+                    <td v-else>
+                        <input
+                            v-model="editValue"
+                            class="inline-input"
+                            maxlength="8"
+                        />
+                    </td>
+                    <td>
+                        <div
+                            v-if="editingId !== item.id"
+                            class="actions"
+                        >
+                            <button
+                                class="btn-outline"
+                                type="button"
+                                @click="startEdit(item)"
                             >
-                                <button
-                                    class="btn-outline"
-                                    type="button"
-                                    @click="startEdit(item)"
-                                >
-                                    编辑
-                                </button>
-                                <button
-                                    class="btn-danger"
-                                    type="button"
-                                    @click="confirmDelete(item)"
-                                >
-                                    删除
-                                </button>
-                            </div>
-                            <div
-                                v-else
-                                class="actions"
+                                编辑
+                            </button>
+                            <button
+                                class="btn-danger"
+                                type="button"
+                                @click="confirmDelete(item)"
                             >
-                                <button
-                                    :disabled="saving"
-                                    class="btn-success"
-                                    type="button"
-                                    @click="saveEdit"
-                                >
-                                    {{ saving ? '保存中...' : '保存' }}
-                                </button>
-                                <button
-                                    class="btn-outline"
-                                    type="button"
-                                    @click="cancelEdit"
-                                >
-                                    取消
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </section>
+                                删除
+                        </button>
+                    </div>
+                    <div
+                        v-else
+                        class="actions"
+                    >
+                        <button
+                            :disabled="saving"
+                            class="btn-success"
+                            type="button"
+                            @click="saveEdit"
+                        >
+                            {{ saving ? '保存中...' : '保存' }}
+                        </button>
+                        <button
+                            class="btn-outline"
+                            type="button"
+                            @click="cancelEdit"
+                        >
+                            取消
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
         </div>
 
         <div
@@ -203,6 +196,15 @@ const router = useRouter()
 const toast = useToastStore()
 const typeOptions = OPTION_TYPE_OPTIONS
 const typeLabels = OPTION_TYPE_LABELS
+const typeIcons = {
+    COLOR: '🎨',
+    SIZE: '📏',
+    TYPE: '🔖',
+    CATEGORY: '📂',
+    UNIT: '⚖️',
+    COMPOSITION: '🧵',
+    YEAR: '📅'
+}
 const initialType = typeof route.query.type === 'string' && typeOptions.some(item => item.value === route.query.type)
     ? route.query.type
     : ''
@@ -333,111 +335,97 @@ async function handleDelete() {
     font-size: var(--font-sm);
 }
 
-.option-layout {
-    width: 100%;
-    display: flex;
-    align-items: stretch;
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
+/* ============ 胶囊工具箱 ============ */
+.capsule-toolbox {
+    margin-bottom: 24px;
+    border: 1px solid #dceae7;
+    border-radius: 14px;
     background: #fff;
-    box-shadow: 0 8px 26px rgba(22, 83, 78, 0.06);
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.type-panel {
-    width: 220px;
-    flex-shrink: 0;
-    padding: 12px;
-    border-right: 1px solid var(--border-light);
-    background: #f8fbfa;
-}
-
-.type-panel-title {
-    padding: 8px 10px 14px;
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.type-item,
-.type-item-active {
-    width: 100%;
-    min-height: 44px;
+.toolbox-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 14px;
-    border-radius: 10px;
-    font-size: 14px;
+    gap: 8px;
+    padding: 12px 18px 0;
+    font-size: 12px;
     font-weight: 700;
-    cursor: pointer;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.type-item {
-    border: 1px solid transparent;
-    background: transparent;
+.toolbox-icon {
+    flex-shrink: 0;
+    color: #94a3b8;
+}
+
+.toolbox-title {
+    color: #64748b;
+}
+
+.toolbox-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 18px 14px;
+}
+
+.capsule {
+    height: 38px;
+    padding: 0 16px 0 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
     color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
-.type-item:hover {
+.capsule:hover {
+    border-color: #14b8a6;
+    color: #0d9488;
     background: #f0fdfa;
-    color: #0f766e;
 }
 
-.type-item-active {
-    border: 1px solid #99f6e4;
-    background: #ccfbf1;
-    color: #0f766e;
+.capsule-active {
+    border-color: #0d9488;
+    background: #0d9488;
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(13, 148, 136, 0.25);
 }
 
-.type-arrow {
-    font-size: 20px;
+.capsule-active:hover {
+    background: #0f766e;
+    border-color: #0f766e;
+    color: #fff;
+}
+
+.capsule-icon {
+    font-size: 15px;
     line-height: 1;
 }
 
-.value-panel {
-    width: calc(100% - 220px);
-    min-height: 420px;
-    padding: 20px;
-    background: #fff;
-    box-shadow: 2px 2px 7px rgba(22, 83, 78, 0.06) inset;
+.capsule-label {
+    line-height: 1;
 }
 
-.value-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.value-panel-title {
-    margin-bottom: 5px;
-    color: #0f172a;
-    font-size: 18px;
-}
-
-.value-panel-desc {
-    color: #94a3b8;
-    font-size: 13px;
-}
-
+/* ============ 表格（全局样式） ============ */
 .data-table th,
 .data-table td {
     text-align: center;
 }
 
-.data-table th {
-    height: 46px;
-    background: #fbfdfd;
-}
-
-.data-table td {
-    height: 58px;
-}
-
-.data-table tbody tr:hover td {
-    background: #f2fbfa;
+.data-table .actions {
+    justify-content: center;
 }
 
 .option-type-badge {
@@ -487,31 +475,19 @@ async function handleDelete() {
         gap: 14px;
     }
 
-    .option-layout {
-        flex-direction: column;
+    .capsule-toolbox {
+        border-radius: 12px;
     }
 
-    .type-panel {
-        width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        border-right: none;
-        border-bottom: 1px solid var(--border-light);
+    .toolbox-body {
+        gap: 6px;
+        padding: 8px 14px 12px;
     }
 
-    .value-panel {
-        width: 100%;
-    }
-
-    .type-panel-title {
-        width: 100%;
-    }
-
-    .type-item,
-    .type-item-active {
-        width: auto;
-        min-width: 92px;
+    .capsule {
+        height: 34px;
+        padding: 0 12px 0 10px;
+        font-size: 12px;
     }
 }
 </style>

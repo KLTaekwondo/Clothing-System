@@ -104,6 +104,11 @@ public class ProductService {
         return ProductConverter.toInfo(product);
     }
 
+    // 查询并导出商品列表
+    public List<ProductInfo> getProductList(){
+        return ProductConverter.toInfoList(productRepository.findAll());
+    }
+
     // 查询所有商品
     public PageResult<ProductInfo> searchPage(Pageable pageable){
         return ProductConverter.toInfoPage(productRepository.findPage(pageable));

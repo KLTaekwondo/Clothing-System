@@ -1,8 +1,8 @@
 package com.superkl.backend.repository.stock;
 
 import com.superkl.backend.entity.stock.WareHouseStock;
-import jakarta.persistence.LockModeType;
-import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -41,4 +41,13 @@ public interface WareHouseStockRepository extends CrudRepository<WareHouseStock,
             "JOIN FETCH ws.wareHouse wh " +
             "WHERE ws.stockId = :stockId")
     Optional<WareHouseStock> findByStockId(@Param("stockId") Long stockId);
+
+    // 分页查询某一个仓库的商品库存记录
+    @Query("SELECT ws FROM WareHouseStock ws " +
+            "JOIN fetch ws.productSku sku " +
+            "JOIN fetch sku.product p " +
+            "JOIN fetch ws.wareHouse wh " +
+            "WHERE wh.wareHouseId = :warehouseId")
+    Page<WareHouseStock> findPageByWareHouseId(@Param("warehouseId") Long warehouseId,
+                                           Pageable pageable);
 }

@@ -1,5 +1,6 @@
 package com.superkl.backend.service.stock;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.stock.StockRecordConverter;
 import com.superkl.backend.converter.stock.WareHouseStockConverter;
@@ -16,6 +17,8 @@ import com.superkl.backend.repository.stock.StockRecordRepository;
 import com.superkl.backend.repository.stock.WareHouseStockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,6 +76,16 @@ public class WareHouseStockService {
             throw new BusinessException(403, "您没有权限查询该仓库的库存记录");
         }
         return WareHouseStockConverter.toInfoList(wareHouseStockRepository.findByProductIdAndWareHouseId(productId, warehouseId));
+    }
+
+    // 分页查询某一个仓库的商品库存记录
+    @Transactional(readOnly = true)
+    public PageResult<WareHouseStockInfo> findByWareHouseId(Long warehouseId, Pageable pageable) {
+        if (!RequestUser.isCurrentWareHouse(warehouseId) && !RequestUser.isAdmin()) {
+            throw new BusinessException(403, "您没有权限查询该仓库的库存记录");
+        }
+        Page<WareHouseStock> wareHouseStockPage = wareHouseStockRepository.findPageByWareHouseId(warehouseId, pageable);
+        return WareHouseStockConverter.toInfoPage(wareHouseStockPage);
     }
 
     // 减少库存
