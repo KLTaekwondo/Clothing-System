@@ -1,12 +1,27 @@
 <template>
     <div class="detail-page">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回仓库</button>
-                <div><h2 class="page-title">仓库详情</h2>
-                    <p v-if="warehouse" class="page-desc">{{ warehouse.name }} · {{ warehouse.code }}</p></div>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">仓库详情</h2>
+                <p class="page-label-desc">{{ warehouse ? warehouse.name + ' · ' + warehouse.code : '加载中...' }}</p>
+                <hr class="label-hr"/>
             </div>
-            <button v-if="!editing" class="btn-primary" @click="startEdit">编辑仓库</button>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回仓库</button>
+                        <button
+                            v-if="!editing"
+                            class="btn-primary search-button"
+                            @click="startEdit"
+                        >编辑仓库</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="detail-tabs">
@@ -68,9 +83,14 @@
 
         <!-- ═══ 库存管理 Tab ═══ -->
         <template v-if="activeTab === 'stock' && warehouse">
-            <div class="stock-search-bar">
-                <input v-model="productId" min="1" placeholder="输入商品 ID 查询库存" type="number"/>
-                <button class="btn-primary btn-sm" @click="fetchStock">查询</button>
+            <div class="stock-tab-head">
+                <div class="stock-search-bar">
+                    <input v-model="productId" min="1" placeholder="输入商品 ID 查询库存" type="number"/>
+                    <button class="btn-primary btn-sm" @click="fetchStock">查询</button>
+                </div>
+                <router-link class="btn-outline btn-sm" :to="`/manage/stock/view?warehouseId=${warehouse.id}`">
+                    查看全部库存 →
+                </router-link>
             </div>
             <div class="card stock-table-card">
                 <div v-if="stockLoading" class="loading-overlay">
@@ -206,21 +226,6 @@ const goBack = () => {
     min-width: 0;
 }
 
-.page-heading,
-.heading-left {
-    display: flex;
-    align-items: center;
-}
-
-.page-heading {
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.heading-left {
-    gap: 12px;
-}
-
 .page-title {
     margin-bottom: 4px;
     font-size: 26px;
@@ -237,6 +242,15 @@ const goBack = () => {
     gap: 4px;
     margin-bottom: 22px;
     border-bottom: 1px solid #dfece9;
+}
+
+.stock-tab-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
 .detail-tab {

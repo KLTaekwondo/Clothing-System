@@ -28,4 +28,8 @@ public interface ProductSkuRepository extends JpaRepository<ProductSku, Long> {
     List<ProductSku> findByProductCodeAndStatus(@Param("productCode") String productCode,
                                                 @Param("status") StatusEnum status);
 
+    @Query("SELECT EXISTS (SELECT 1 FROM ProductSku p " +
+            "WHERE p.product.productId = :productId " +
+            "AND p.skuName = :skuName)")
+    boolean existsByProductIdAndSkuName(@Param("productId") Long productId, @Param("skuName") String skuName);
 }

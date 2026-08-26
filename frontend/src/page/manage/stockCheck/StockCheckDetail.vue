@@ -1,50 +1,50 @@
 <template>
     <div class="stock-check-detail">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button
-                    class="btn-outline"
-                    @click="goBack"
-                >← 返回盘点单</button>
-                <div>
-                    <h2 class="page-title">库存盘点单详情</h2>
-                    <p
-                        v-if="checkOrder"
-                        class="page-desc"
-                    >{{ checkOrder.stockCheckNo }}</p>
-                </div>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">库存盘点单详情</h2>
+                <p class="page-label-desc">{{ checkOrder ? checkOrder.stockCheckNo : '加载中...' }}</p>
+                <hr class="label-hr"/>
             </div>
-            <div
-                v-if="checkOrder"
-                class="heading-actions"
-            >
-                <router-link
-                    v-if="isDraft"
-                    :to="`/manage/stock-check/${checkOrder.id}/edit`"
-                    class="btn-outline"
-                >编辑草稿</router-link>
-                <button
-                    v-if="isDraft"
-                    :disabled="submitting"
-                    class="btn-primary"
-                    @click="handleCheck"
-                >提交审核</button>
-                <button
-                    v-if="isDraft"
-                    :disabled="deleting"
-                    class="btn-danger"
-                    @click="handleDelete"
-                >{{ deleting ? '删除中...' : '删除草稿' }}</button>
-                <button
-                    v-if="isChecking"
-                    class="btn-primary"
-                    @click="handleApprove"
-                >审批通过</button>
-                <button
-                    v-if="isChecking"
-                    class="btn-danger"
-                    @click="handleReject"
-                >拒绝</button>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回盘点单</button>
+                        <template v-if="checkOrder">
+                            <router-link
+                                v-if="isDraft"
+                                class="btn-outline search-button"
+                                :to="`/manage/stock-check/${checkOrder.id}/edit`"
+                            >编辑草稿</router-link>
+                            <button
+                                v-if="isDraft"
+                                :disabled="submitting"
+                                class="btn-primary search-button"
+                                @click="handleCheck"
+                            >提交审核</button>
+                            <button
+                                v-if="isDraft"
+                                :disabled="deleting"
+                                class="btn-danger search-button"
+                                @click="handleDelete"
+                            >{{ deleting ? '删除中...' : '删除草稿' }}</button>
+                            <button
+                                v-if="isChecking"
+                                class="btn-primary search-button"
+                                @click="handleApprove"
+                            >审批通过</button>
+                            <button
+                                v-if="isChecking"
+                                class="btn-danger search-button"
+                                @click="handleReject"
+                            >拒绝</button>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -278,23 +278,6 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading,
-.heading-left,
-.heading-actions {
-    display: flex;
-    align-items: center;
-}
-
-.page-heading {
-    justify-content: space-between;
-    margin-bottom: 26px;
-}
-
-.heading-left,
-.heading-actions {
-    gap: 10px;
-}
-
 .page-title {
     margin-bottom: 6px;
     font-size: 26px;
@@ -390,7 +373,6 @@ function goBack() {
 }
 
 @media (max-width: 900px) {
-    .page-heading,
     .remark-card {
         align-items: flex-start;
         flex-direction: column;

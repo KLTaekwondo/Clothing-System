@@ -35,7 +35,7 @@ public class WareHouseStockController {
     @GetMapping("/page")
     public Result<PageResult<WareHouseStockInfo>> page(
             @RequestParam Long warehouseId,
-            @RequestParam PageParam pageParam) {
+            @Valid PageParam pageParam) {
         Pageable pageable = pageParam.toPageable();
         return Result.success(wareHouseStockService.findByWareHouseId(warehouseId, pageable));
     }

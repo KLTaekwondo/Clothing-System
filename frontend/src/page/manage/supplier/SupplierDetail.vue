@@ -1,40 +1,40 @@
 <template>
     <div class="supplier-detail">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button
-                    class="btn-outline"
-                    @click="requestBack"
-                >← 返回供应商</button>
-                <div>
-                    <h2 class="page-title">供应商详情</h2>
-                    <p
-                        v-if="supplier"
-                        class="page-desc"
-                    >{{ supplier.supplierName }} · {{ supplier.supplierCode }}</p>
-                </div>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">供应商详情</h2>
+                <p class="page-label-desc">{{ supplier ? supplier.supplierName + ' · ' + supplier.supplierCode : '' }}</p>
+                <hr class="label-hr"/>
             </div>
-            <div
-                v-if="supplier"
-                class="heading-actions"
-            >
-                <button
-                    v-if="!editing"
-                    class="btn-primary"
-                    @click="startEdit"
-                >编辑供应商</button>
-                <template v-else>
-                    <button
-                        :disabled="saving"
-                        class="btn-outline"
-                        @click="cancelEdit"
-                    >取消</button>
-                    <button
-                        :disabled="saving || !canSave"
-                        class="btn-primary"
-                        @click="saveEdit"
-                    >{{ saving ? '保存中...' : '保存修改' }}</button>
-                </template>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="requestBack"
+                        >← 返回供应商</button>
+                        <template v-if="supplier">
+                            <button
+                                v-if="!editing"
+                                class="btn-primary search-button"
+                                @click="startEdit"
+                            >编辑供应商</button>
+                            <template v-else>
+                                <button
+                                    :disabled="saving"
+                                    class="btn-outline search-button"
+                                    @click="cancelEdit"
+                                >取消</button>
+                                <button
+                                    :disabled="saving || !canSave"
+                                    class="btn-primary search-button"
+                                    @click="saveEdit"
+                                >{{ saving ? '保存中...' : '保存修改' }}</button>
+                            </template>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -280,23 +280,6 @@ function confirmLeave() {
 .supplier-detail {
     width: 100%;
     min-width: 0;
-}
-
-.page-heading,
-.heading-left,
-.heading-actions {
-    display: flex;
-    align-items: center;
-}
-
-.page-heading {
-    justify-content: space-between;
-    margin-bottom: 28px;
-}
-
-.heading-left,
-.heading-actions {
-    gap: 12px;
 }
 
 .page-title {

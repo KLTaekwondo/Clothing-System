@@ -168,6 +168,12 @@ const ManageChildren = [
         meta: {title: '盘点单详情', icon: 'stock'}
     },
     {
+        path: 'stock/view',
+        name: 'StockViewManage',
+        component: () => import('../page/manage/stock/StockViewManage.vue'),
+        meta: {title: '查看库存', icon: 'stock'}
+    },
+    {
         path: 'stock',
         name: 'StockManage',
         component: () => import('../page/manage/stock/StockManage.vue'),
@@ -226,6 +232,12 @@ const ManageChildren = [
         name: 'OptionManage',
         component: () => import('../page/manage/option/OptionManage.vue'),
         meta: {title: '选项管理', icon: 'option'}
+    },
+    {
+        path: 'statistics',
+        name: 'Statistics',
+        component: () => import('../page/manage/statistics/Statistics.vue'),
+        meta: {title: '数据统计', icon: 'trend'}
     },
     {
         path: 'setting',

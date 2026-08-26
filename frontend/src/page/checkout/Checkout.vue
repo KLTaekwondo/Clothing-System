@@ -229,6 +229,13 @@
                     <span class="tool-icon"><IconGraphic name="trash"/></span>
                     <span class="tool-label">清空</span>
                 </button>
+                <button
+                    class="tool-bar-item tool-bar-item-danger"
+                    @click="handleShiftChange"
+                >
+                    <span class="tool-icon"><IconGraphic name="clock"/></span>
+                    <span class="tool-label">交班</span>
+                </button>
             </div>
 
             <div class="payment-panel">
@@ -274,6 +281,7 @@ import productSkuInterface from '../../axios/interface/ProductSkuInterface.js'
 import employeeInterface from '../../axios/interface/EmployeeInterface.js'
 import memberInterface from '../../axios/interface/MemberInterface.js'
 import orderInterface from '../../axios/interface/OrderInterface.js'
+import wareHouseInterface from '../../axios/interface/WareHouseInterface.js'
 import {MEMBER_LEVEL_LABELS} from '../../constants/memberLevel.js'
 import {PAY_METHOD_OPTIONS} from '../../constants/payMethod.js'
 import cashIcon from '../../assets/icons/cash.svg'
@@ -605,6 +613,29 @@ function clearCart() {
         '清空购物车',
         '确定要清空当前购物车吗？此操作不会保存当前内容。',
         resetCurrentOrder
+    )
+}
+
+// 交班：形式上结算本班，实质为退出收银登录
+function handleShiftChange() {
+    const cartQty = cart.value.reduce((sum, item) => sum + item.quantity, 0)
+    openConfirmModal(
+        '交班',
+        cartQty > 0
+            ? `当前购物车还有 ${cartQty} 件商品未结账，交班后将丢失。确定交班吗？`
+            : '确定结束当班并退出收银吗？',
+        async () => {
+            allowRouteLeave = true
+            try {
+                await wareHouseInterface.logout()
+            } catch {
+                // 后端会话可能已失效，继续清理本地状态
+            }
+            userStore.logout()
+            router.push('/')
+        },
+        null,
+        {confirmText: '确认交班'}
     )
 }
 

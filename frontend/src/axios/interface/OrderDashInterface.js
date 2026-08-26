@@ -31,6 +31,11 @@ function orderDashInterface() {
         return Array.isArray(data) ? data : {}
     }
 
+    const everyDayDash = async (startDate,endDate) => {
+        const data = await orderDashApI.everyDayDash(startDate,endDate)
+        return Array.isArray(data) ? data : {}
+    }
+
     return {
         dailyDash,
         weeklyDash,
@@ -38,6 +43,7 @@ function orderDashInterface() {
         yearlyDash,
         customDash,
         sevenDaysDash,
+        everyDayDash,
     }
 }
 

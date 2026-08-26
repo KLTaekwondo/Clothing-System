@@ -1,15 +1,21 @@
 <template>
     <div class="stock-check-edit">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button
-                    class="btn-outline"
-                    type="button"
-                    @click="goBack"
-                >← 返回盘点单</button>
-                <div>
-                    <h2 class="page-title">编辑库存盘点草稿</h2>
-                    <p class="page-desc">{{ checkOrder?.stockCheckNo || '加载中...' }}</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">编辑库存盘点草稿</h2>
+                <p class="page-label-desc">{{ checkOrder?.stockCheckNo || '加载中...' }}</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goBack"
+                        >← 返回盘点单</button>
+                    </div>
                 </div>
             </div>
         </div>

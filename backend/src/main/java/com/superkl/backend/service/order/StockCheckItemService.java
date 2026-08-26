@@ -17,7 +17,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +55,14 @@ public class StockCheckItemService {
     // 创建盘点项列表
     public List<StockCheckItem> createList(List<StockCheckItemCreateDto> dtos, StockCheck stockCheck) {
         List<StockCheckItem> stockCheckItems = new ArrayList<>();
+        // 校验商品编码是否重复
+        Set<String> checkedCodes = new HashSet<>();
         for(StockCheckItemCreateDto dto : dtos) {
+            // 如果重复直接跳过，不要直接暴力甩出异常
+            if(!checkedCodes.add(dto.getSkuCode())) {
+                continue;
+            }
+            // 创建盘点项并添加到列表中
             stockCheckItems.add(create(dto, stockCheck));
         }
         return stockCheckItems;

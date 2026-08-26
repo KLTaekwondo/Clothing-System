@@ -7,6 +7,12 @@ function wareHouseStockInterface() {
         return Array.isArray(data) ? data : [];
     }
 
+    // 分页查询某仓库的全部库存
+    const searchStockPage = async (warehouseId, page, size) => {
+        const data = await wareHouseStockAPI.searchStockPage(warehouseId, page, size);
+        return data || null;
+    }
+
     // 批量更新库存
     const batchUpdateStock = async (data) => {
         await wareHouseStockAPI.batchUpdateStock(data);
@@ -15,6 +21,7 @@ function wareHouseStockInterface() {
     
     return {
         searchStock,
+        searchStockPage,
         batchUpdateStock,
     }
 }

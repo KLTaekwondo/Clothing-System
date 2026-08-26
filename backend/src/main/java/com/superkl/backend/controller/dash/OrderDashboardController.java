@@ -56,4 +56,11 @@ public class OrderDashboardController {
     public Result<List<DayInfo>> getSevenDaysInfo(){
         return Result.success(orderDashboardService.getSevenDaysInfo());
     }
+
+    // 查询区间内的所有每日数据
+    @GetMapping("/everyDay")
+    public Result<List<DayInfo>> getEveryDayInfo(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate){
+        return Result.success(orderDashboardService.getEveryDayInfo(startDate, endDate));
+    }
 }

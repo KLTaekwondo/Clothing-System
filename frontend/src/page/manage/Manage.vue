@@ -100,15 +100,19 @@ import adminInterface from '../../axios/interface/AdminInterface.js'
 import dashboardIcon from '../../assets/icons/navigation/dashboard.svg'
 import productIcon from '../../assets/icons/navigation/product.svg'
 import employeeIcon from '../../assets/icons/navigation/employee.svg'
-import supplierIcon from '../../assets/icons/navigation/supplier.svg'
+import memberIcon from '../../assets/icons/navigation/member.svg'
+import supplierIcon from '../../assets/icons/supplier.svg'
 import warehouseIcon from '../../assets/icons/navigation/warehouse.svg'
 import stockIcon from '../../assets/icons/navigation/stock.svg'
+import stockViewIcon from '../../assets/icons/navigation/stock-view.svg'
 import stockRecordIcon from '../../assets/icons/navigation/stock-record.svg'
+import stockCheckIcon from '../../assets/icons/navigation/stock-check.svg'
 import orderIcon from '../../assets/icons/navigation/order.svg'
 import importOrderIcon from '../../assets/icons/navigation/import-order.svg'
 import transferOrderIcon from '../../assets/icons/navigation/transfer-order.svg'
 import optionIcon from '../../assets/icons/navigation/option.svg'
 import settingsIcon from '../../assets/icons/navigation/settings.svg'
+import statisticsIcon from '../../assets/icons/trend.svg'
 import logoutIcon from '../../assets/icons/navigation/logout.svg'
 import brandMark from '../../assets/brand-mark.svg'
 
@@ -126,15 +130,17 @@ const navItems = [
     {path: '/manage/product', label: '商品管理', icon: productIcon},
     {path: '/manage/warehouse', label: '仓库管理', icon: warehouseIcon},
     {path: '/manage/employee', label: '员工管理', icon: employeeIcon},
-    {path: '/manage/member', label: '会员管理', icon: employeeIcon},
+    {path: '/manage/member', label: '会员管理', icon: memberIcon},
     {path: '/manage/option', label: '选项管理', icon: optionIcon},
     {path: '/manage/supplier', label: '供应商管理', icon: supplierIcon},
-    {path: '/manage/stock-check', label: '库存盘点', icon: stockRecordIcon},
+    {path: '/manage/stock-check', label: '库存盘点', icon: stockCheckIcon},
     {path: '/manage/import-order', label: '采购订单', icon: importOrderIcon},
     {path: '/manage/transfer-order', label: '调拨订单', icon: transferOrderIcon},
+    {path: '/manage/stock/view', label: '查看库存', icon: stockViewIcon},
     {path: '/manage/stock', label: '人工库存调整', icon: stockIcon},
     {path: '/manage/order', label: '订单管理', icon: orderIcon},
     {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon},
+    {path: '/manage/statistics', label: '数据统计', icon: statisticsIcon},
     {path: '/manage/setting', label: '系统设置', icon: settingsIcon}
 ]
 
@@ -454,7 +460,19 @@ async function handleLogout() {
 }
 
 .sidebar-nav .nav-item:nth-child(13) .nav-icon {
+    filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
+}
+
+.sidebar-nav .nav-item:nth-child(14) .nav-icon {
+    filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
+}
+
+.sidebar-nav .nav-item:nth-child(15) .nav-icon {
     filter: invert(54%) sepia(11%) saturate(578%) hue-rotate(124deg) brightness(91%) contrast(88%);
+}
+
+.sidebar-nav .nav-item:nth-child(16) .nav-icon {
+    filter: invert(45%) sepia(68%) saturate(1230%) hue-rotate(234deg) brightness(90%) contrast(91%);
 }
 
 .nav-item-active .nav-icon {

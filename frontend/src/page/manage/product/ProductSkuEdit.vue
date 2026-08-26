@@ -1,11 +1,20 @@
 <template>
     <div class="sku-form-page">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回 SKU</button>
-                <div>
-                    <h2 class="page-title">编辑 SKU</h2>
-                    <p class="page-desc">修改 SKU 名称、规格和状态</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">编辑 SKU</h2>
+                <p class="page-label-desc">修改 SKU 名称、规格和状态</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回 SKU</button>
+                    </div>
                 </div>
             </div>
         </div>

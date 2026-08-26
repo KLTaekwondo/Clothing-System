@@ -1,14 +1,22 @@
 <template>
     <div class="member-add">
-        <div class="page-heading">
-            <button
-                class="btn-outline"
-                type="button"
-                @click="goBack"
-            >← 返回会员</button>
-            <div>
-                <h2 class="page-title">添加会员</h2>
-                <p class="page-desc">创建会员资料并设置初始等级、积分和折扣</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">添加会员</h2>
+                <p class="page-label-desc">创建会员资料并设置初始等级、积分和折扣</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goBack"
+                        >← 返回会员</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -244,7 +252,6 @@ function goBack() {
 }
 
 @media (max-width: 640px) {
-    .page-heading,
     .form-row {
         align-items: flex-start;
         flex-direction: column;

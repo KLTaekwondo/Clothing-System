@@ -1,17 +1,38 @@
 <template>
     <div class="detail-page">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回调拨单</button>
-                <div>
-                    <h2 class="page-title">调拨订单详情</h2>
-                    <p v-if="order" class="page-desc">{{ order.transferOrderNo }}</p>
-                </div>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">调拨订单详情</h2>
+                <p class="page-label-desc">{{ order ? order.transferOrderNo : '加载中...' }}</p>
+                <hr class="label-hr"/>
             </div>
-            <div v-if="order" class="heading-actions">
-                <button v-if="order.status === AUDIT_STATUS.DRAFT" class="btn-primary" @click="handleCheck">提交</button>
-                <button v-if="order.status === AUDIT_STATUS.CHECKING" class="btn-primary" @click="handleApprove">通过</button>
-                <button v-if="order.status === AUDIT_STATUS.CHECKING" class="btn-danger" @click="handleReject">拒绝</button>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回调拨单</button>
+                        <template v-if="order">
+                            <button
+                                v-if="order.status === AUDIT_STATUS.DRAFT"
+                                class="btn-primary search-button"
+                                @click="handleCheck"
+                            >提交</button>
+                            <button
+                                v-if="order.status === AUDIT_STATUS.CHECKING"
+                                class="btn-primary search-button"
+                                @click="handleApprove"
+                            >通过</button>
+                            <button
+                                v-if="order.status === AUDIT_STATUS.CHECKING"
+                                class="btn-danger search-button"
+                                @click="handleReject"
+                            >拒绝</button>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -135,25 +156,6 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading, .heading-left {
-    display: flex;
-    align-items: center;
-}
-
-.page-heading {
-    justify-content: space-between;
-    margin-bottom: 28px;
-}
-
-.heading-left {
-    gap: 12px;
-}
-
-.heading-actions {
-    display: flex;
-    gap: 8px;
-}
-
 .page-title {
     margin-bottom: 6px;
     font-size: 26px;
@@ -232,16 +234,6 @@ function goBack() {
 }
 
 @media (max-width: 900px) {
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
-    }
-
-    .heading-actions {
-        flex-wrap: wrap;
-    }
-
     .card {
         overflow-x: auto;
     }

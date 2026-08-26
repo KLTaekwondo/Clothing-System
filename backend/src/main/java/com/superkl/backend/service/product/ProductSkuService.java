@@ -44,6 +44,12 @@ public class ProductSkuService {
         if(!product.isEnabled()){
             throw new BusinessException(405, product.getProductName()+"商品已被禁用，不能新增SKU");
         }
+
+        // 补：与批量入口一致的重复规格拦截
+        if (productSkuRepository.existsByProductIdAndSkuName(dto.getProductId(), dto.getName())) {
+            throw new BusinessException(405, product.getProductName()+"商品已存在该SKU");
+        }
+
         // 转化为Sku实体
         ProductSku productSku = ProductSkuConverter.toEntity(dto, product);
 
@@ -94,6 +100,10 @@ public class ProductSkuService {
     // 4. 特殊创建方法
     @Transactional
     public void createFromProduct(Product product , Map<String , String>combo) {
+        // 校验商品是否存在
+        if(productSkuRepository.existsByProductIdAndSkuName(product.getProductId(), SkuUtil.generateSkuName(combo))){
+            throw new BusinessException(405, product.getProductName()+"商品已存在该SKU");
+        }
         ProductSku sku = ProductSku.builder()
                 .product(product)
                 .skuName(SkuUtil.generateSkuName(combo))

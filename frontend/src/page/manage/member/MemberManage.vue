@@ -261,14 +261,6 @@ function formatDiscount(value) {
     background: color-mix(in srgb, var(--info) 12%, transparent);
 }
 
-@media (max-width: 900px) {
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
-    }
-}
-
 @media (max-width: 560px) {
 }
 </style>

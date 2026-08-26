@@ -1,15 +1,28 @@
 <template>
     <div class="sku-manage">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回商品</button>
-                <div>
-                    <h2 class="page-title">SKU 管理</h2>
-                    <p v-if="product" class="page-desc">{{ product.name }} · {{ product.code }}</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">SKU 管理</h2>
+                <p v-if="product" class="page-label-desc">{{ product.name }} · {{ product.code }}</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goBack"
+                        >← 返回商品</button>
+                        <router-link
+                            v-if="product"
+                            class="btn-primary search-button"
+                            :to="`/manage/product/${product.id}/sku/add`"
+                        >+ 添加 SKU</router-link>
+                    </div>
                 </div>
             </div>
-            <router-link v-if="product" :to="`/manage/product/${product.id}/sku/add`" class="btn-primary">+ 添加 SKU
-            </router-link>
         </div>
 
         <div v-if="product" class="sku-product-strip">

@@ -1,15 +1,21 @@
 <template>
     <div class="import-order-edit">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button
-                    class="btn-outline"
-                    type="button"
-                    @click="goBack"
-                >← 返回采购单</button>
-                <div>
-                    <h2 class="page-title">编辑采购订单草稿</h2>
-                    <p class="page-desc">{{ order?.importOrderNo || '加载中...' }}</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">编辑采购订单草稿</h2>
+                <p class="page-label-desc">{{ order?.importOrderNo || '加载中...' }}</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goBack"
+                        >← 返回采购单</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -711,8 +717,6 @@ function goBack() {
 }
 
 @media (max-width: 900px) {
-    .page-heading,
-
     .field,
     .supplier-field,
     .warehouse-field,

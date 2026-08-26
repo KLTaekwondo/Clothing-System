@@ -1,14 +1,29 @@
 <template>
     <div class="product-detail-page">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回</button>
-                <div>
-                    <h2 class="page-title">商品详情</h2>
-                    <p v-if="product" class="page-desc">{{ product.name }} · {{ product.code }}</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">商品详情</h2>
+                <p v-if="product" class="page-label-desc">{{ product.name }} · {{ product.code }}</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goBack"
+                        >← 返回</button>
+                        <button
+                            v-if="!editing"
+                            class="btn-primary search-button"
+                            type="button"
+                            @click="startEdit"
+                        >编辑商品</button>
+                    </div>
                 </div>
             </div>
-            <button v-if="!editing" class="btn-primary" @click="startEdit">编辑商品</button>
         </div>
 
         <div class="detail-tabs">
@@ -355,21 +370,6 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading,
-.heading-left {
-    display: flex;
-    align-items: center;
-}
-
-.page-heading {
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.heading-left {
-    gap: 12px;
-}
-
 .page-title {
     margin-bottom: 4px;
     font-size: 26px;
@@ -496,12 +496,6 @@ function goBack() {
 @media (max-width: 900px) {
     .info-card {
         width: calc(50% - 7px);
-    }
-
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 12px;
     }
 }
 

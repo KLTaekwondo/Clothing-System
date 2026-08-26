@@ -1,11 +1,20 @@
 <template>
     <div class="import-order-add">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回采购单</button>
-                <div>
-                    <h2 class="page-title">新建采购单</h2>
-                    <p class="page-desc">选择供应商和仓库，添加商品后保存草稿</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">新建采购单</h2>
+                <p class="page-label-desc">选择供应商和仓库，添加商品后保存草稿</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回采购单</button>
+                    </div>
                 </div>
             </div>
         </div>

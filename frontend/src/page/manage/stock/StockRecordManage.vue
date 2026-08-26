@@ -324,12 +324,4 @@ function formatQuantity(quantity) {
     color: var(--text-secondary);
     font-weight: 800;
 }
-
-@media (max-width: 900px) {
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
-    }
-}
 </style>

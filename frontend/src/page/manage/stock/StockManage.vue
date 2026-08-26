@@ -380,21 +380,6 @@ function handleBeforeUnload(event) {
     min-width: 0;
 }
 
-.page-heading {
-    margin-bottom: 24px;
-}
-
-.page-heading .page-title {
-    margin-bottom: 6px;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-}
-
-.page-heading .page-desc {
-    color: var(--text-secondary);
-    font-size: var(--font-sm);
-}
-
 .empty-form-card {
     border-radius: var(--radius-xl);
 }

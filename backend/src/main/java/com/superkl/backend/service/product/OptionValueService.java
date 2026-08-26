@@ -44,6 +44,11 @@ public class OptionValueService {
         // 1. 从数据库中查询选项值
         OptionValue optionValue = optionValueRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(403, "选项值不存在"));
+        // 2. 检查是否已经被引用，不能删除
+        if(optionValueRepository.existsBySpecExactValue(optionValue.getOptionValue())){
+            throw new BusinessException(403,"选项值被引用，不能更新! 建议重建选项值");
+        }
+
         if(optionValueRepository.existsByTypeAndValueNotId(id,dto.getOptionType(),dto.getOptionValue())) {
             throw new BusinessException(403,"选项值已经存在");
         }

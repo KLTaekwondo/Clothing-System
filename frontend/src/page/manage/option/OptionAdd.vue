@@ -1,16 +1,20 @@
 <template>
     <div class="standalone-form-page">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button
-                    class="btn-outline"
-                    @click="goBack"
-                >
-                    ← 返回选项
-                </button>
-                <div>
-                    <h2 class="page-title">添加选项值</h2>
-                    <p class="page-desc">创建颜色、尺码、类型等商品选项</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">添加选项值</h2>
+                <p class="page-label-desc">创建颜色、尺码、类型等商品选项</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回选项</button>
+                    </div>
                 </div>
             </div>
         </div>

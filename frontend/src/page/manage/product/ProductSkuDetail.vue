@@ -1,16 +1,27 @@
 <template>
     <div class="sku-detail">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回 SKU</button>
-                <div>
-                    <h2 class="page-title">SKU 详情</h2>
-                    <p class="page-desc">查看 SKU 编码、规格和状态</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">SKU 详情</h2>
+                <p class="page-label-desc">查看 SKU 编码、规格和状态</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回 SKU</button>
+                        <router-link
+                            v-if="sku"
+                            class="btn-primary search-button"
+                            :to="`/manage/product/${productId}/sku/${sku.id}/edit`"
+                        >编辑 SKU</router-link>
+                    </div>
                 </div>
             </div>
-            <router-link v-if="sku" :to="`/manage/product/${productId}/sku/${sku.id}/edit`" class="btn-primary">编辑
-                SKU
-            </router-link>
         </div>
 
         <div v-if="loading" class="loading-overlay">
@@ -73,20 +84,6 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading, .heading-left {
-    display: flex;
-    align-items: center;
-}
-
-.page-heading {
-    justify-content: space-between;
-    margin-bottom: 28px;
-}
-
-.heading-left {
-    gap: 12px;
-}
-
 .page-title {
     margin-bottom: 6px;
     font-size: 26px;
@@ -130,11 +127,5 @@ function goBack() {
     .info-wide-card {
         width: 100%;
         min-width: 0;
-    }
-
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
     }
 }</style>

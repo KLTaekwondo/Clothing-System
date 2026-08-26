@@ -101,6 +101,10 @@
 
                 <div class="card-actions">
                     <button
+                        class="detail-button"
+                        @click="openDetail(order)"
+                    >查看详情</button>
+                    <button
                         class="delete-button"
                         @click="confirmDelete(order)"
                     >删除挂单</button>
@@ -120,6 +124,75 @@
             :total-pages="totalPages"
             @change="changePage"
         />
+
+        <div
+            v-if="detailTarget"
+            class="confirm-overlay"
+            @click.self="closeDetail"
+        >
+            <div class="detail-dialog">
+                <div class="detail-heading">
+                    <div class="detail-title">
+                        <strong>挂单详情</strong>
+                        <code>{{ detailTarget.orderNo }}</code>
+                    </div>
+                    <button
+                        class="cancel-button detail-close"
+                        @click="closeDetail"
+                    >×</button>
+                </div>
+
+                <div
+                    v-if="detailLoading"
+                    class="detail-loading"
+                >
+                    <div class="loading-spinner"></div>
+                    <span>正在读取明细...</span>
+                </div>
+                <div
+                    v-else-if="detailItems.length === 0"
+                    class="detail-empty"
+                >无商品明细</div>
+                <div
+                    v-else
+                    class="detail-table-wrap"
+                >
+                    <table class="detail-table">
+                        <thead>
+                        <tr>
+                            <th>类型</th>
+                            <th>商品</th>
+                            <th>SKU</th>
+                            <th>单价</th>
+                            <th>数量</th>
+                            <th>折扣</th>
+                            <th>小计</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr
+                            v-for="item in detailItems"
+                            :key="item.id"
+                        >
+                            <td>{{ item.direction === 'OUT' ? '退货' : '销售' }}</td>
+                            <td>
+                                <strong>{{ item.productName || '-' }}</strong>
+                                <span class="sub-text">{{ item.productCode || '-' }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ item.skuName || '-' }}</strong>
+                                <span class="sub-text"><code>{{ item.skuCode || '-' }}</code></span>
+                            </td>
+                            <td>¥{{ formatMoney(item.unitPrice) }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ formatDiscount(item.discount) }}</td>
+                            <td><strong>¥{{ formatMoney(item.actualPrice ?? item.totalPrice) }}</strong></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         <div
             v-if="deleteTarget"
@@ -163,6 +236,9 @@ const searchQuery = ref('')
 const loading = ref(true)
 const deleting = ref(false)
 const deleteTarget = ref(null)
+const detailTarget = ref(null)
+const detailLoading = ref(false)
+const detailItems = ref([])
 const pageInfo = ref({
     totalElements: 0,
     totalPages: 0,
@@ -222,6 +298,31 @@ function directionLabel(value) {
     if (value === 'OUT') return '退货'
     if (value === 'IN') return '销售'
     return '混合订单'
+}
+
+function formatDiscount(value) {
+    const discount = Number(value || 1)
+    if (discount >= 1) return '原价'
+    return `${(discount * 10).toFixed(1)} 折`
+}
+
+async function openDetail(order) {
+    detailTarget.value = order
+    detailLoading.value = true
+    detailItems.value = []
+    try {
+        const detail = await orderInterface.search(order.id)
+        detailItems.value = detail.items || []
+    } catch {
+        detailItems.value = []
+    } finally {
+        detailLoading.value = false
+    }
+}
+
+function closeDetail() {
+    detailTarget.value = null
+    detailItems.value = []
 }
 
 function restoreOrder(order) {
@@ -587,6 +688,121 @@ function goCheckout() {
 
 .confirm-delete-button:hover {
     background: #b91c1c;
+}
+
+.detail-button {
+    height: 34px;
+    padding: 0 14px;
+    color: var(--primary-dark);
+    background: var(--bg-card);
+    border: 1px solid var(--border-hover);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.detail-button:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary);
+}
+
+.detail-dialog {
+    width: 760px;
+    max-width: 100%;
+    overflow: hidden;
+    background: var(--bg-card);
+    border-radius: 14px;
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.22);
+}
+
+.detail-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.detail-title {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detail-title strong {
+    color: var(--primary-dark);
+    font-size: 15px;
+}
+
+.detail-title code {
+    overflow: hidden;
+    color: var(--primary-dark);
+    font-size: 12px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.detail-close {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--text-secondary);
+    font-size: 20px;
+    line-height: 1;
+}
+
+.detail-loading,
+.detail-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 220px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.detail-table-wrap {
+    overflow-x: auto;
+    padding: 4px 0;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.detail-table th {
+    padding: 11px 14px;
+    color: var(--primary-dark);
+    background: #eff8f6;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.detail-table td {
+    padding: 11px 14px;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-light);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.detail-table td strong {
+    color: var(--primary);
+}
+
+.sub-text {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 11px;
 }
 
 @media (max-width: 1050px) {

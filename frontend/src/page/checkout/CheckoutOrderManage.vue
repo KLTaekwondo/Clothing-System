@@ -181,8 +181,14 @@
                             :key="item.id"
                         >
                             <td>{{ item.direction === 'OUT' ? '退货' : '销售' }}</td>
-                            <td>{{ item.productName || '-' }}</td>
-                            <td>{{ item.skuName || item.skuCode || '-' }}</td>
+                            <td>
+                                <strong>{{ item.productName || '-' }}</strong>
+                                <span class="sub-text">{{ item.productCode || '-' }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ item.skuName || '-' }}</strong>
+                                <span class="sub-text"><code>{{ item.skuCode || '-' }}</code></span>
+                            </td>
                             <td>¥{{ formatMoney(item.unitPrice) }}</td>
                             <td>{{ item.quantity }}</td>
                             <td>{{ formatDiscount(item.discount) }}</td>
@@ -706,6 +712,13 @@ function goCheckout() {
 
 .detail-table td strong {
     color: var(--primary);
+}
+
+.sub-text {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 11px;
 }
 
 @media (max-width: 1050px) {

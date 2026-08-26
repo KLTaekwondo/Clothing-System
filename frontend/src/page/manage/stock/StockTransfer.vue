@@ -1,9 +1,10 @@
 <template>
     <div class="stock-transfer">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">库存转移</h2>
-                <p class="page-desc">选择源仓库和目标仓库，查询商品后批量转移库存</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">库存转移</h2>
+                <p class="page-label-desc">选择源仓库和目标仓库，查询商品后批量转移库存</p>
+                <hr class="label-hr"/>
             </div>
         </div>
 
@@ -474,13 +475,6 @@ function formatSpec(spec) {
 .stock-transfer {
     width: 100%;
     min-width: 0;
-}
-
-.page-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 24px;
 }
 
 .page-title {

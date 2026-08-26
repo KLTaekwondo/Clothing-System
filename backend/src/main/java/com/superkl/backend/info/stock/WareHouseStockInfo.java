@@ -17,4 +17,8 @@ import java.util.Map;
 public class WareHouseStockInfo extends BaseInfo {
     private Map<String , String> spec;// 规格参数
     private Integer stock;// 库存数量
-}
+    private String productName;// 商品名称
+    private String productCode;// 商品编码
+    private String skuName;// 商品规格名称
+    private String skuCode;// 商品规格编码
+   }

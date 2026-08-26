@@ -1,10 +1,21 @@
 <template>
     <div class="stock-page">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回仓库</button>
-                <div><h2 class="page-title">库存管理</h2>
-                    <p class="page-desc">{{ warehouse?.name || '仓库' }} 的 SKU 库存</p></div>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">库存管理</h2>
+                <p class="page-label-desc">{{ warehouse?.name || '仓库' }} 的 SKU 库存</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回仓库</button>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card search-card">

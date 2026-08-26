@@ -1,8 +1,23 @@
 <template>
     <div class="product-add">
-        <div class="page-top">
-            <button class="btn-outline" @click="goBack">← 返回</button>
-            <h2 class="page-title">添加商品</h2>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">添加商品</h2>
+                <p class="page-label-desc">录入商品基础信息并配置颜色、尺码规格</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goBack"
+                        >← 返回</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="add-layout">
@@ -386,19 +401,6 @@ function goBack() {
 .product-add {
     width: 100%;
     min-width: 0;
-}
-
-.page-top {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 28px;
-}
-
-.page-top .page-title {
-    margin-bottom: 0;
-    font-size: 26px;
-    letter-spacing: -0.5px;
 }
 
 .add-layout {

@@ -1,14 +1,20 @@
 <template>
     <div class="stock-check-add">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button
-                    class="btn-outline"
-                    @click="goBack"
-                >← 返回盘点单</button>
-                <div>
-                    <h2 class="page-title">新建库存盘点单</h2>
-                    <p class="page-desc">选择仓库并录入 SKU 的实际库存数量</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">新建库存盘点单</h2>
+                <p class="page-label-desc">选择仓库并录入 SKU 的实际库存数量</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回盘点单</button>
+                    </div>
                 </div>
             </div>
         </div>

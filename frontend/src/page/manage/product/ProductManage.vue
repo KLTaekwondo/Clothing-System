@@ -265,12 +265,6 @@ tr:hover .actions {
 }
 
 @media (max-width: 900px) {
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
-    }
-
     .data-table {
         min-width: 980px;
     }

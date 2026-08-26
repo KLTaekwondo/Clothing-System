@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,15 +31,15 @@ public class ProductService {
 
     // 创建商品（重中之重）
     @Transactional
-    public void create(ProductCreateDto productCreateDto) {
+    public void create(ProductCreateDto dto) {
         // 检查商品编码是否已经存在
-        if(productRepository.existsByCode(productCreateDto.getCode())){
+        if(productRepository.existsByCode(dto.getCode())){
             throw new BusinessException(403, "商品编码已存在！");
         }
         // 1.开始处理规格信息（只取颜色和尺码）
-        Map<String, List<String>> selectedOptions =
-                productCreateDto.getSelectedOptions();
-        Map<String, List<String>> skuOptions = new java.util.HashMap<>();
+        Map<String, List<String>> selectedOptions = dto.getSelectedOptions();
+        Map<String, List<String>> skuOptions = new HashMap<>();
+
         // 只处理颜色和尺码规格
         if (selectedOptions.containsKey("COLOR")) {
             skuOptions.put("COLOR", selectedOptions.get("COLOR"));
@@ -54,7 +55,7 @@ public class ProductService {
         }
 
         // 2.创建商品本体的信息，然后入库
-        Product product = ProductConverter.toEntity(productCreateDto);
+        Product product = ProductConverter.toEntity(dto);
         productRepository.save(product);
         log.info("新增商品：{}，编码：{}", product.getProductName(),
                 product.getProductCode());

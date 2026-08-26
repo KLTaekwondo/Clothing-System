@@ -1,16 +1,25 @@
 <template>
     <div class="detail-page">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回订单</button>
-                <button
-                    v-if="order"
-                    class="btn-secondary"
-                    @click="printReceipt"
-                >🖨️ 打印小票</button>
-                <div>
-                    <h2 class="page-title">订单详情</h2>
-                    <p v-if="order" class="page-desc">{{ order.orderNo }}</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">订单详情</h2>
+                <p class="page-label-desc">{{ order ? order.orderNo : '加载中...' }}</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回订单</button>
+                        <button
+                            v-if="order"
+                            class="btn-primary search-button"
+                            @click="printReceipt"
+                        >🖨️ 打印小票</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -66,8 +75,14 @@
                     </thead>
                     <tbody>
                     <tr v-for="item in order.items" :key="item.itemId">
-                        <td>{{ item.productName }}</td>
-                        <td>{{ item.skuName }}</td>
+                        <td>
+                            <strong>{{ item.productName }}</strong>
+                            <span class="sub-text">{{ item.productCode || '-' }}</span>
+                        </td>
+                        <td>
+                            <strong>{{ item.skuName }}</strong>
+                            <span class="sub-text"><code>{{ item.skuCode || '-' }}</code></span>
+                        </td>
                         <td>¥{{ item.unitPrice }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ (item.discount * 100).toFixed(0) }}%</td>
@@ -165,21 +180,6 @@ function goBack() {
     min-width: 0;
 }
 
-.page-heading,
-.heading-left {
-    display: flex;
-    align-items: center;
-}
-
-.page-heading {
-    justify-content: space-between;
-    margin-bottom: 28px;
-}
-
-.heading-left {
-    gap: 12px;
-}
-
 .btn-secondary {
     height: 36px;
     padding: 0 14px;
@@ -259,16 +259,18 @@ function goBack() {
     color: var(--text-muted);
 }
 
+.sub-text {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
 .data-table td {
     height: 52px;
 }
 
 @media (max-width: 900px) {
-    .page-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
-    }
 
     .card {
         overflow-x: auto;

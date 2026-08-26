@@ -1,15 +1,21 @@
 <template>
     <div class="employee-add">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button
-                    class="btn-outline"
-                    type="button"
-                    @click="goBack"
-                >← 返回员工</button>
-                <div class="heading-content">
-                    <h2 class="page-title">添加员工</h2>
-                    <p class="page-desc">创建员工账号并分配所属仓库</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">添加员工</h2>
+                <p class="page-label-desc">创建员工账号并分配所属仓库</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goBack"
+                        >← 返回员工</button>
+                    </div>
                 </div>
             </div>
         </div>

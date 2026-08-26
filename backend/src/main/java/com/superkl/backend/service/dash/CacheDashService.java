@@ -18,7 +18,7 @@ public class CacheDashService {
     private final OrderRepository orderRepository;
     private final CacheManager cacheManager;
 
-    @Cacheable(cacheNames = "SevenDays", key = "#day")
+    @Cacheable(cacheNames = "DaysCache", key = "#day")
     public BigDecimal sumSomeDaySaleAmount(LocalDate day){
         return orderRepository.sumTotalAmountByTime(day.atStartOfDay(),
                 day.plusDays(1).atStartOfDay(),
@@ -28,7 +28,7 @@ public class CacheDashService {
     }
 
     public void clearCache(LocalDate day) {
-        Cache cache = cacheManager.getCache("SevenDays");
+        Cache cache = cacheManager.getCache("DaysCache");
         if (cache != null) {
             cache.evict(day);
         }

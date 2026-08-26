@@ -1,25 +1,41 @@
 <template>
     <div class="detail-page">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button class="btn-outline" @click="goBack">← 返回员工</button>
-                <div>
-                    <h2 class="page-title">员工详情</h2>
-                    <p v-if="!editing" class="page-desc">查看员工基本信息和状态</p>
-                    <p v-else class="page-desc">在卡片上直接修改员工信息</p>
-                </div>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">员工详情</h2>
+                <p class="page-label-desc">{{ editing ? '在卡片上直接修改员工信息' : '查看员工基本信息和状态' }}</p>
+                <hr class="label-hr"/>
             </div>
-            <div v-if="employee" class="heading-actions">
-                <template v-if="!editing">
-                    <button class="btn-primary" @click="startEdit">编辑员工</button>
-                </template>
-                <template v-else>
-                    <button :disabled="saving" class="btn-outline" @click="cancelEdit">取消</button>
-                    <button :disabled="saving" class="btn-primary" @click="saveEdit">{{
-                            saving ? '保存中...' : '保存修改'
-                        }}
-                    </button>
-                </template>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            @click="goBack"
+                        >← 返回员工</button>
+                        <template v-if="employee">
+                            <template v-if="!editing">
+                                <button
+                                    class="btn-primary search-button"
+                                    @click="startEdit"
+                                >编辑员工</button>
+                            </template>
+                            <template v-else>
+                                <button
+                                    :disabled="saving"
+                                    class="btn-outline search-button"
+                                    @click="cancelEdit"
+                                >取消</button>
+                                <button
+                                    :disabled="saving"
+                                    class="btn-primary search-button"
+                                    @click="saveEdit"
+                                >{{ saving ? '保存中...' : '保存修改' }}</button>
+                            </template>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
 

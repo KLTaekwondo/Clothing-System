@@ -1,42 +1,45 @@
 <template>
     <div class="member-detail">
-        <div class="page-heading">
-            <div class="heading-left">
-                <button
-                    class="btn-outline"
-                    type="button"
-                    @click="goBack"
-                >← 返回会员</button>
-                <div>
-                    <h2 class="page-title">会员详情</h2>
-                    <p class="page-desc">查看和维护会员资料、等级与积分</p>
-                </div>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">会员详情</h2>
+                <p class="page-label-desc">查看和维护会员资料、等级与积分</p>
+                <hr class="label-hr"/>
             </div>
-            <div
-                v-if="member"
-                class="heading-actions"
-            >
-                <template v-if="!editing">
-                    <button
-                        class="btn-primary"
-                        type="button"
-                        @click="startEdit"
-                    >编辑会员</button>
-                </template>
-                <template v-else>
-                    <button
-                        :disabled="saving"
-                        class="btn-outline"
-                        type="button"
-                        @click="cancelEdit"
-                    >取消</button>
-                    <button
-                        :disabled="saving || !canSave"
-                        class="btn-primary"
-                        type="button"
-                        @click="saveEdit"
-                    >{{ saving ? '保存中...' : '保存修改' }}</button>
-                </template>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goBack"
+                        >← 返回会员</button>
+                        <template v-if="member">
+                            <template v-if="!editing">
+                                <button
+                                    class="btn-primary search-button"
+                                    type="button"
+                                    @click="startEdit"
+                                >编辑会员</button>
+                            </template>
+                            <template v-else>
+                                <button
+                                    :disabled="saving"
+                                    class="btn-outline search-button"
+                                    type="button"
+                                    @click="cancelEdit"
+                                >取消</button>
+                                <button
+                                    :disabled="saving || !canSave"
+                                    class="btn-primary search-button"
+                                    type="button"
+                                    @click="saveEdit"
+                                >{{ saving ? '保存中...' : '保存修改' }}</button>
+                            </template>
+                        </template>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -290,11 +293,6 @@ function goBack() {
 }
 
 @media (max-width: 760px) {
-
-    .heading-actions button {
-        width: calc(50% - 6px);
-    }
-
     .detail-card {
         width: 100%;
     }

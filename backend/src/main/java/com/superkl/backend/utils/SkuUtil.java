@@ -42,9 +42,15 @@ public class SkuUtil {
 
     // 3. 校验规格参数
     public static void validateSelectedOptions(Map<String, List<String>> selectedOptions) {
+
         if (selectedOptions == null || selectedOptions.isEmpty())
         {
             throw new BusinessException("商品规格不能为空");
+        }
+
+        // 为确保笛卡尔积完整生成，至少需要两种规格（如颜色+尺码）
+        if (selectedOptions.size() < 2) {
+            throw new BusinessException("商品规格不完整，至少需要两种规格（如颜色+尺码）");
         }
 
         for (Map.Entry<String, List<String>> entry : selectedOptions.entrySet()) {

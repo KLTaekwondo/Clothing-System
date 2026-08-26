@@ -91,6 +91,18 @@ public class OrderDashboardService {
         return dayInfoList;
     }
 
+    // 查询区间内的所有每日数据
+    public List<DayInfo> getEveryDayInfo(LocalDate start, LocalDate end){
+        List<DayInfo> dayInfoList = new ArrayList<>();
+        for(LocalDate day = start; day.isBefore(end); day = day.plusDays(1)){
+            dayInfoList.add(DayInfo.builder()
+                    .day(day)
+                    .amount(cacheDashService.sumSomeDaySaleAmount(day))
+                    .build());
+        }
+        return dayInfoList;
+    }
+
 
     // 辅助函数
     private BigDecimal sumSaleAmountByTimeAndStatus(LocalDate start, LocalDate end , OrderStatusEnum status){

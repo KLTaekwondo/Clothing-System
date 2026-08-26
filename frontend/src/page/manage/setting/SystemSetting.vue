@@ -1,9 +1,10 @@
 <template>
     <div class="setting-page">
-        <div class="page-heading">
-            <div>
-                <h2 class="page-title">系统设置</h2>
-                <p class="page-desc">外观与主题偏好设置，切换后立即生效并自动保存</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">系统设置</h2>
+                <p class="page-label-desc">外观与主题偏好设置，切换后立即生效并自动保存</p>
+                <hr class="label-hr"/>
             </div>
         </div>
 
