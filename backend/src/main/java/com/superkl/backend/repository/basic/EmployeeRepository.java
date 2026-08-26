@@ -13,7 +13,8 @@ import java.util.Optional;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e " +
-            "WHERE e.wareHouse.wareHouseId = :wareHouseId AND e.status = :status")
+            "JOIN fetch e.wareHouse w " +
+            "WHERE w.wareHouseId = :wareHouseId AND e.status = :status")
     List<Employee> findByWareHouseId(@Param("wareHouseId") Long wareHouseId,
                                      @Param("status") StatusEnum status);
 

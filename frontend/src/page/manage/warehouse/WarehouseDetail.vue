@@ -24,14 +24,6 @@
             </div>
         </div>
 
-        <div class="detail-tabs">
-            <button :class="{ active: activeTab === 'info' }" class="detail-tab" @click="activeTab = 'info'">基本信息
-            </button>
-            <button :class="{ active: activeTab === 'stock' }" class="detail-tab" @click="activeTab = 'stock'">
-                库存管理
-            </button>
-        </div>
-
         <div v-if="loading" class="loading-overlay">
             <div class="loading-spinner"></div>
         </div>
@@ -40,8 +32,7 @@
             <div class="empty-text">仓库不存在</div>
         </div>
 
-        <!-- ═══ 基本信息 Tab ═══ -->
-        <template v-if="activeTab === 'info' && warehouse">
+        <template v-if="warehouse">
             <div class="info-grid">
                 <div class="info-card"><span>仓库编码</span><input v-if="editing" v-model="form.code" class="card-input"
                                                                    maxlength="10" minlength="2"
@@ -80,43 +71,6 @@
                 </button>
             </div>
         </template>
-
-        <!-- ═══ 库存管理 Tab ═══ -->
-        <template v-if="activeTab === 'stock' && warehouse">
-            <div class="stock-tab-head">
-                <div class="stock-search-bar">
-                    <input v-model="productId" min="1" placeholder="输入商品 ID 查询库存" type="number"/>
-                    <button class="btn-primary btn-sm" @click="fetchStock">查询</button>
-                </div>
-                <router-link class="btn-outline btn-sm" :to="`/manage/stock/view?warehouseId=${warehouse.id}`">
-                    查看全部库存 →
-                </router-link>
-            </div>
-            <div class="card stock-table-card">
-                <div v-if="stockLoading" class="loading-overlay">
-                    <div class="loading-spinner"></div>
-                </div>
-                <div v-else-if="stockList.length === 0" class="empty-state">
-                    <div class="empty-icon"><IconGraphic name="stock"/></div>
-                    <div class="empty-text">输入商品 ID 查询该仓库的库存</div>
-                </div>
-                <table v-else class="data-table">
-                    <thead>
-                    <tr>
-                        <th>规格</th>
-                        <th>库存数量</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for="(s, i) in stockList" :key="s.id || i">
-                        <td>{{ formatSpec(s.spec) }}</td>
-                        <td><strong :class="{'stock-low': s.stock <= 10}">{{ s.stock ?? 0 }}</strong></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </template>
-
     </div>
 </template>
 
@@ -125,7 +79,6 @@ import {onMounted, ref} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import {useToastStore} from '../../../stores/toastStore.js';
 import wareHouseInterface from '../../../axios/interface/WareHouseInterface.js';
-import wareHouseStockInterface from '../../../axios/interface/WareHouseStockInterface.js';
 import {STATUS, STATUS_LABELS, STATUS_OPTIONS} from '../../../constants/status.js'
 import {CHECK_STATUS, CHECK_STATUS_LABELS} from '../../../constants/checkStatus.js'
 
@@ -141,10 +94,6 @@ const editing = ref(false);
 const saving = ref(false);
 const form = ref({});
 const formBackup = ref(null);
-const activeTab = ref('info')
-const stockList = ref([]);
-const stockLoading = ref(false);
-const productId = ref('')
 
 onMounted(async () => {
     try {
@@ -195,26 +144,6 @@ async function saveEdit() {
 }
 
 // 获取仓库库存
-async function fetchStock() {
-    if (!productId.value) {
-        toast.warning('请输入商品 ID');
-        return
-    }
-    stockLoading.value = true;
-    try {
-        stockList.value = await wareHouseStockInterface.searchStock(route.params.id, Number(productId.value))
-    } catch {
-        stockList.value = []
-    } finally {
-        stockLoading.value = false
-    }
-}
-
-function formatSpec(s) {
-    if (!s) return '-';
-    return Object.entries(s).map(([k, v]) => `${k}:${v}`).join(' / ')
-}
-
 const goBack = () => {
     router.push('/manage/warehouse')
 }
@@ -235,44 +164,6 @@ const goBack = () => {
 .page-desc {
     color: var(--text-secondary);
     font-size: var(--font-sm);
-}
-
-.detail-tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 22px;
-    border-bottom: 1px solid #dfece9;
-}
-
-.stock-tab-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-}
-
-.detail-tab {
-    padding: 10px 20px;
-    border: none;
-    border-bottom: 2px solid transparent;
-    background: none;
-    color: var(--text-secondary);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: -1px;
-}
-
-.detail-tab:hover {
-    color: var(--primary);
-}
-
-.detail-tab.active {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
 }
 
 .info-card {
@@ -303,29 +194,4 @@ const goBack = () => {
     padding-top: 18px;
     border-top: 1px solid var(--border-light);
 }
-
-.stock-search-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-}
-
-.stock-search-bar input {
-    width: 280px;
-    height: 40px;
-    border-radius: 10px;
-    padding: 0 12px;
-    border: 1px solid var(--border);
-    background: var(--bg-subtle);
-}
-
-.stock-table-card {
-    padding: 8px 20px 20px;
-    border-radius: 16px;
-}
-
-.stock-low {
-    color: var(--error);
-    font-weight: 800;
-}</style>
+</style>

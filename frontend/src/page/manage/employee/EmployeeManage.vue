@@ -51,6 +51,7 @@
                 <tr>
                     <th>编码</th>
                     <th>姓名</th>
+                    <th>所属仓库</th>
                     <th>状态</th>
                     <th>操作</th>
                 </tr>
@@ -59,6 +60,10 @@
                 <tr v-for="item in filteredList" :key="item.id" style="cursor:pointer" @dblclick="goDetail(item)">
                     <td><code>{{ item.code }}</code></td>
                     <td><strong>{{ item.name }}</strong></td>
+                    <td>
+                        <strong>{{ item.wareHouseName || '-' }}</strong>
+                        <span class="sub-text"><code>{{ item.wareHouseCode || '-' }}</code></span>
+                    </td>
                     <td>
                             <span :class="item.status === STATUS.ENABLE ? 'status-ok' : 'status-error'"
                                   class="status-badge">
@@ -204,6 +209,13 @@ async function handleDelete() {
 .status-error {
     background: var(--error-light);
     color: var(--error-dark);
+}
+
+.sub-text {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
 @media (max-width: 760px) {

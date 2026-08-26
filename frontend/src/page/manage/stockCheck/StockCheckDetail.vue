@@ -328,6 +328,7 @@ function goBack() {
 
 .remark-card,
 .detail-card {
+    width: 100%;
     padding: 20px;
     margin-bottom: 16px;
     background: var(--bg-card);

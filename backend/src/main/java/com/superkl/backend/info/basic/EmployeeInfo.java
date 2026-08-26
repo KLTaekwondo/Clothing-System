@@ -16,5 +16,7 @@ import lombok.experimental.SuperBuilder;
 public class EmployeeInfo extends BaseInfo {
     private String name; // 员工姓名
     private String code; // 员工编码
+    private String wareHouseCode; // 仓库编码
+    private String wareHouseName; // 仓库名称
     private StatusEnum status; // 员工状态
 }

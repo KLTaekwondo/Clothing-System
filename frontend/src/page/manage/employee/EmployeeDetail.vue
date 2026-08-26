@@ -70,12 +70,16 @@
                         statusLabels[employee.status] || employee.status
                     }}</span>
             </div>
-            <div v-if="editing" class="detail-card">
+            <div class="detail-card">
                 <span>所属仓库</span>
-                <select v-model.number="form.wareHouseId" class="card-select">
+                <select v-if="editing" v-model.number="form.wareHouseId" class="card-select">
                     <option value="">请选择仓库</option>
                     <option v-for="item in warehouses" :key="item.id" :value="item.id">{{ item.name }}</option>
                 </select>
+                <div v-else class="warehouse-value">
+                    <strong>{{ employee.wareHouseName || '-' }}</strong>
+                    <span class="sub-text"><code>{{ employee.wareHouseCode || '' }}</code></span>
+                </div>
             </div>
             <div class="detail-card">
                 <span>创建时间</span>
@@ -177,6 +181,17 @@ function goBack() {
 .detail-card > span:first-child {
     color: var(--text-muted);
     font-size: var(--font-sm);
+}
+
+.warehouse-value {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sub-text {
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
 

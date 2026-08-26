@@ -17,6 +17,8 @@ public class EmployeeConverter {
                 .id(employee.getEmployeeId())
                 .name(employee.getEmployeeName())
                 .code(employee.getEmployeeCode())
+                .wareHouseCode(employee.getWareHouse().getWareHouseCode())
+                .wareHouseName(employee.getWareHouse().getWareHouseName())
                 .status(employee.getStatus())
                 .createTime(employee.getCreateTime())
                 .updateTime(employee.getUpdateTime())

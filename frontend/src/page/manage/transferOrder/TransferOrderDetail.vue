@@ -71,8 +71,14 @@
                     </thead>
                     <tbody>
                     <tr v-for="item in order.items" :key="item.id">
-                        <td>{{ item.productName || '-' }}</td>
-                        <td>{{ item.skuName || '-' }}</td>
+                        <td>
+                            <strong>{{ item.productName || '-' }}</strong>
+                            <span class="sub-text">{{ item.productCode || '-' }}</span>
+                        </td>
+                        <td>
+                            <strong>{{ item.skuName || '-' }}</strong>
+                            <span class="sub-text"><code>{{ item.skuCode || '-' }}</code></span>
+                        </td>
                         <td>¥{{ item.price ?? '0.00' }}</td>
                         <td>{{ item.quantity ?? 0 }}</td>
                         <td><strong>¥{{ item.totalPrice ?? '0.00' }}</strong></td>
@@ -197,6 +203,13 @@ function goBack() {
     color: var(--primary);
     font-size: 20px;
     font-weight: 700;
+}
+
+.sub-text {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
 .remark-text {
