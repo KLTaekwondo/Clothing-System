@@ -222,10 +222,11 @@ public class OrderService {
     @Transactional(readOnly = true)
     public PageResult<OrderInfo> searchCompletePageByWareHouseId(LocalDateTime startTime,
                                                                  LocalDateTime endTime,
+                                                                 Long employeeId,
                                                                  Pageable pageable) {
         Long wareHouseId = RequestUser.notNull().getRequestId();
         Page<Order> orders = orderRepository.findPageByTimeAndWId(startTime, endTime,
-                OrderStatusEnum.COMPLETED,wareHouseId,pageable);
+                OrderStatusEnum.COMPLETED,employeeId,wareHouseId,pageable);
         return OrderConverter.toInfoPage(orders);
     }
 

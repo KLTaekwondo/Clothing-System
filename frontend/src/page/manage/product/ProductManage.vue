@@ -29,6 +29,12 @@
                         >
                             + 添加商品
                         </router-link>
+                        <button
+                            :disabled="exporting"
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="handleExport"
+                        >{{ exporting ? '导出中...' : '导出商品' }}</button>
                     </div>
                 </div>
             </div>
@@ -116,6 +122,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
+import exportInterface from '../../../axios/interface/ExportInterface.js'
 import DeleteConfirmDialog from '../../../component/DeleteConfirmDialog.vue'
 import TablePagination from '../../../component/common/TablePagination.vue'
 import {SEASON_LABELS} from '../../../constants/season.js'
@@ -123,6 +130,7 @@ import {STATUS, STATUS_LABELS} from '../../../constants/status.js'
 
 const router = useRouter()
 const toast = useToastStore()
+const exporting = ref(false)
 const seasonLabels = SEASON_LABELS
 const statusLabels = STATUS_LABELS
 
@@ -153,6 +161,21 @@ const filteredList = computed(() => {
 })
 
 onMounted(fetchList)
+
+// 导出商品列表 CSV
+async function handleExport() {
+    exporting.value = true
+    try {
+        const ok = await exportInterface.exportProducts()
+        if (ok) {
+            toast.success('商品列表已导出')
+        } else {
+            toast.error('导出失败，请稍后重试')
+        }
+    } finally {
+        exporting.value = false
+    }
+}
 
 async function fetchList() {
     loading.value = true

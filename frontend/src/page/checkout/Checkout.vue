@@ -288,6 +288,7 @@ import cashIcon from '../../assets/icons/cash.svg'
 import bankCardIcon from '../../assets/icons/bank-card.svg'
 import alipayIcon from '../../assets/icons/alipay.svg'
 import wechatIcon from '../../assets/icons/wechat.svg'
+import douyinIcon from '../../assets/icons/douyin.svg'
 import IconGraphic from '../../component/IconGraphic.vue'
 import CheckoutCart from '../../component/checkout/CheckoutCart.vue'
 import CheckoutConfirmModal from '../../component/checkout/CheckoutConfirmModal.vue'
@@ -306,7 +307,8 @@ const payMethodIcons = {
     CASH: cashIcon,
     CARD: bankCardIcon,
     ALIPAY: alipayIcon,
-    WECHAT: wechatIcon
+    WECHAT: wechatIcon,
+    TIKTOK_WRITE_OFF: douyinIcon
 }
 
 // 搜索

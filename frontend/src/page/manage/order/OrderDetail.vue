@@ -98,6 +98,7 @@
         </template>
     </div>
 <ReceiptPreview
+        ref="receiptRef"
         :visible="showReceipt"
         :order-no="order?.orderNo || ''"
         :items="receiptItems"
@@ -147,6 +148,7 @@ function statusClass(s) {
 }
 
 const showReceipt = ref(false)
+const receiptRef = ref(null)
 const receiptItems = ref([])
 const receiptPayMethod = ref('')
 
@@ -166,7 +168,8 @@ async function printReceipt() {
     }))
     showReceipt.value = true
     await nextTick()
-    window.print()
+    // 走组件 print()：动态计算 57mm 纸高度再打印
+    receiptRef.value?.print()
 }
 
 function goBack() {

@@ -71,8 +71,10 @@ public class OrderController {
     // 8.收银前段查询当前登录仓库的完成订单列表
     @GetMapping("/search/wareHouse/complete")
     public Result<PageResult<OrderInfo>> searchCompletePage(@RequestParam LocalDateTime startTime,
-                                                            @RequestParam LocalDateTime endTime, @Valid PageParam pageParam) {
+                                                            @RequestParam LocalDateTime endTime,
+                                                            @RequestParam Long employeeId,
+                                                            @Valid PageParam pageParam) {
         Pageable pageable = pageParam.toPageable();
-        return Result.success(orderService.searchCompletePageByWareHouseId(startTime, endTime,pageable));
+        return Result.success(orderService.searchCompletePageByWareHouseId(startTime, endTime,employeeId,pageable));
     }
 }

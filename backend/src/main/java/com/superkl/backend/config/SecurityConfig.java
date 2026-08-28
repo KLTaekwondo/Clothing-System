@@ -60,7 +60,8 @@ public class SecurityConfig {
                         // 公开接口
                         .requestMatchers("/api/admin/login", "/api/warehouse/login").permitAll()
                         // 仓库仅有接口
-                        .requestMatchers("/api/order/search/wareHouse/**").hasRole("WAREHOUSE")
+                        .requestMatchers("/api/order/search/wareHouse/**",
+                                "/api/dash/order/checkout/**").hasRole("WAREHOUSE")
                         // 仓库和管理员可以访问所有接口
                         .requestMatchers(
                                 "/api/warehouse/logout",// 仓库退出

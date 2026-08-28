@@ -36,7 +36,7 @@ public class ExportController {
         CSVUtil.writeLine(writer, "日期", "销售额", "成本", "毛利", "毛利率");
 
         LocalDate currentDate = from;
-        while (!currentDate.isBefore(to)) {
+        while (!currentDate.isAfter(to)) {
             OrderDashInfo info = orderDashboardService.getCustomInfo(currentDate, currentDate.plusDays(1));
             CSVUtil.writeLine(writer,
                     currentDate.toString(),

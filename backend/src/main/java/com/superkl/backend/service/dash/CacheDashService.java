@@ -24,7 +24,10 @@ public class CacheDashService {
                 day.plusDays(1).atStartOfDay(),
                 DirectionEnum.IN,
                 DirectionEnum.OUT,
-                OrderStatusEnum.COMPLETED);
+                OrderStatusEnum.COMPLETED,
+                null,
+                null,
+                null);
     }
 
     public void clearCache(LocalDate day) {

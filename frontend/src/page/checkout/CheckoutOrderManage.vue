@@ -1,135 +1,196 @@
 <template>
     <div class="orders-page">
-        <header class="orders-header">
-            <div class="header-left">
-                <button
-                    class="back-button"
-                    @click="goCheckout"
-                >← 返回收银台</button>
-                <div>
-                    <h1>订单查询</h1>
-                    <p>查看当前仓库已完成的收银订单</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">订单查询</h2>
+                <p class="page-label-desc">查看当前仓库已完成的收银订单</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-label">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                        <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span>订单检索</span>
+                </div>
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goCheckout"
+                        >← 返回收银台</button>
+                        <input
+                            v-model="searchQuery"
+                            class="search-code-input"
+                            placeholder="搜索订单编号、员工、会员或备注"
+                            type="text"
+                        />
+                        <input
+                            v-model="startDate"
+                            class="date-input"
+                            type="date"
+                            @change="applyDateFilter"
+                        />
+                        <span class="date-sep">至</span>
+                        <input
+                            v-model="endDate"
+                            class="date-input"
+                            type="date"
+                            @change="applyDateFilter"
+                        />
+                        <button
+                            :disabled="loading"
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="fetchOrders"
+                        >{{ loading ? '刷新中...' : '↻ 刷新' }}</button>
+                    </div>
                 </div>
             </div>
-            <div class="header-actions">
-                <span>共 {{ pageInfo.totalElements }} 笔订单</span>
-                <button
-                    :disabled="loading"
-                    class="refresh-button"
-                    @click="fetchOrders"
-                >{{ loading ? '刷新中...' : '刷新' }}</button>
-            </div>
-        </header>
-
-        <section class="orders-toolbar">
-            <div class="search-box">
-                <IconGraphic name="search"/>
-                <input
-                    v-model="searchQuery"
-                    placeholder="搜索订单编号、员工、会员或备注"
-                    type="text"
-                />
-            </div>
-            <div class="date-range">
-                <label>开始日期</label>
-                <input
-                    v-model="startDate"
-                    type="date"
-                    @change="applyDateFilter"
-                />
-                <span>至</span>
-                <input
-                    v-model="endDate"
-                    type="date"
-                    @change="applyDateFilter"
-                />
-            </div>
-            <div class="summary-list">
-                <span>当前页 {{ orderList.length }} 笔</span>
-                <strong>实付合计 ¥{{ pageActualAmount }}</strong>
-            </div>
-        </section>
-
-        <div
-            v-if="loading"
-            class="loading-state"
-        >
-            <div class="loading-spinner"></div>
-            <span>正在读取订单...</span>
         </div>
 
-        <div
-            v-else-if="filteredOrders.length === 0"
-            class="empty-panel"
-        >
-            <IconGraphic name="order"/>
-            <strong>{{ orderList.length ? '没有符合条件的订单' : '当前仓库暂无已完成订单' }}</strong>
-            <span>{{ orderList.length ? '可以修改关键词重新搜索' : '在收银台完成收款后即可看到订单记录' }}</span>
+        <div class="view-tabs">
             <button
-                v-if="!orderList.length"
-                class="checkout-link"
-                @click="goCheckout"
-            >返回收银台</button>
+                :class="activeView === 'stats' ? 'view-tab-active' : 'view-tab'"
+                type="button"
+                @click="switchToStats"
+            >支付统计</button>
+            <button
+                :class="activeView === 'list' ? 'view-tab-active' : 'view-tab'"
+                type="button"
+                @click="activeView = 'list'"
+            >订单列表</button>
         </div>
 
-        <div
-            v-else
-            class="orders-list"
-        >
-            <article
-                v-for="order in filteredOrders"
-                :key="order.id"
-                class="order-card"
+        <template v-if="activeView === 'list'">
+            <div
+                v-if="loading"
+                class="loading-state"
             >
-                <div class="card-heading">
-                    <div class="order-identity">
-                        <span>订单编号</span>
-                        <code>{{ order.orderNo || '-' }}</code>
-                    </div>
-                    <strong class="order-amount">¥{{ formatMoney(order.actualPrice) }}</strong>
-                </div>
+                <div class="loading-spinner"></div>
+                <span>正在读取订单...</span>
+            </div>
 
-                <div class="order-details">
-                    <div class="detail-item">
-                        <span>收银员工</span>
-                        <strong>{{ order.employeeName || '未指定员工' }}</strong>
-                    </div>
-                    <div class="detail-item">
-                        <span>支付方式</span>
-                        <strong>{{ payMethodLabel(order.payMethod) }}</strong>
-                    </div>
-                    <div class="detail-item">
-                        <span>业务方向</span>
-                        <strong>{{ directionLabel(order.direction) }}</strong>
-                    </div>
-                    <div class="detail-item">
-                        <span>会员手机号</span>
-                        <strong>{{ order.memberPhone || '无会员' }}</strong>
-                    </div>
-                </div>
+            <div
+                v-else-if="filteredOrders.length === 0"
+                class="empty-panel"
+            >
+                <IconGraphic name="order"/>
+                <strong>{{ orderList.length ? '没有符合条件的订单' : '当前仓库暂无已完成订单' }}</strong>
+                <span>{{ orderList.length ? '可以修改关键词重新搜索' : '在收银台完成收款后即可看到订单记录' }}</span>
+                <button
+                    v-if="!orderList.length"
+                    class="checkout-link"
+                    @click="goCheckout"
+                >返回收银台</button>
+            </div>
 
-                <div class="order-meta">
-                    <span>{{ order.createTime || '-' }}</span>
-                    <p>{{ order.remark || '无备注' }}</p>
-                </div>
+            <div
+                v-else
+                class="orders-list"
+            >
+                <article
+                    v-for="order in filteredOrders"
+                    :key="order.id"
+                    class="order-card"
+                >
+                    <div class="card-heading">
+                        <div class="order-identity">
+                            <span>订单编号</span>
+                            <code>{{ order.orderNo || '-' }}</code>
+                        </div>
+                        <strong class="order-amount">¥{{ formatMoney(order.actualPrice) }}</strong>
+                    </div>
 
-                <div class="card-actions">
-                    <button
-                        class="detail-button"
-                        @click="openDetail(order)"
-                    >查看详情</button>
-                </div>
-            </article>
-        </div>
+                    <div class="order-details">
+                        <div class="detail-item">
+                            <span>收银员工</span>
+                            <strong>{{ order.employeeName || '未指定员工' }}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>支付方式</span>
+                            <strong>{{ payMethodLabel(order.payMethod) }}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>业务方向</span>
+                            <strong>{{ directionLabel(order.direction) }}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>会员手机号</span>
+                            <strong>{{ order.memberPhone || '无会员' }}</strong>
+                        </div>
+                    </div>
 
-        <TablePagination
-            v-if="pageInfo.totalElements > 0"
-            :loading="loading"
-            :page="pageInfo.page"
-            :total-elements="pageInfo.totalElements"
-            :total-pages="totalPages"
-            @change="changePage"
-        />
+                    <div class="order-meta">
+                        <span>{{ order.createTime || '-' }}</span>
+                        <p>{{ order.remark || '无备注' }}</p>
+                    </div>
+
+                    <div class="card-actions">
+                        <button
+                            class="detail-button"
+                            type="button"
+                            @click="openDetail(order)"
+                        >查看详情</button>
+                    </div>
+                </article>
+            </div>
+
+            <TablePagination
+                v-if="pageInfo.totalElements > 0"
+                :loading="loading"
+                :page="pageInfo.page"
+                :total-elements="pageInfo.totalElements"
+                :total-pages="totalPages"
+                @change="changePage"
+            />
+        </template>
+
+        <template v-if="activeView === 'stats'">
+            <div class="stats-total-card">
+                <span class="stats-total-icon"><img :src="moneyIcon" alt=""/></span>
+                <span class="stats-total-body">
+                    <span class="stats-total-label">区间实付总额</span>
+                    <strong class="stats-total-value">¥{{ totalAmount }}</strong>
+                </span>
+                <span class="stats-total-meta">{{ startDate }} 至 {{ endDate }}</span>
+            </div>
+
+            <div
+                v-if="statsLoading"
+                class="loading-state"
+            >
+                <div class="loading-spinner"></div>
+                <span>正在统计...</span>
+            </div>
+            <div
+                v-else-if="Number(totalAmount) <= 0"
+                class="empty-panel"
+            >
+                <IconGraphic name="order"/>
+                <strong>该区间暂无支付统计</strong>
+                <span>没有符合所选日期的已完成订单</span>
+            </div>
+            <div
+                v-else
+                class="pay-stats-grid"
+            >
+                <div
+                    v-for="item in payStats"
+                    :key="item.payMethod"
+                    class="pay-stat-card"
+                >
+                    <span class="pay-stat-icon"><img :src="payMethodIcon(item.payMethod)" alt=""/></span>
+                    <span class="pay-stat-body">
+                        <strong>¥{{ formatMoney(item.amount) }}</strong>
+                        <span>{{ item.label }}</span>
+                    </span>
+                </div>
+            </div>
+        </template>
 
         <div
             v-if="detailTarget"
@@ -207,12 +268,20 @@ import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '../../stores/toastStore.js'
 import orderInterface from '../../axios/interface/OrderInterface.js'
-import {PAY_METHOD_LABELS} from '../../constants/payMethod.js'
+import orderDashInterface from '../../axios/interface/OrderDashInterface.js'
+import {PAY_METHOD, PAY_METHOD_LABELS} from '../../constants/payMethod.js'
 import IconGraphic from '../../component/IconGraphic.vue'
 import TablePagination from '../../component/common/TablePagination.vue'
+import moneyIcon from '../../assets/icons/money.svg'
+import cashIcon from '../../assets/icons/cash.svg'
+import bankCardIcon from '../../assets/icons/bank-card.svg'
+import alipayIcon from '../../assets/icons/alipay.svg'
+import wechatIcon from '../../assets/icons/wechat.svg'
+import douyinIcon from '../../assets/icons/douyin.svg'
 
 const router = useRouter()
 const toast = useToastStore()
+const activeView = ref('stats')
 const orderList = ref([])
 const searchQuery = ref('')
 const startDate = ref(getToday())
@@ -228,6 +297,20 @@ const pageInfo = ref({
     size: 9
 })
 
+// ── 支付统计状态 ──
+const statsLoading = ref(false)
+const payStats = ref([])
+const totalAmount = ref('0.00')
+
+// 后端 /dash/order/checkout/custom 返回的支付方式字段映射（固定五张卡，后端除 sumAmount 外均为大驼峰）
+const PAY_STAT_FIELDS = [
+    {field: 'CashAmount', payMethod: PAY_METHOD.CASH, label: '现金'},
+    {field: 'CardAmount', payMethod: PAY_METHOD.CARD, label: '信用卡'},
+    {field: 'AlipayAmount', payMethod: PAY_METHOD.ALIPAY, label: '支付宝'},
+    {field: 'WeChatAmount', payMethod: PAY_METHOD.WECHAT, label: '微信'},
+    {field: 'TikTokWriteOffAmount', payMethod: PAY_METHOD.TIKTOK_WRITE_OFF, label: '抖音核销'}
+]
+
 const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
 const pageActualAmount = computed(() => {
     return orderList.value.reduce((sum, order) => sum + Number(order.actualPrice || 0), 0).toFixed(2)
@@ -242,7 +325,10 @@ const filteredOrders = computed(() => {
     })
 })
 
-onMounted(fetchOrders)
+onMounted(() => {
+    fetchOrders()
+    fetchPayStats()
+})
 
 async function fetchOrders() {
     const startTime = `${startDate.value}T00:00:00`
@@ -280,6 +366,7 @@ function applyDateFilter() {
     }
     pageInfo.value.page = 0
     fetchOrders()
+    fetchPayStats()
 }
 
 function changePage(page) {
@@ -300,6 +387,52 @@ function directionLabel(value) {
     if (value === 'OUT') return '退货'
     if (value === 'IN') return '销售'
     return '混合订单'
+}
+
+function payMethodIcon(value) {
+    const map = {
+        [PAY_METHOD.CASH]: cashIcon,
+        [PAY_METHOD.CARD]: bankCardIcon,
+        [PAY_METHOD.ALIPAY]: alipayIcon,
+        [PAY_METHOD.WECHAT]: wechatIcon,
+        [PAY_METHOD.TIKTOK_WRITE_OFF]: douyinIcon
+    }
+    return map[value] || moneyIcon
+}
+
+// 切到支付统计：每次进入都重新拉取（日期可能已变化）
+async function switchToStats() {
+    activeView.value = 'stats'
+    await fetchPayStats()
+}
+
+// 统计：直接调后端 /dash/order/checkout/custom（按支付方式汇总，一次请求，不再循环翻页）
+async function fetchPayStats() {
+    // 后端区间为 [start, end)，结束日要加一天才能包含所选结束日当天
+    const dashEndDate = nextDay(endDate.value)
+    statsLoading.value = true
+    try {
+        const data = await orderDashInterface.checkoutCustomDash(startDate.value, dashEndDate)
+        payStats.value = PAY_STAT_FIELDS.map(item => ({
+            payMethod: item.payMethod,
+            label: item.label,
+            amount: Number(data[item.field] || 0)
+        }))
+        totalAmount.value = Number(data.sumAmount || 0).toFixed(2)
+    } catch {
+        payStats.value = []
+        totalAmount.value = '0.00'
+    } finally {
+        statsLoading.value = false
+    }
+}
+
+// 返回 yyyy-MM-dd 的次日
+function nextDay(dateStr) {
+    const date = new Date(`${dateStr}T00:00:00`)
+    date.setDate(date.getDate() + 1)
+    const pad = n => String(n).padStart(2, '0')
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
 function formatDiscount(value) {
@@ -335,154 +468,37 @@ function goCheckout() {
 <style scoped>
 .orders-page {
     width: 100%;
-    min-height: 100vh;
+    min-width: 0;
     padding: 28px 34px;
     background: var(--bg-body);
 }
 
-.orders-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.header-left,
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.header-left h1 {
-    margin-bottom: 4px;
-    color: var(--text);
-    font-size: 26px;
-}
-
-.header-left p,
-.header-actions span {
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-.back-button,
-.refresh-button,
-.checkout-link,
-.detail-close {
-    height: 36px;
+/* ── 搜索区（复用全局 page-toolbar / search-shell） ── */
+.date-input {
+    width: 148px;
+    height: 40px;
     padding: 0 14px;
-    color: var(--primary-dark);
-    background: var(--bg-card);
-    border: 1px solid var(--border-hover);
+    border: 1px solid var(--border-strong);
     border-radius: 999px;
-    font-weight: 700;
+    background: var(--bg-card);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: var(--transition);
+    cursor: pointer;
 }
 
-.back-button:hover,
-.refresh-button:hover,
-.checkout-link:hover,
-.detail-close:hover {
-    background: var(--bg-hover);
+.date-input:focus {
     border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-focus);
 }
 
-.orders-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    flex-wrap: wrap;
-    padding: 12px 14px;
-    margin-bottom: 16px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 5px 18px rgba(22, 83, 78, 0.05);
-}
-
-.search-box {
-    width: 420px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.search-box :deep(img) {
-    width: 20px;
-    height: 20px;
-}
-
-.search-box input {
-    width: 100%;
-    height: 36px;
-    border: none;
-    box-shadow: none;
-}
-
-.date-range {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.date-range label,
-.date-range span {
-    color: var(--text-secondary);
+.date-sep {
+    color: var(--text-muted);
     font-size: 13px;
 }
 
-.date-range input {
-    height: 36px;
-    padding: 0 8px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg-subtle);
-    font-size: 13px;
-}
-
-.summary-list {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-.summary-list strong {
-    color: var(--warning-dark);
-    font-size: 15px;
-}
-
-.loading-state,
-.empty-panel {
-    min-height: 360px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    color: var(--text-secondary);
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-}
-
-.empty-panel :deep(img) {
-    width: 52px;
-    height: 52px;
-}
-
-.empty-panel strong {
-    color: var(--primary-dark);
-    font-size: 17px;
-}
-
-.empty-panel span {
-    font-size: 13px;
-}
-
+/* ── 卡片列表 ── */
 .orders-list {
     display: flex;
     gap: 14px;
@@ -604,6 +620,7 @@ function goCheckout() {
     font-size: 12px;
     font-weight: 700;
     box-shadow: 0 3px 10px rgba(13, 148, 136, 0.2);
+    cursor: pointer;
 }
 
 .detail-button:hover {
@@ -611,6 +628,51 @@ function goCheckout() {
     transform: translateY(-1px);
 }
 
+.loading-state,
+.empty-panel {
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.empty-panel :deep(img) {
+    width: 52px;
+    height: 52px;
+}
+
+.empty-panel strong {
+    color: var(--primary-dark);
+    font-size: 17px;
+}
+
+.empty-panel span {
+    font-size: 13px;
+}
+
+.checkout-link {
+    height: 36px;
+    padding: 0 14px;
+    color: var(--primary-dark);
+    background: var(--bg-card);
+    border: 1px solid var(--border-hover);
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.checkout-link:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary);
+}
+
+/* ── 详情弹窗 ── */
 .detail-overlay {
     position: fixed;
     inset: 0;
@@ -668,6 +730,15 @@ function goCheckout() {
     color: var(--text-secondary);
     font-size: 20px;
     line-height: 1;
+    border: 1px solid var(--border-hover);
+    border-radius: 999px;
+    background: var(--bg-card);
+    cursor: pointer;
+}
+
+.detail-close:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary);
 }
 
 .detail-loading,
@@ -721,6 +792,144 @@ function goCheckout() {
     font-size: 11px;
 }
 
+/* ── 视图切换 Tabs ── */
+.view-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.view-tab,
+.view-tab-active {
+    padding: 10px 20px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.view-tab:hover {
+    color: var(--primary);
+}
+
+.view-tab-active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* ── 支付统计 ── */
+.stats-total-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--primary), #14b8a6);
+    border-radius: 16px;
+    color: var(--text-invert);
+    box-shadow: 0 10px 24px rgba(13, 148, 136, 0.18);
+}
+
+.stats-total-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    font-size: 24px;
+}
+
+.stats-total-icon :deep(img) {
+    width: 24px;
+    height: 24px;
+    filter: invert(1);
+}
+
+.stats-total-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stats-total-label {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.stats-total-value {
+    font-size: 30px;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+
+.stats-total-meta {
+    margin-left: auto;
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.pay-stats-grid {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.pay-stat-card {
+    width: calc(25% - 11px);
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+.pay-stat-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--primary-light);
+}
+
+.pay-stat-icon :deep(img) {
+    width: 20px;
+    height: 20px;
+}
+
+.pay-stat-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pay-stat-body strong {
+    font-size: 18px;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.pay-stat-body span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
 @media (max-width: 1050px) {
     .order-card {
         width: calc(50% - 7px);
@@ -732,25 +941,18 @@ function goCheckout() {
         padding: 20px;
     }
 
-    .orders-header,
-    .orders-toolbar {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .header-left {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .search-box,
     .order-card {
         width: 100%;
         min-width: 0;
     }
 
-    .date-range {
-        flex-wrap: wrap;
+    .pay-stat-card {
+        width: calc(50% - 7px);
+        min-width: 0;
+    }
+
+    .stats-total-meta {
+        display: none;
     }
 }
 </style>

@@ -234,20 +234,21 @@ function printReceipt() {
 
 defineExpose({ print: printReceipt })
 
+// 57mm 热敏纸：屏幕小票宽 300px ≈ 79.4mm，打印宽度收窄到 57mm 后
+// 同一内容换行更多、实际高度按宽度比例放大，另加缓冲避免内容翻到第二页
 function setReceiptPageHeight() {
     const el = document.getElementById('receipt-content')
     if (!el) return
-    // 测量小票内容实际高度（px），转换为 mm
     const heightPx = el.offsetHeight
-    // 96dpi 下 1mm = 96/25.4 px ≈ 3.7795px
-    const heightMm = Math.ceil((heightPx * 25.4) / 96) + 5
+    const screenWidthMm = (300 * 25.4) / 96
+    const heightMm = Math.ceil((heightPx * 25.4) / 96 * (screenWidthMm / 57)) + 15
     let tag = document.getElementById('receipt-page-style')
     if (!tag) {
         tag = document.createElement('style')
         tag.id = 'receipt-page-style'
         document.head.appendChild(tag)
     }
-    tag.textContent = `@page { size: 80mm ${Math.max(heightMm, 30)}mm; margin: 0; }`
+    tag.textContent = `@page { size: 57mm ${Math.max(heightMm, 40)}mm; margin: 0; }`
 }
 
 function handleOverlayClick() {
@@ -603,21 +604,47 @@ function handleOverlayClick() {
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
-        width: 80mm !important;
+        width: 57mm !important;
         max-width: none !important;
         padding: 0 !important;
         margin: 0 !important;
         box-shadow: none !important;
         border-radius: 0 !important;
-        font-size: 12px !important;
+        font-size: 11px !important;
+        line-height: 1.4 !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+    }
+    /* 57mm 窄纸下列宽压缩，避免金额列溢出 */
+    .receipt-paper .col-price {
+        width: 40px !important;
+    }
+    .receipt-paper .col-qty {
+        width: 26px !important;
+    }
+    .receipt-paper .col-discount {
+        width: 30px !important;
+    }
+    .receipt-paper .col-total {
+        width: 46px !important;
+    }
+    .receipt-paper .shop-name {
+        font-size: 15px !important;
+    }
+    .receipt-paper .amount-row {
+        font-size: 12px !important;
+    }
+    .receipt-paper .amount-row-final {
+        font-size: 13px !important;
+    }
+    .receipt-paper .final-price {
+        font-size: 15px !important;
     }
 }
 
 /* 默认 @page 回退（动态 JS 会覆盖此值） */
 @page {
-    size: 80mm 150mm;
+    size: 57mm 120mm;
     margin: 0;
 }
 </style>

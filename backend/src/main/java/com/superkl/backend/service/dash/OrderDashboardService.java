@@ -1,7 +1,11 @@
 package com.superkl.backend.service.dash;
 
+import com.superkl.backend.common.ManageQueryParams;
+import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.OrderStatusEnum;
+import com.superkl.backend.enums.PayMethodEnum;
+import com.superkl.backend.info.dash.CheckoutDashInfo;
 import com.superkl.backend.info.dash.DayInfo;
 import com.superkl.backend.info.dash.OrderDashInfo;
 import com.superkl.backend.repository.order.OrderRepository;
@@ -103,21 +107,65 @@ public class OrderDashboardService {
         return dayInfoList;
     }
 
+    // =========收银端专属=========
+    public CheckoutDashInfo getCheckoutInfo(LocalDate start , LocalDate end){
+        BigDecimal sumAmount = sumAmountByTimeAndWIdAndPayMethod(start, end, null);
+        BigDecimal AlipayAmount = sumAmountByTimeAndWIdAndPayMethod(start, end, PayMethodEnum.ALIPAY);
+        BigDecimal CashAmount = sumAmountByTimeAndWIdAndPayMethod(start, end, PayMethodEnum.CASH);
+        BigDecimal CardAmount = sumAmountByTimeAndWIdAndPayMethod(start, end, PayMethodEnum.CARD);
+        BigDecimal WeChatAmount = sumAmountByTimeAndWIdAndPayMethod(start, end, PayMethodEnum.WECHAT);
+        BigDecimal TikTokWriteOffAmount = sumAmountByTimeAndWIdAndPayMethod(start, end, PayMethodEnum.TIKTOK_WRITE_OFF);
+
+        return CheckoutDashInfo.builder()
+                .sumAmount(sumAmount)
+                .AlipayAmount(AlipayAmount)
+                .CashAmount(CashAmount)
+                .CardAmount(CardAmount)
+                .WeChatAmount(WeChatAmount)
+                .TikTokWriteOffAmount(TikTokWriteOffAmount)
+                .build();
+    }
+
 
     // 辅助函数
-    private BigDecimal sumSaleAmountByTimeAndStatus(LocalDate start, LocalDate end , OrderStatusEnum status){
+    // 管理端查看总汇总（不可选参数）
+    private BigDecimal sumSaleAmountByTimeAndStatus(LocalDate start,
+                                                    LocalDate end ,
+                                                    OrderStatusEnum status){
         return orderRepository.sumTotalAmountByTime(start.atStartOfDay(),
                 end.atStartOfDay(),
                 DirectionEnum.IN,
                 DirectionEnum.OUT,
-                status);
+                status,
+                null,
+                null,
+                null);
     }
 
-    private BigDecimal sumImportAmountByTimeAndStatus(LocalDate start, LocalDate end , OrderStatusEnum status){
+    // 管理端查看总进货汇总（不可选参数）
+    private BigDecimal sumImportAmountByTimeAndStatus(LocalDate start,
+                                                      LocalDate end ,
+                                                      OrderStatusEnum status){
         return orderRepository.sumImportAmountByTime(start.atStartOfDay(),
                 end.atStartOfDay(),
                 DirectionEnum.IN,
                 DirectionEnum.OUT,
-                status);
+                status,
+                null,
+                null,
+                null);
+    }
+
+    // 收银端查看汇总
+    private BigDecimal sumAmountByTimeAndWIdAndPayMethod(LocalDate start, LocalDate end, PayMethodEnum payMethod){
+        Long wareHouseId = RequestUser.notNull().getRequestId();
+
+        return orderRepository.sumAmountByTimeAndWId(start.atStartOfDay(),
+                end.atStartOfDay(),
+                DirectionEnum.IN,
+                DirectionEnum.OUT,
+                OrderStatusEnum.COMPLETED,
+                wareHouseId,
+                payMethod);
     }
 }

@@ -1,6 +1,7 @@
 package com.superkl.backend.controller.dash;
 
 import com.superkl.backend.common.Result;
+import com.superkl.backend.info.dash.CheckoutDashInfo;
 import com.superkl.backend.info.dash.DayInfo;
 import com.superkl.backend.info.dash.OrderDashInfo;
 import com.superkl.backend.service.dash.OrderDashboardService;
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/dash")
+@RequestMapping("/api/dash/order")
 @RequiredArgsConstructor
 public class OrderDashboardController {
     private final OrderDashboardService orderDashboardService;
@@ -62,5 +63,12 @@ public class OrderDashboardController {
     public Result<List<DayInfo>> getEveryDayInfo(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate){
         return Result.success(orderDashboardService.getEveryDayInfo(startDate, endDate));
+    }
+
+    // 收银页面专属
+    @GetMapping("/checkout/custom")
+    public Result<CheckoutDashInfo> getCheckoutCustomInfo(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                          @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate){
+        return Result.success(orderDashboardService.getCheckoutInfo(startDate, endDate));
     }
 }

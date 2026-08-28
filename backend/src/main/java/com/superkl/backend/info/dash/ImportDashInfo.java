@@ -1,10 +1,17 @@
 package com.superkl.backend.info.dash;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import com.superkl.backend.enums.SeasonEnum;
+import lombok.*;
 
+import java.math.BigDecimal;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ImportDashInfo {
-    private LocalDate day;
+    private SeasonEnum season;
     private BigDecimal amount;
-    private Integer count;
+    private Long quantity;
 }

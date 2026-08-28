@@ -1,40 +1,43 @@
 <template>
     <div class="draft-page">
-        <header class="draft-header">
-            <div class="header-left">
-                <button
-                    class="back-button"
-                    @click="goCheckout"
-                >← 返回收银台</button>
-                <div>
-                    <h1>挂单查询</h1>
-                    <p>查看当前仓库尚未完成的收银订单</p>
+        <div class="page-toolbar">
+            <div class="page-label">
+                <h2 class="page-label-title">挂单查询</h2>
+                <p class="page-label-desc">查看当前仓库尚未完成的收银订单</p>
+                <hr class="label-hr"/>
+            </div>
+            <i class="toolbar-divider"></i>
+            <div class="toolbox-stack">
+                <div class="search-label">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="14" height="14">
+                        <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M14 14l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span>挂单检索</span>
+                </div>
+                <div class="search-shell">
+                    <div class="search-controls">
+                        <button
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="goCheckout"
+                        >← 返回收银台</button>
+                        <input
+                            v-model="searchQuery"
+                            class="search-code-input"
+                            placeholder="搜索订单编号、员工或备注"
+                            type="text"
+                        />
+                        <button
+                            :disabled="loading"
+                            class="btn-outline search-button"
+                            type="button"
+                            @click="fetchDrafts"
+                        >{{ loading ? '刷新中...' : '↻ 刷新' }}</button>
+                    </div>
                 </div>
             </div>
-            <div class="header-actions">
-                <span>共 {{ pageInfo.totalElements }} 笔挂单</span>
-                <button
-                    :disabled="loading"
-                    class="refresh-button"
-                    @click="fetchDrafts"
-                >{{ loading ? '刷新中...' : '刷新' }}</button>
-            </div>
-        </header>
-
-        <section class="draft-toolbar">
-            <div class="search-box">
-                <IconGraphic name="search"/>
-                <input
-                    v-model="searchQuery"
-                    placeholder="搜索订单编号、员工或备注"
-                    type="text"
-                />
-            </div>
-            <div class="summary-list">
-                <span>当前页 {{ draftList.length }} 笔</span>
-                <strong>实付合计 ¥{{ pageActualAmount }}</strong>
-            </div>
-        </section>
+        </div>
 
         <div
             v-if="loading"
@@ -137,7 +140,7 @@
                         <code>{{ detailTarget.orderNo }}</code>
                     </div>
                     <button
-                        class="cancel-button detail-close"
+                        class="detail-close"
                         @click="closeDetail"
                     >×</button>
                 </div>
@@ -247,9 +250,6 @@ const pageInfo = ref({
 })
 
 const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
-const pageActualAmount = computed(() => {
-    return draftList.value.reduce((sum, order) => sum + Number(order.actualPrice || 0), 0).toFixed(2)
-})
 
 const filteredDrafts = computed(() => {
     const query = searchQuery.value.trim().toLowerCase()
@@ -366,40 +366,12 @@ function goCheckout() {
 <style scoped>
 .draft-page {
     width: 100%;
-    min-height: 100vh;
+    min-width: 0;
     padding: 28px 34px;
     background: var(--bg-body);
 }
 
-.draft-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.header-left,
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.header-left h1 {
-    margin-bottom: 4px;
-    color: var(--text);
-    font-size: 26px;
-}
-
-.header-left p,
-.header-actions span {
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-.back-button,
-.refresh-button,
+/* ── 页头与搜索区（复用全局 page-toolbar / search-shell） ── */
 .checkout-link,
 .cancel-button {
     height: 36px;
@@ -407,61 +379,14 @@ function goCheckout() {
     color: var(--primary-dark);
     background: var(--bg-card);
     border: 1px solid var(--border-hover);
-    border-radius: 8px;
+    border-radius: 999px;
     font-weight: 700;
 }
 
-.back-button:hover,
-.refresh-button:hover,
 .checkout-link:hover,
 .cancel-button:hover {
     background: var(--bg-hover);
     border-color: var(--primary);
-}
-
-.draft-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
-    padding: 12px 14px;
-    margin-bottom: 16px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 5px 18px rgba(22, 83, 78, 0.05);
-}
-
-.search-box {
-    width: 390px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.search-box :deep(img) {
-    width: 20px;
-    height: 20px;
-}
-
-.search-box input {
-    width: 100%;
-    height: 36px;
-    border: none;
-    box-shadow: none;
-}
-
-.summary-list {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-.summary-list strong {
-    color: var(--warning-dark);
-    font-size: 15px;
 }
 
 .loading-state,
@@ -611,7 +536,7 @@ function goCheckout() {
 .confirm-delete-button {
     height: 34px;
     padding: 0 14px;
-    border-radius: 8px;
+    border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
 }
@@ -696,7 +621,7 @@ function goCheckout() {
     color: var(--primary-dark);
     background: var(--bg-card);
     border: 1px solid var(--border-hover);
-    border-radius: 8px;
+    border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
 }
@@ -752,6 +677,15 @@ function goCheckout() {
     color: var(--text-secondary);
     font-size: 20px;
     line-height: 1;
+    border: 1px solid var(--border-hover);
+    border-radius: 999px;
+    background: var(--bg-card);
+    cursor: pointer;
+}
+
+.detail-close:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary);
 }
 
 .detail-loading,
@@ -816,18 +750,6 @@ function goCheckout() {
         padding: 20px;
     }
 
-    .draft-header,
-    .draft-toolbar {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .header-left {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .search-box,
     .draft-card {
         width: 100%;
         min-width: 0;
