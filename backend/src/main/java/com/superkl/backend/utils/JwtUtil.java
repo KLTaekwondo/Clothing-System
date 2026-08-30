@@ -1,6 +1,7 @@
 package com.superkl.backend.utils;
 
 import com.superkl.backend.common.RequestUser;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -30,7 +31,7 @@ public class JwtUtil {
 
         // 检查密钥长度是否大于32位
         if(keyBytes.length < 32) {
-            throw new BusinessException("JWT密钥长度必须大于32位");
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR, "JWT密钥长度必须大于32位");
         }
 
         return Keys.hmacShaKeyFor(keyBytes);
@@ -65,7 +66,7 @@ public class JwtUtil {
                     .build()
                     .parseSignedClaims(token);
         }catch(Exception e){
-            throw new BusinessException("token无效");
+            throw new BusinessException(ErrorCodeEnum.INVALID_SESSION, "token无效");
         }
 
         return true;
@@ -90,7 +91,7 @@ public class JwtUtil {
                     .requestCode(claims.get("code",String.class))
                     .build();
         }catch(Exception e){
-            throw new BusinessException("token无效");
+            throw new BusinessException(ErrorCodeEnum.INVALID_SESSION, "token无效");
         }
     }
 }

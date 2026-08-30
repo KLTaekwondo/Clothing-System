@@ -1,6 +1,7 @@
 package com.superkl.backend.utils;
 
 import com.superkl.backend.common.RequestUser;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.service.auth.AuthRedisService;
 import jakarta.servlet.FilterChain;
@@ -48,11 +49,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = AuthContext.extractTokenFromCookie(request, jwtUtil);
         // 校验token是否有效
         if(authRedisService.isBlacklisted(token)){
-            throw new BusinessException("账号已被踢下线");
+            throw new BusinessException(ErrorCodeEnum.BLACKLISTED, "账号已被踢下线");
         }
 
         if(!authRedisService.isCurrentToken(requestUser.getRequestRole(), requestUser.getRequestId(), token)){
-            throw new BusinessException("会话已失效，请重新登录");
+            throw new BusinessException(ErrorCodeEnum.INVALID_SESSION, "会话已失效，请重新登录");
         }
         // 第一个参数 userId：存的是“谁”（principal）。
         // 第二个参数 null：凭证（credentials），这里没有密码之类的，所以填 null。

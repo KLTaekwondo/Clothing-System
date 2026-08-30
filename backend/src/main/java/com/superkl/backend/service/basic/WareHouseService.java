@@ -8,6 +8,7 @@ import com.superkl.backend.dto.basic.WareHouseUpdateDto;
 import com.superkl.backend.entity.basic.Admin;
 import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.entity.stock.WareHouseStock;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.basic.WareHouseInfo;
@@ -55,14 +56,14 @@ public class WareHouseService {
     public void create(WareHouseCreateDto wareHouseCreateDto) {
         // 先查找管理员是否存在
         Admin admin = adminRepository.findById(RequestUser.notNull().getRequestId())
-                .orElseThrow(() -> new BusinessException(403, "管理员不存在！"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "管理员不存在！"));
         // 检查仓库编号是否已经存在
         if(wareHouseRepository.existsByCode(wareHouseCreateDto.getCode())){
-            throw new BusinessException(403, "仓库编号已存在！");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "仓库编号已存在！");
         }
         // 检查仓库名称是否已经存在
         if(wareHouseRepository.existsByName(wareHouseCreateDto.getName())){
-            throw new BusinessException(403, "仓库名称已存在！");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "仓库名称已存在！");
         }
 
         // 转换为仓库实体
@@ -96,18 +97,18 @@ public class WareHouseService {
     public void update(Long wareHouseId, WareHouseUpdateDto wareHouseUpdateDto) {
         // 先查找仓库是否存在
         WareHouse wareHouse = wareHouseRepository.findById(wareHouseId)
-                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "仓库不存在"));
 
         // 检查是否和其他的仓库编号重复
         String code = wareHouseUpdateDto.getCode();
         if(wareHouseRepository.existsByCode(code) && !code.equals(wareHouse.getWareHouseCode())){
-            throw new BusinessException(403, "仓库编号已存在！");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "仓库编号已存在！");
         }
 
         // 检查是否和其他的仓库名称重复
         String name = wareHouseUpdateDto.getName();
         if(wareHouseRepository.existsByName(name) && !name.equals(wareHouse.getWareHouseName())){
-            throw new BusinessException(403, "仓库名称已存在！");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "仓库名称已存在！");
         }
 
         // 更新仓库实体
@@ -128,7 +129,7 @@ public class WareHouseService {
     public void delete(Long wareHouseId) {
         // 先查找仓库是否存在
         WareHouse wareHouse = wareHouseRepository.findById(wareHouseId)
-                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "仓库不存在"));
 
         // 禁用仓库状态
         wareHouse.setStatus(StatusEnum.DISABLE);
@@ -141,7 +142,7 @@ public class WareHouseService {
     @Transactional(readOnly = true)
     public WareHouseInfo search(Long wareHouseId) {
         WareHouse wareHouse =  wareHouseRepository.findById(wareHouseId)
-                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "仓库不存在"));
 
         return WareHouseConverter.toInfo(wareHouse);
     }
@@ -160,7 +161,7 @@ public class WareHouseService {
 
         // 先查找仓库是否存在
         WareHouse wareHouse = wareHouseRepository.findByAccount(account)
-                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "仓库不存在"));
 
         // 校验密码
         String dbPassword = wareHouse.getWareHousePassword();
@@ -168,12 +169,12 @@ public class WareHouseService {
 
         // 校验密码是否正确
         if(!passwordEncoder.matches(password, dbPassword)) {
-            throw new BusinessException("密码错误");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "密码错误");
         }
 
         // 校验仓库状态是否启用
         if(status.equals(StatusEnum.DISABLE)) {
-            throw new BusinessException(405, "仓库已禁用！请联系管理员处理！");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "仓库已禁用！请联系管理员处理！");
         }
 
         Long wareHouseId = wareHouse.getWareHouseId();

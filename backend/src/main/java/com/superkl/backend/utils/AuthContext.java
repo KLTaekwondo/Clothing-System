@@ -1,6 +1,7 @@
 package com.superkl.backend.utils;
 
 import com.superkl.backend.common.RequestUser;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,12 +16,12 @@ public class AuthContext {
         //自动检验token是否为空或过期
         // token为空，说明用户没有登录，抛出异常401，提示用户先登录
         if (token == null) {
-            throw new BusinessException(401, "未登录，请先登录");
+            throw new BusinessException(ErrorCodeEnum.UNAUTHORIZED, "未登录，请先登录");
         }
         // token不为空，说明用户登录了，验证token是否过期
         // 如果token过期，抛出异常401，提示用户登录验证失败，重新重新登录
         if (!jwtUtil.validateToken(token)) {
-            throw new BusinessException(401, "token过期，请重新登录");
+            throw new BusinessException(ErrorCodeEnum.UNAUTHORIZED, "token过期，请重新登录");
         }
 
         // token验证通过，返回token值

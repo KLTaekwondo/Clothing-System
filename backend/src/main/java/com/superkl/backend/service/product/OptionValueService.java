@@ -5,6 +5,7 @@ import com.superkl.backend.converter.product.OptionValueConverter;
 import com.superkl.backend.dto.product.OptionValueCreateDto;
 import com.superkl.backend.dto.product.OptionValueUpdateDto;
 import com.superkl.backend.entity.product.OptionValue;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.OptionTypeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.product.OptionValueInfo;
@@ -28,7 +29,7 @@ public class OptionValueService {
     public void create(OptionValueCreateDto dto) {
         // 1. 检查选项值是否存在
         if (optionValueRepository.existsByTypeAndValue(dto.getOptionType(), dto.getOptionValue())) {
-            throw new BusinessException(403, "选项值已存在");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "选项值已存在");
         }
         // 2. 创建选项值实体
         OptionValue optionValue = OptionValueConverter.toEntity(dto);
@@ -43,14 +44,14 @@ public class OptionValueService {
     public void update(Long id ,  OptionValueUpdateDto dto) {
         // 1. 从数据库中查询选项值
         OptionValue optionValue = optionValueRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(403, "选项值不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "选项值不存在"));
         // 2. 检查是否已经被引用，不能删除
         if(optionValueRepository.existsBySpecExactValue(optionValue.getOptionValue())){
-            throw new BusinessException(403,"选项值被引用，不能更新! 建议重建选项值");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "选项值被引用，不能更新! 建议重建选项值");
         }
 
         if(optionValueRepository.existsByTypeAndValueNotId(id,dto.getOptionType(),dto.getOptionValue())) {
-            throw new BusinessException(403,"选项值已经存在");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "选项值已经存在");
         }
 
         // 2. 更新选项值
@@ -66,10 +67,10 @@ public class OptionValueService {
     public void delete(Long id) {
         // 1. 从数据库中查询选项值
         OptionValue optionValue = optionValueRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(403, "选项值不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "选项值不存在"));
         // 2. 检查是否被引用
         if(optionValueRepository.existsBySpecExactValue(optionValue.getOptionValue())){
-            throw new BusinessException(403,"选项值被引用，不能删除");
+            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "选项值被引用，不能删除");
         }
         // 3. 删除选项值
         optionValueRepository.deleteById(id);
@@ -81,7 +82,7 @@ public class OptionValueService {
     public OptionValueInfo search(Long id) {
         // 1. 从数据库中查询选项值
         OptionValue optionValue = optionValueRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(403, "选项值不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "选项值不存在"));
         // 2. 转换为选项值信息
         return OptionValueConverter.toInfo(optionValue);
     }
@@ -101,7 +102,7 @@ public class OptionValueService {
         try{
             oType = OptionTypeEnum.valueOf(type);
         }catch(Exception e){
-            throw new BusinessException(403,"类型不存在！");
+            throw new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "类型不存在！");
         }
         List<OptionValue> optionValueList = optionValueRepository.findByOptionType(oType);
         // 2. 转换为选项值信息列表

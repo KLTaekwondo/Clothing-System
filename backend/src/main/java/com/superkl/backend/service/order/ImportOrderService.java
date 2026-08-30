@@ -9,10 +9,7 @@ import com.superkl.backend.entity.order.ImportOrder;
 import com.superkl.backend.entity.order.ImportOrderItem;
 import com.superkl.backend.entity.basic.Supplier;
 import com.superkl.backend.entity.basic.WareHouse;
-import com.superkl.backend.enums.AuditStatusEnum;
-import com.superkl.backend.enums.DirectionEnum;
-import com.superkl.backend.enums.StockChangeTypeEnum;
-import com.superkl.backend.enums.StockSourceTypeEnum;
+import com.superkl.backend.enums.*;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.order.ImportOrderInfo;
 import com.superkl.backend.info.order.ImportOrderItemInfo;
@@ -58,10 +55,10 @@ public class ImportOrderService {
     public void update(Long importOrderId, ImportOrderDraftDto dto) {
         // 首先找订单是否存在
         ImportOrder importOrder = importOrderRepository.findById(importOrderId)
-                .orElseThrow(() -> new BusinessException(403, "进货订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "进货订单不存在"));
         // 先检查是否是草稿状态
         if(!importOrder.isDraft()){
-            throw new BusinessException(405, "进货订单状态不是草稿，不能修改");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "进货订单状态不是草稿，不能修改");
         }
         // 清除已存在的商品项
         importOrderItemService.updateDelete(importOrderId);
@@ -74,10 +71,10 @@ public class ImportOrderService {
     public void check(Long importOrderId){
         // 首先找订单是否存在
         ImportOrder importOrder = importOrderRepository.findById(importOrderId)
-                .orElseThrow(() -> new BusinessException(403, "进货订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "进货订单不存在"));
         // 先检查是否是草稿状态
         if(!importOrder.isDraft()){
-            throw new BusinessException(405, "进货订单状态不是草稿，不能设置审核中");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "进货订单状态不是草稿，不能设置审核中");
         }
         // 设置审核中状态
         importOrder.setStatus(AuditStatusEnum.CHECKING);
@@ -94,10 +91,10 @@ public class ImportOrderService {
     public void approve(Long importOrderId){
         // 首先找订单是否存在
         ImportOrder importOrder = importOrderRepository.findById(importOrderId)
-                .orElseThrow(() -> new BusinessException(403, "进货订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "进货订单不存在"));
         // 先检查是否是审核中状态
         if(!importOrder.isChecking()){
-            throw new BusinessException(405, "进货订单状态不是审核中，不能通过");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "进货订单状态不是审核中，不能通过");
         }
         // 增加/减少库存
         Long wareHouseId = importOrder.getWareHouse().getWareHouseId();
@@ -133,10 +130,10 @@ public class ImportOrderService {
     public void reject(Long importOrderId){
         // 首先找订单是否存在
         ImportOrder importOrder = importOrderRepository.findById(importOrderId)
-                .orElseThrow(() -> new BusinessException(403, "进货订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "进货订单不存在"));
         // 先检查是否是审核中状态
         if(!importOrder.isChecking()){
-            throw new BusinessException(405, "进货订单状态不是审核中，不能拒绝");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "进货订单状态不是审核中，不能拒绝");
         }
         // 审核拒绝
         importOrder.setStatus(AuditStatusEnum.REJECTED);
@@ -152,10 +149,10 @@ public class ImportOrderService {
     public void delete(Long importOrderId){
         // 首先找订单是否存在
         ImportOrder importOrder = importOrderRepository.findById(importOrderId)
-                .orElseThrow(() -> new BusinessException(403, "进货订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "进货订单不存在"));
         // 先检查是否是草稿状态
         if(!importOrder.isDraft()){
-            throw new BusinessException(405, "进货订单已被处理，不能删除");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "进货订单已被处理，不能删除");
         }
         // 删除订单
         importOrderRepository.deleteById(importOrderId);
@@ -170,7 +167,7 @@ public class ImportOrderService {
     @Transactional(readOnly = true)
     public ImportOrderWithItemsInfo search(Long importOrderId){
         ImportOrder importOrder = importOrderRepository.findById(importOrderId)
-                .orElseThrow(() -> new BusinessException(403, "进货订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "进货订单不存在"));
         List<ImportOrderItemInfo> items = importOrderItemService.findByImportOrderId(importOrderId);
         return ImportOrderConverter.toInfoWithItems(importOrder, items);
     }
@@ -186,15 +183,15 @@ public class ImportOrderService {
     // 辅助方法：校验+创建进货订单项
     private void applyImportOrder(ImportOrder importOrder , ImportOrderDraftDto dto) {
         WareHouse warehouse = wareHouseRepository.findById(dto.getWareHouseId())
-                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "仓库不存在"));
         Supplier supplier = supplierRepository.findById(dto.getSupplierId())
-                .orElseThrow(() -> new BusinessException(403, "供应商不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "供应商不存在"));
 
         if(!warehouse.isEnabled()){
-            throw new BusinessException(405, "仓库已被禁用！请检查后重试");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "仓库已被禁用！请检查后重试");
         }
         if(!supplier.isEnabled()){
-            throw new BusinessException(405, "供应商已被禁用！请检查后重试");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "供应商已被禁用！请检查后重试");
         }
 
         List<ImportOrderItem> importItems = importOrderItemService.createList(dto.getImportItems(), importOrder);
@@ -209,7 +206,7 @@ public class ImportOrderService {
         }
 
         if(f_totalPrice.compareTo(b_totalPrice) != 0){
-            throw new BusinessException("金额不一致");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "金额不一致");
         }
 
         // 保存订单

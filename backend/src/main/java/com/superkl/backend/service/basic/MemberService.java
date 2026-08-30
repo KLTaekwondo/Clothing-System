@@ -6,6 +6,7 @@ import com.superkl.backend.dto.basic.MemberCreateDto;
 import com.superkl.backend.dto.basic.MemberMaxCreateDto;
 import com.superkl.backend.dto.basic.MemberUpdateDto;
 import com.superkl.backend.entity.basic.Member;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.MemberLevelEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.basic.MemberInfo;
@@ -30,7 +31,7 @@ public class MemberService {
     public void create_checkout(MemberCreateDto memberCreateDto) {
         // 1.1 检查会员是否存在
         if (memberRepository.existsMemberByPhone(memberCreateDto.getPhone())) {
-            throw new BusinessException("会员已存在");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "会员已存在");
         }
 
         // 1.2 创建会员
@@ -46,7 +47,7 @@ public class MemberService {
     public void create_manage(MemberMaxCreateDto dto) {
         // 1.1 检查会员是否存在
         if (memberRepository.existsMemberByPhone(dto.getPhone())) {
-            throw new BusinessException("会员已存在");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "会员已存在");
         }
 
         // 1.2 创建会员
@@ -63,7 +64,7 @@ public class MemberService {
     public void update(Long id ,MemberUpdateDto dto) {
         // 1.1 检查会员是否存在
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("会员不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
 
         // 1.2 更新会员信息
         MemberConverter.updateEntity(dto, member);
@@ -78,10 +79,10 @@ public class MemberService {
     public void increasePoints(Long id, Integer points) {
         // 1.1 检查会员是否存在
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("会员不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
 
         if(points == null || points < 0){
-            throw new BusinessException("增加积分点不能小于0");
+            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "增加积分点不能小于0");
         }
 
         // 1.2 增加会员积分点
@@ -112,15 +113,15 @@ public class MemberService {
     public void decreasePoints(Long id, Integer points) {
         // 1.1 检查会员是否存在
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("会员不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
 
         if(points == null || points < 0){
-            throw new BusinessException("减少积分点不能小于0");
+            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "减少积分点不能小于0");
         }
 
         // 1.2 减少会员积分点
         if (member.getMemberPoints() < points) {
-            throw new BusinessException("会员积分不足");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "会员积分不足");
         }
         member.setMemberPoints(member.getMemberPoints() - points);
         memberRepository.save(member);
@@ -132,7 +133,7 @@ public class MemberService {
     // 查询单个会员
     public MemberInfo search(String phone) {
         Member member = memberRepository.findMemberByPhone(phone)
-                .orElseThrow(() -> new BusinessException("会员不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
         return MemberConverter.toInfo(member);
     }
 
@@ -145,6 +146,6 @@ public class MemberService {
     // 不外放，只用于内部调用的查询方法
     public Member getFromPhone(String phone) {
         return memberRepository.findMemberByPhone(phone)
-                .orElseThrow(() -> new BusinessException("会员不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
     }
 }

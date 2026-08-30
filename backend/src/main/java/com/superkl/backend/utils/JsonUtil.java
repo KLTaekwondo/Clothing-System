@@ -1,6 +1,7 @@
 package com.superkl.backend.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -14,7 +15,7 @@ public class JsonUtil {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (Exception e) {
-            throw new BusinessException("JSON转换失败");
+            throw new BusinessException(ErrorCodeEnum.JSON_PARSE_ERROR, "JSON转换失败");
         }
     }
 
@@ -22,7 +23,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {});
         } catch (Exception e) {
-            throw new BusinessException("JSON解析失败");
+            throw new BusinessException(ErrorCodeEnum.JSON_PARSE_ERROR, "JSON解析失败");
         }
     }
 }

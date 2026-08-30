@@ -1,5 +1,6 @@
 package com.superkl.backend.utils;
 
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 
 import java.util.*;
@@ -45,12 +46,12 @@ public class SkuUtil {
 
         if (selectedOptions == null || selectedOptions.isEmpty())
         {
-            throw new BusinessException("商品规格不能为空");
+            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "商品规格不能为空");
         }
 
         // 为确保笛卡尔积完整生成，至少需要两种规格（如颜色+尺码）
         if (selectedOptions.size() < 2) {
-            throw new BusinessException("商品规格不完整，至少需要两种规格（如颜色+尺码）");
+            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "商品规格不完整，至少需要两种规格（如颜色+尺码）");
         }
 
         for (Map.Entry<String, List<String>> entry : selectedOptions.entrySet()) {
@@ -58,26 +59,26 @@ public class SkuUtil {
             List<String> optionValues = entry.getValue();
 
             if (optionName == null || optionName.isBlank()) {
-                throw new BusinessException("商品规格名称不能为空");
+                throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "商品规格名称不能为空");
             }
 
             if (optionValues == null || optionValues.isEmpty()) {
-                throw new BusinessException("商品规格值不能为空");
+                throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "商品规格值不能为空");
             }
 
             Set<String> uniqueValues = new HashSet<>();
 
             for (String value : optionValues) {
                 if (value == null || value.isBlank()) {
-                    throw new BusinessException("商品规格值不能为空");
+                    throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "商品规格值不能为空");
                 }
 
                 if (!uniqueValues.add(value.trim())) {
-                    throw new BusinessException("同一规格下不能有重复值");
+                    throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "同一规格下不能有重复值");
                 }
 
                 if(!value.equals(value.trim())) {
-                    throw new BusinessException("商品规格值不能包含前后空格");
+                    throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "商品规格值不能包含前后空格");
                 }
             }
         }

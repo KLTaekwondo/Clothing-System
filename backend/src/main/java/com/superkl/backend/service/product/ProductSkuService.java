@@ -7,6 +7,7 @@ import com.superkl.backend.dto.product.ProductSkuUpdateDto;
 import com.superkl.backend.entity.product.Product;
 import com.superkl.backend.entity.product.ProductSku;
 import com.superkl.backend.entity.stock.WareHouseStock;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.product.ProductSkuCheckInfo;
@@ -40,14 +41,14 @@ public class ProductSkuService {
     public void create(ProductSkuCreateDto dto) {
         // 校验商品是否存在
         Product product = productRepository.findById(dto.getProductId())
-                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品不存在"));
         if(!product.isEnabled()){
-            throw new BusinessException(405, product.getProductName()+"商品已被禁用，不能新增SKU");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, product.getProductName()+"商品已被禁用，不能新增SKU");
         }
 
         // 补：与批量入口一致的重复规格拦截
         if (productSkuRepository.existsByProductIdAndSkuName(dto.getProductId(), dto.getName())) {
-            throw new BusinessException(405, product.getProductName()+"商品已存在该SKU");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, product.getProductName()+"商品已存在该SKU");
         }
 
         // 转化为Sku实体
@@ -74,7 +75,7 @@ public class ProductSkuService {
     public void update(Long id , ProductSkuUpdateDto dto) {
         // 校验商品SKU是否存在
         ProductSku productSku = productSkuRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(403, "商品SKU不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品SKU不存在"));
 
         // 更新商品SKU
         ProductSkuConverter.updateEntity(productSku, dto);
@@ -88,7 +89,7 @@ public class ProductSkuService {
     public void delete(Long id) {
         // 校验商品SKU是否存在
         ProductSku productSku = productSkuRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(403, "商品SKU不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品SKU不存在"));
 
         // 禁用商品SKU状态
         productSku.setStatus(StatusEnum.DISABLE);
@@ -102,7 +103,7 @@ public class ProductSkuService {
     public void createFromProduct(Product product , Map<String , String>combo) {
         // 校验商品是否存在
         if(productSkuRepository.existsByProductIdAndSkuName(product.getProductId(), SkuUtil.generateSkuName(combo))){
-            throw new BusinessException(405, product.getProductName()+"商品已存在该SKU");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, product.getProductName()+"商品已存在该SKU");
         }
         ProductSku sku = ProductSku.builder()
                 .product(product)
@@ -133,7 +134,7 @@ public class ProductSkuService {
     // 6. 查询单个的商品属性
     public ProductSkuInfo searchById(Long id) {
         ProductSku productSku = productSkuRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(403, "商品SKU不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品SKU不存在"));
         return ProductSkuConverter.toInfo(productSku);
     }
 
@@ -143,26 +144,26 @@ public class ProductSkuService {
         ProductSku productSku = productSkuRepository.findBySkuCode(code).orElse(null);
         if (productSku != null) {
             if (!productSku.getProduct().isEnabled()) {
-                throw new BusinessException(405, productSku.getProduct().getProductName()+"商品已禁用");
+                throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, productSku.getProduct().getProductName()+"商品已禁用");
             }
             if (!productSku.isEnabled()) {
-                throw new BusinessException(405, productSku.getSkuName()+"商品SKU已禁用");
+                throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, productSku.getSkuName()+"商品SKU已禁用");
             }
             return List.of(ProductSkuConverter.toCheckInfo(productSku));
         }
 
         // 2. 没查到，当商品编码查
         Product product = productRepository.findByProductCode(code)
-                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品不存在"));
 
         if (!product.isEnabled()) {
-            throw new BusinessException(405, product.getProductName()+"商品已禁用");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, product.getProductName()+"商品已禁用");
         }
 
         // 只返回启用状态的商品SKU列表
         List<ProductSku> productSkus = productSkuRepository.findByProductCodeAndStatus(code, StatusEnum.ENABLE);
         if (productSkus.isEmpty()) {
-            throw new BusinessException(405, product.getProductName()+"该商品下没有可用SKU");
+            throw new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, product.getProductName()+"该商品下没有可用SKU");
         }
 
         return ProductSkuConverter.toCheckInfoList(productSkus);

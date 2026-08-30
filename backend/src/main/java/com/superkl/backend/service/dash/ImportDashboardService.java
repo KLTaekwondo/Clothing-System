@@ -3,6 +3,7 @@ package com.superkl.backend.service.dash;
 import com.superkl.backend.common.SeasonStartEnd;
 import com.superkl.backend.enums.AuditStatusEnum;
 import com.superkl.backend.enums.DirectionEnum;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.SeasonEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.dash.ImportDashInfo;
@@ -145,7 +146,7 @@ public class ImportDashboardService {
     private SeasonStartEnd getSeasonStartEnd(int year, int month) {
         // 先检查月份是否有效
         if (month < 1 || month > 12) {
-            throw new BusinessException("无效的月份！");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "无效的月份！");
         }
 
         // 提前声明，避免后续if判断中重复声明

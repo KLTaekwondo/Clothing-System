@@ -2,6 +2,7 @@ package com.superkl.backend.service.dash;
 
 import com.superkl.backend.common.ManageQueryParams;
 import com.superkl.backend.enums.DirectionEnum;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.dash.OrderDashInfo;
 import com.superkl.backend.repository.basic.EmployeeRepository;
@@ -95,11 +96,11 @@ public class FilterDashboardService {
         Long wareHouseId = null;
         if(params.getEmployeeId() != null) {
             wareHouseId = employeeRepository.findById(params.getEmployeeId())
-                    .orElseThrow(() -> new BusinessException(403, "员工不存在")).getWareHouse().getWareHouseId();
+                    .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "员工不存在")).getWareHouse().getWareHouseId();
         }
         // 查筛选条件是否冲突
         if(params.getWareHouseId() != null && !params.getWareHouseId().equals(wareHouseId) && params.getEmployeeId() != null) {
-            throw new BusinessException(403,"员工和仓库不匹配，建议修改查询条件");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "员工和仓库不匹配，建议修改查询条件");
         }
         return orderRepository.sumTotalAmountByTime(params.getStart().atStartOfDay(),
                 params.getEnd().atStartOfDay(),
@@ -117,11 +118,12 @@ public class FilterDashboardService {
         Long wareHouseId = null;
         if(params.getEmployeeId() != null) {
             wareHouseId = employeeRepository.findById(params.getEmployeeId())
-                    .orElseThrow(() -> new BusinessException(403, "员工不存在")).getWareHouse().getWareHouseId();
+                    .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "员工不存在"))
+                    .getWareHouse().getWareHouseId();
         }
         // 查筛选条件是否冲突
         if(params.getWareHouseId() != null && !params.getWareHouseId().equals(wareHouseId) && params.getEmployeeId() != null) {
-            throw new BusinessException(403,"员工和仓库不匹配，建议修改查询条件");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "员工和仓库不匹配，建议修改查询条件");
         }
         return orderRepository.sumImportAmountByTime(params.getStart().atStartOfDay(),
                 params.getEnd().atStartOfDay(),

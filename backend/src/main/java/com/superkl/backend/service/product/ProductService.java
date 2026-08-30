@@ -6,6 +6,7 @@ import com.superkl.backend.converter.product.ProductConverter;
 import com.superkl.backend.dto.product.ProductCreateDto;
 import com.superkl.backend.dto.product.ProductUpdateDto;
 import com.superkl.backend.entity.product.Product;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.product.ProductInfo;
@@ -34,7 +35,7 @@ public class ProductService {
     public void create(ProductCreateDto dto) {
         // 检查商品编码是否已经存在
         if(productRepository.existsByCode(dto.getCode())){
-            throw new BusinessException(403, "商品编码已存在！");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "商品编码已存在！");
         }
         // 1.开始处理规格信息（只取颜色和尺码）
         Map<String, List<String>> selectedOptions = dto.getSelectedOptions();
@@ -51,7 +52,7 @@ public class ProductService {
         List<Map<String, String>> skuList =
                 SkuUtil.generateSkuList(skuOptions);
         if (skuList.isEmpty()) {
-            throw new BusinessException("商品规格不能为空");
+            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "商品规格不能为空");
         }
 
         // 2.创建商品本体的信息，然后入库
@@ -72,11 +73,11 @@ public class ProductService {
     public void update(Long id , ProductUpdateDto dto) {
         // 1.先查一下，看是否存在商品
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品不存在"));
         // 检查商品编码是否已经存在
         String code = dto.getCode();
         if(productRepository.existsByCode(code) && !code.equals(product.getProductCode())){
-            throw new BusinessException(403, "商品编码已存在！");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "商品编码已存在！");
         }
         // 2.更新商品信息
         ProductConverter.updateEntity(product, dto);
@@ -90,7 +91,7 @@ public class ProductService {
     public void delete(Long id) {
         // 现找是否存在商品
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品不存在"));
         // 2.禁用商品
         product.setStatus(StatusEnum.DISABLE);
         productRepository.save(product);
@@ -101,7 +102,7 @@ public class ProductService {
     // 查询单个商品详情
     public ProductInfo search(Long id){
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(403, "商品不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品不存在"));
         return ProductConverter.toInfo(product);
     }
 

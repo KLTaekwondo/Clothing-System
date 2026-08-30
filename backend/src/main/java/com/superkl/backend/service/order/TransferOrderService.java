@@ -9,6 +9,7 @@ import com.superkl.backend.entity.order.TransferOrder;
 import com.superkl.backend.entity.order.TransferOrderItem;
 import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.enums.AuditStatusEnum;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.StockChangeTypeEnum;
 import com.superkl.backend.enums.StockSourceTypeEnum;
 import com.superkl.backend.exception.BusinessException;
@@ -53,9 +54,9 @@ public class TransferOrderService {
     @Transactional
     public void update(Long transferOrderId, TransferOrderDraftDto dto) {
         TransferOrder transferOrder = transferOrderRepository.findById(transferOrderId)
-                .orElseThrow(() -> new BusinessException("转移订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "转移订单不存在"));
         if(!transferOrder.isDraft()){
-            throw new BusinessException("转移订单不是草稿状态，不能更新");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "转移订单不是草稿状态，不能更新");
         }
         // 删除老的订单项
         transferOrderItemService.updateDelete(transferOrderId);
@@ -72,9 +73,9 @@ public class TransferOrderService {
     @Transactional
     public void check(Long transferOrderId) {
         TransferOrder transferOrder = transferOrderRepository.findById(transferOrderId)
-                .orElseThrow(() -> new BusinessException("转移订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "转移订单不存在"));
         if(!transferOrder.isDraft()){
-            throw new BusinessException("转移订单不是草稿状态，不能提交");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "转移订单不是草稿状态，不能提交");
         }
 
         // 设置为审核中状态
@@ -90,9 +91,9 @@ public class TransferOrderService {
     @Transactional
     public void approve(Long transferOrderId) {
         TransferOrder transferOrder = transferOrderRepository.findById(transferOrderId)
-                .orElseThrow(() -> new BusinessException("转移订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "转移订单不存在"));
         if(!transferOrder.isChecking()){
-            throw new BusinessException("转移订单不是校验中状态，不能通过");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "转移订单不是校验中状态，不能通过");
         }
         // 处理库存
         Long sourceWareHouseId = transferOrder.getSourceWareHouse().getWareHouseId();
@@ -129,9 +130,9 @@ public class TransferOrderService {
     @Transactional
     public void reject(Long transferOrderId) {
         TransferOrder transferOrder = transferOrderRepository.findById(transferOrderId)
-                .orElseThrow(() -> new BusinessException("转移订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "转移订单不存在"));
         if(!transferOrder.isChecking()){
-            throw new BusinessException("转移订单不是校验中状态，不能拒绝");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "转移订单不是校验中状态，不能拒绝");
         }
         // 设置为拒绝状态
         transferOrder.setStatus(AuditStatusEnum.REJECTED);
@@ -146,9 +147,9 @@ public class TransferOrderService {
     @Transactional
     public void delete(Long transferOrderId) {
         TransferOrder transferOrder = transferOrderRepository.findById(transferOrderId)
-                .orElseThrow(() -> new BusinessException("转移订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "转移订单不存在"));
         if(!transferOrder.isDraft()){
-            throw new BusinessException("转移订单不是草稿状态，不能删除");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "转移订单不是草稿状态，不能删除");
         }
         transferOrderRepository.delete(transferOrder);
 
@@ -161,7 +162,7 @@ public class TransferOrderService {
     @Transactional(readOnly = true)
     public TransferOrderWithItemsInfo search(Long transferOrderId) {
         TransferOrder transferOrder = transferOrderRepository.findById(transferOrderId)
-                .orElseThrow(() -> new BusinessException("转移订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "转移订单不存在"));
 
         // 查出所有订单项
         List<TransferOrderItemInfo> items = transferOrderItemService.findByTransferOrderId(transferOrderId);
@@ -183,23 +184,23 @@ public class TransferOrderService {
         Long targetWareHouseId = dto.getTargetWareHouseId();
 
         WareHouse sourceWareHouse = wareHouseRepository.findById(sourceWareHouseId)
-                .orElseThrow(() -> new BusinessException("源仓库不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "源仓库不存在"));
 
         WareHouse targetWareHouse = wareHouseRepository.findById(targetWareHouseId)
-                .orElseThrow(() -> new BusinessException("目标仓库不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "目标仓库不存在"));
 
         if(sourceWareHouseId.equals(targetWareHouseId)){
-            throw new BusinessException("源仓库和目标仓库不能相同");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "源仓库和目标仓库不能相同");
         }
 
         if(!sourceWareHouse.isEnabled() || !targetWareHouse.isEnabled()){
-            throw new BusinessException("源仓库或目标仓库已被禁用，请检查后再试");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "源仓库或目标仓库已被禁用，请检查后再试");
         }
 
         // 检查是否为空列表
         boolean isEmpty = dto.getTransferOrderItems().isEmpty();
         if(isEmpty){
-            throw new BusinessException("转移订单项列表不能为空");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "转移订单项列表不能为空");
         }
 
         List<TransferOrderItem> transferItems = transferOrderItemService.createList(dto.getTransferOrderItems(), transferOrder);
@@ -213,7 +214,7 @@ public class TransferOrderService {
         }
 
         if(f_totalPrice.compareTo(b_totalPrice) != 0){
-            throw new BusinessException("转移订单金额与商品总价不一致");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "转移订单金额与商品总价不一致");
         }
 
         // 保存订单

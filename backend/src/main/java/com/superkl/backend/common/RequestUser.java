@@ -1,5 +1,6 @@
 package com.superkl.backend.common;
 
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class RequestUser {
     public static RequestUser notNull() {
         RequestUser user = current();
         if (user == null) {
-            throw new BusinessException("未获取到当前用户信息！");
+            throw new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "未获取到当前用户信息！");
         }
         return user;
     }

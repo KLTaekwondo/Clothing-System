@@ -10,10 +10,7 @@ import com.superkl.backend.entity.basic.Member;
 import com.superkl.backend.entity.order.Order;
 import com.superkl.backend.entity.order.OrderItem;
 import com.superkl.backend.entity.basic.WareHouse;
-import com.superkl.backend.enums.DirectionEnum;
-import com.superkl.backend.enums.OrderStatusEnum;
-import com.superkl.backend.enums.StockChangeTypeEnum;
-import com.superkl.backend.enums.StockSourceTypeEnum;
+import com.superkl.backend.enums.*;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.order.OrderInfo;
 import com.superkl.backend.info.order.OrderItemInfo;
@@ -99,11 +96,11 @@ public class OrderService {
             // 情况二：已保存订单
             // 1.校验订单是否存在
             order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+                    .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "订单不存在"));
             checkBelongs(order.getWareHouse().getWareHouseId());
             // 2.校验订单状态是否为草稿
             if(!order.isDraft()){
-                throw new BusinessException(403, "订单不是草稿状态，不可完成！");
+                throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单不是草稿状态，不可完成！");
             }
 
             // 3.删除旧订单项，并添加新的订单项
@@ -159,15 +156,15 @@ public class OrderService {
 
         Long orderId = dto.getOrderId();
         if(orderId == null){
-            throw new BusinessException(403, "订单ID为空！无法更新！");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单ID为空！无法更新！先保存为草稿订单！");
         }
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "订单不存在"));
 
         checkBelongs(order.getWareHouse().getWareHouseId());
 
         if(!order.isDraft()){
-            throw new BusinessException(403, "订单不是草稿状态，不可更新！");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单不是草稿状态，不可更新！");
         }
         orderItemService.updateDelete(orderId);
         applyOrder(dto,order);
@@ -183,7 +180,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderWithItemsInfo search(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "订单不存在"));
         checkBelongs(order.getWareHouse().getWareHouseId());
         List<OrderItemInfo> items = orderItemService.findByOrderId(orderId);
         return OrderConverter.toInfoWithItems(order,items);
@@ -199,10 +196,10 @@ public class OrderService {
     @Transactional
     public void deleteDraft(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new BusinessException(403, "订单不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "订单不存在"));
         checkBelongs(order.getWareHouse().getWareHouseId());
         if(!order.isDraft()){
-            throw new BusinessException(403, "订单不是草稿状态，不可删除！");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单不是草稿状态，不可删除！");
         }
         orderRepository.delete(order);
         // 日志记录
@@ -234,15 +231,15 @@ public class OrderService {
     private void applyOrder(OrderCreateDto dto ,Order order) {
         // 1.校验仓库和销售员是否存在
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new BusinessException(403, "销售员不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "销售员不存在"));
         WareHouse wareHouse = wareHouseRepository.findById(dto.getWareHouseId())
-                .orElseThrow(() -> new BusinessException(403, "仓库不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "仓库不存在"));
         // 1.1 检查仓库和销售员状态是否正常
         if(!employee.isEnabled()){
-            throw new BusinessException(405, employee.getEmployeeName()+"员工已禁用！不可创建订单！");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, employee.getEmployeeName()+"员工已禁用！不可创建订单！");
         }
         if(!wareHouse.isEnabled()){
-            throw new BusinessException(405, wareHouse.getWareHouseName()+"仓库已禁用！不可创建订单！");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, wareHouse.getWareHouseName()+"仓库已禁用！不可创建订单！");
         }
 
         // 1.2 检查员工是否属于该仓库
@@ -250,14 +247,15 @@ public class OrderService {
         Long targetWareHouseId = wareHouse.getWareHouseId();
 
         if(!employeeWareHouseId.equals(targetWareHouseId)){
-            throw new BusinessException(405, employee.getEmployeeName()+"员工不属于"+wareHouse.getWareHouseName()+"仓库！不可创建订单！");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR,
+                    employee.getEmployeeName()+"员工不属于"+wareHouse.getWareHouseName()+"仓库！不可创建订单！");
         }
 
         // 2.创建商品项
         // 2.1 先检查是否有商品项为空
         boolean isEmpty = dto.getSaleItems().isEmpty() && dto.getRefundItems().isEmpty();
         if(isEmpty){
-            throw new BusinessException("订单项不能为空");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单项不能为空");
         }
         List<OrderItem> saleItems = orderItemService.createList(dto.getSaleItems(), order , DirectionEnum.IN);
         List<OrderItem> refundItems = orderItemService.createList(dto.getRefundItems(), order, DirectionEnum.OUT);
@@ -284,7 +282,7 @@ public class OrderService {
 
         // 校验金额是否一致
         if (f_ActualAmount.compareTo(b_ActualAmount) != 0 || f_TotalAmount.compareTo(b_TotalAmount) != 0) {
-            throw new BusinessException("订单金额与商品项金额不一致");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单金额与商品项金额不一致");
         }
 
         // 整合订单项
@@ -325,14 +323,14 @@ public class OrderService {
     // 权限管理
     private void checkPermission(Long wareHouseId) {
         if(!RequestUser.isAdmin() && !RequestUser.isCurrentWareHouse(wareHouseId)) {
-            throw new BusinessException(403, "您没有权限操作该订单！");
+            throw new BusinessException(ErrorCodeEnum.FORBIDDEN, "您没有权限操作该订单！");
         }
     }
 
     // 检查所属权
     private void checkBelongs(Long wareHouseId) {
         if(!RequestUser.isAdmin() && !RequestUser.isCurrentWareHouse(wareHouseId)) {
-            throw new BusinessException(403, "订单所属仓库与当前用户不一致！");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单所属仓库与当前用户不一致！");
         }
     }
 

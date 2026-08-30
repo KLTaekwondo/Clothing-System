@@ -29,3 +29,6 @@ logs/
 *.pid
 *.seed
 *.pid.lock
+# git 备份目录（勿提交）
+.git.bak/
+.git.bak.clean/

@@ -5,6 +5,7 @@ import com.superkl.backend.converter.basic.AdminConverter;
 import com.superkl.backend.dto.basic.LoginDto;
 import com.superkl.backend.dto.basic.ResetDto;
 import com.superkl.backend.entity.basic.Admin;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.basic.AdminInfo;
 import com.superkl.backend.repository.basic.AdminRepository;
@@ -47,17 +48,17 @@ public class AdminService {
 
         // 先查找管理员是否存在
         Admin admin = adminRepository.findByAccount(account)
-                .orElseThrow(() -> new BusinessException(403, "账号不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "账号不存在"));
 
         // 检查两部分是否匹配
         // 1. 密码是否匹配
         if (!passwordEncoder.matches(password, admin.getPassword())) {
-            throw new BusinessException("密码错误");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "密码错误");
         }
 
         // 2. 账号状态是否启用
         if (!admin.isEnabled()) {
-            throw new BusinessException(405, "账号已禁用");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "账号已禁用");
         }
 
         // 提前解析出来，避免调用过长
@@ -107,19 +108,20 @@ public class AdminService {
 
         // 先查找管理员是否存在
         Admin admin = adminRepository.findById(account)
-                .orElseThrow(() -> new BusinessException(403, "账号不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "账号不存在"));
 
         // 先编码新密码，再比较是否匹配
         String adminPassword = admin.getPassword();
 
         if (!passwordEncoder.matches(oldPassword, adminPassword)) {
-            throw new BusinessException("旧密码错误");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "旧密码错误");
         }
 
         // 新旧密码比较，不能相同
         if (passwordEncoder.matches(newPassword, adminPassword)) {
-            throw new BusinessException("新密码不能与旧密码相同");
+            throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "新密码不能与旧密码相同");
         }
+
 
         // 保存新密码到数据库
         String newEncodedPassword = passwordEncoder.encode(newPassword);

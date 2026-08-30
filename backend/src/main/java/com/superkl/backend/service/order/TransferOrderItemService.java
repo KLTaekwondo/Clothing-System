@@ -5,6 +5,7 @@ import com.superkl.backend.dto.order.TransferOrderItemCreateDto;
 import com.superkl.backend.entity.product.ProductSku;
 import com.superkl.backend.entity.order.TransferOrder;
 import com.superkl.backend.entity.order.TransferOrderItem;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.order.TransferOrderItemInfo;
 import com.superkl.backend.repository.product.ProductSkuRepository;
@@ -25,12 +26,12 @@ public class TransferOrderItemService {
     // 新增
     public TransferOrderItem create(TransferOrderItemCreateDto dto , TransferOrder transferOrder) {
         ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode())
-                .orElseThrow(()-> new BusinessException(403,"商品sku不存在！"));
+                .orElseThrow(()-> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品sku不存在！"));
         if(!productSku.getProduct().isEnabled()){
-            throw new BusinessException(405,"商品已被禁用，请检查后再试");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "商品已被禁用，请检查后再试");
         }
         if(!productSku.isEnabled()){
-            throw new BusinessException(405,"商品sku已被禁用，请检查后再试");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "商品sku已被禁用，请检查后再试");
         }
         TransferOrderItem item = TransferOrderItemConverter.toEntity(dto,productSku);
         item.setTransferOrder(transferOrder);

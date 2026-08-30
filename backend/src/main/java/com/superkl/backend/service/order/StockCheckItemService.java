@@ -6,6 +6,7 @@ import com.superkl.backend.entity.order.StockCheck;
 import com.superkl.backend.entity.order.StockCheckItem;
 import com.superkl.backend.entity.product.ProductSku;
 import com.superkl.backend.entity.stock.WareHouseStock;
+import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.order.StockCheckItemInfo;
 import com.superkl.backend.repository.order.StockCheckItemRepository;
@@ -33,17 +34,17 @@ public class StockCheckItemService {
         Long targetWareHouseId = stockCheck.getTargetWarehouse().getWareHouseId();
         // 先查找需要盘点的商品sku
         ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode())
-                .orElseThrow(() -> new BusinessException("商品编码不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品编码不存在"));
         // 查出系统中该商铺记录的商品数量
         WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(productSku.getSkuId(), targetWareHouseId)
-                .orElseThrow(() -> new BusinessException("商品库存记录不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品库存记录不存在"));
 
         // 检查商品状态是否正常
         if (!productSku.getProduct().isEnabled()) {
-            throw new BusinessException(403, "商品并未启用，无法进行盘点");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "商品并未启用，无法进行盘点");
         }
         if(!productSku.isEnabled()) {
-            throw new BusinessException(403, "改商品编码未启用，无法进行盘点");
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "改商品编码未启用，无法进行盘点");
         }
 
         // 记录数据
