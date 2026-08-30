@@ -1,14 +1,17 @@
 <template>
-    <div
-        v-if="visible"
-        class="receipt-overlay"
-        @click.self="handleOverlayClick"
-    >
+    <!-- Teleport 到 body：打印时 #app 整体隐藏，小票作为唯一内容独立成页 -->
+    <Teleport to="body">
+        <div
+            v-if="visible"
+            class="receipt-overlay"
+            @click.self="handleOverlayClick"
+        >
         <div class="receipt-controls">
             <button
+                :disabled="printing"
                 class="controls-btn controls-print"
                 @click="printReceipt"
-            >🖨️ 打印小票</button>
+            >{{ printing ? '打印中...' : '🖨️ 打印小票' }}</button>
             <button
                 class="controls-btn controls-close"
                 @click="$emit('close')"
@@ -166,11 +169,15 @@
                 <div class="footer-note">退换货请保留此小票</div>
             </div>
         </div>
-    </div>
+        </div>
+    </Teleport>
 </template>
 <script setup>
 import {computed, onMounted, ref} from 'vue'
+import {useToastStore} from '../../stores/toastStore.js'
 import {PAY_METHOD_LABELS} from '../../constants/payMethod.js'
+
+const toast = useToastStore()
 
 const props = defineProps({
     visible: Boolean,
@@ -227,29 +234,247 @@ function getItemDiscount(item) {
     return item.special ? 1 : Number(item.discount || 1)
 }
 
+const printing = ref(false)
+
+// 小票打印：C-Lodop SEND_PRINT_RAWDATA 裸流直发（最终通道）
+// 不走 GDI（无 210mm 前置空白）；GBK 编码由本机 C-Lodop 服务完成（前端零编码）
 function printReceipt() {
-    setReceiptPageHeight()
-    window.print()
+    console.log('[lodop] printReceipt 触发')
+    lodopPrint(buildLines())
+}
+
+// 获取 C-Lodop 打印对象：兼容入口链
+// C-Lodop 6.6.x 的官方脚本只定义 getCLodop / window.CLODOP（getLodop 是旧版 Lodop 的入口）
+function getLodopObj() {
+    if (typeof getLodop === 'function') return getLodop()
+    if (typeof getCLodop === 'function') return getCLodop()
+    if (window.CLODOP) return window.CLODOP
+    if (window.LODOP) return window.LODOP
+    return null
+}
+
+// 任意一个 C-Lodop 入口已就绪
+function lodopReady() {
+    return typeof getLodop === 'function'
+        || typeof getCLodop === 'function'
+        || !!window.CLODOP
+        || !!window.LODOP
+}
+
+// 加载本机 C-Lodop 接口：自动多地址尝试 + 等待入口就绪（最多 3 秒）
+function loadClodopFuncs() {
+    return new Promise((resolve, reject) => {
+        const waitLodop = (maxWait, done) => {
+            console.log('[lodop] 探测全局: getLodop=', typeof getLodop,
+                'getCLodop=', typeof getCLodop,
+                'CLODOP=', typeof window.CLODOP,
+                'LODOP=', typeof window.LODOP)
+            if (lodopReady()) {
+                done(true)
+                return
+            }
+            const t0 = Date.now()
+            const timer = setInterval(() => {
+                if (lodopReady()) {
+                    clearInterval(timer)
+                    console.log('[lodop] 轮询等待到位')
+                    done(true)
+                    return
+                }
+                if (Date.now() - t0 > maxWait) {
+                    clearInterval(timer)
+                    done(false)
+                }
+            }, 200)
+        }
+        if (lodopReady()) {
+            console.log('[lodop] C-Lodop 入口已存在，跳过加载')
+            resolve()
+            return
+        }
+        // 官方集成多候选地址：按顺序尝试
+        const candidates = [
+            'http://localhost:8000/CLodopfuncs.js',
+            'http://127.0.0.1:8000/CLodopfuncs.js',
+            'https://localhost:8000/CLodopfuncs.js'
+        ]
+        let index = 0
+        const tryNext = () => {
+            if (index >= candidates.length) {
+                console.log('[lodop] 全部候选地址加载失败')
+                reject(new Error('CLODOP_LOAD_FAIL'))
+                return
+            }
+            const script = document.createElement('script')
+            script.src = candidates[index]
+            index += 1
+            script.onload = () => {
+                console.log('[lodop] 接口脚本加载成功:', script.src)
+                // 脚本就绪后等待入口可用
+                waitLodop(3000, ok => {
+                    console.log('[lodop] 等待结果:', ok ? 'C-Lodop 就绪' : '3秒后仍未就绪')
+                    if (ok) {
+                        resolve()
+                    } else {
+                        script.remove()
+                        tryNext()
+                    }
+                })
+            }
+            script.onerror = () => {
+                console.log('[lodop] 接口脚本加载失败:', script.src)
+                script.remove()
+                tryNext()
+            }
+            document.head.appendChild(script)
+        }
+        tryNext()
+    })
+}
+
+async function lodopPrint(lines) {
+    console.log('[lodop] lodopPrint 开始, 行数:', lines.length)
+    try {
+        await loadClodopFuncs()
+    } catch {
+        console.log('[lodop] loadClodopFuncs 抛出异常')
+        toast.error('无法加载 C-Lodop 接口：请确认本机已安装并运行 C-Lodop（端口 8000）')
+        return
+    }
+    const LODOP = getLodopObj()
+    if (!LODOP) {
+        console.log('[lodop] 打印对象获取失败')
+        toast.error('C-Lodop 连接失败，请确认本地服务已启动')
+        return
+    }
+    console.log('[lodop] 打印对象获取成功, 默认打印机:', LODOP.GET_PRINTER_NAME(-1))
+    // 拼装 ESC/POS 裸流（行文本已手动对齐；纯文本最小指令集）
+    let buf = ''
+    buf += '\x1B\x40' // 打印机初始化
+    buf += '\x1C\x26' // 芯烨开启中文模式（FS &）
+    for (const line of lines) {
+        buf += (line.text || '') + '\r\n'
+    }
+    // 结尾仅留 1 行换行（手撕余量）。
+    // ⚠️ 不加 GS V 切纸指令：无刀手动撕纸机型上，GS V 会"走纸到切刀位置"，
+    // 即使没刀也会强制送出一大截白纸（小票内容被送到刀口位置）——这是空白纸的根源之一
+    buf += '\r\n'
+    console.log('[lodop] buf 长度:', buf.length, '前60字符:', JSON.stringify(buf.slice(0, 60)))
+    LODOP.PRINT_INIT('小票打印')
+    // 编码由本机 C-Lodop 转 GBK（浏览器不参与编码）
+    LODOP.SET_PRINT_MODE('SEND_RAW_DATA_ENCODE', 'GBK')
+    console.log('[lodop] SET_PRINT_MODE 完成')
+    LODOP.SEND_PRINT_RAWDATA(buf)
+    console.log('[lodop] SEND_PRINT_RAWDATA 完成')
+    LODOP.PRINT()
+    console.log('[lodop] PRINT() 已调用')
+    window.dispatchEvent(new Event('afterprint'))
+}
+
+// 小票内容 → 打印行（57mm 纸：一行最多 32 个半角字符，超宽会被打印机硬换行错位）
+// 对齐用手动空格填充（打印机对齐命令在部分固件上失效，空格任何固件都认）
+function buildLines() {
+    const lines = []
+    const row = (text, options = {}) => lines.push({text: text || '', align: 'left', ...options})
+    // 分隔线用 *（ASCII 减号 - 笔画太细，热敏打印几乎看不清；* 点阵最实）
+    const rule = () => '*'.repeat(32)
+
+    // 店头
+    row(center(fitText(props.shopName, 30), 32), {bold: true})
+    if (props.shopSlogan) row(center(fitText(props.shopSlogan, 32), 32))
+    row('')
+    row(rule())
+    // 订单信息（"标签: " 占 12 半角，值最多 20）
+    row(`订单编号: ${fitText(props.orderNo, 20)}`)
+    row(`收银员: ${fitText(props.employeeName, 20)}`)
+    row(`门店: ${fitText(props.warehouseName, 20)}`)
+    row(`时间: ${printTime.value}`)
+    row(rule())
+    // 商品表头
+    row(pad('品名', 12) + pad('数量', 6) + pad('折扣', 4) + rpad('金额', 8), {bold: true})
+    // 商品明细（一行一商品：品名/数量/折扣/金额，列宽与表头对齐）
+    saleItems.value.forEach(item => {
+        const discount = item.special ? '特价' : `${Math.round(Number(item.discount || 1) * 100)}%`
+        row(pad(fitText(item.productName || item.skuName, 12), 12)
+            + pad(`x${item.quantity}件`, 6)
+            + pad(discount, 4)
+            + rpad(`${formatPrice(itemSubtotal(item))}元`, 8))
+        if (item.skuCode) row(fitText(`  货号 ${item.skuCode}`, 26))
+    })
+    refundItems.value.forEach(item => {
+        row(pad(fitText(`退${item.productName || item.skuName}`, 12), 12)
+            + pad(`x${item.quantity}件`, 6)
+            + pad('退货', 4)
+            + rpad(`${formatPrice(itemSubtotal(item))}元`, 8))
+        if (item.skuCode) row(fitText(`  货号 ${item.skuCode}`, 26))
+    })
+    row(rule())
+    row(center(fitText(`销售 ${saleQty.value} 件${refundQty.value > 0 ? `，退货 ${refundQty.value} 件` : ''}`, 32), 32))
+    row(rule())
+    // 金额（用"元"：小票固件字库无 ¥ 符号）
+    row(`总金额    ${formatPrice(props.totalAmount)}元`)
+    if (Number(props.discountAmount) > 0) {
+        row(`优惠      -${formatPrice(props.discountAmount)}元`)
+    }
+    row(`实付金额  ${formatPrice(props.actualAmount)}元`, {bold: true})
+    row(rule())
+    // 支付/会员/备注
+    row(`支付方式: ${fitText(payMethodLabel.value, 20)}`)
+    if (props.memberPhone) row(`会员: ${fitText(props.memberPhone, 20)}`)
+    if (props.remark) row(fitText(`备注: ${props.remark}`, 32))
+    row(rule())
+    // 结尾
+    row(center('感谢您的光临！', 32), {bold: true})
+    row(center('退换货请保留此小票', 32))
+    return lines
+}
+
+// 左侧补空格到指定显示宽度（中文按 2 列）
+function pad(text, width) {
+    text = String(text || '')
+    return text + ' '.repeat(Math.max(0, width - displayWidth(text)))
+}
+
+// 右侧补空格到指定显示宽度
+function rpad(text, width) {
+    text = String(text || '')
+    return ' '.repeat(Math.max(0, width - displayWidth(text))) + text
+}
+
+// 居中：两侧补空格
+function center(text, width) {
+    text = String(text || '')
+    const left = Math.max(0, Math.floor((width - displayWidth(text)) / 2))
+    return ' '.repeat(left) + text
+}
+
+// 显示宽度（中文/全角按 2 列）
+function displayWidth(text) {
+    let width = 0
+    for (const ch of String(text || '')) {
+        width += ch.charCodeAt(0) > 255 ? 2 : 1
+    }
+    return width
+}
+
+function itemSubtotal(item) {
+    return Number(item.unitPrice || 0) * Number(item.quantity || 0) * getItemDiscount(item)
+}
+
+// 按显示宽度截断（中文按 2 个半角字符）
+function fitText(text, maxWidth) {
+    let width = 0
+    let out = ''
+    for (const ch of String(text || '')) {
+        const w = ch.charCodeAt(0) > 255 ? 2 : 1
+        if (width + w > maxWidth) break
+        out += ch
+        width += w
+    }
+    return out
 }
 
 defineExpose({ print: printReceipt })
-
-// 57mm 热敏纸：屏幕小票宽 300px ≈ 79.4mm，打印宽度收窄到 57mm 后
-// 同一内容换行更多、实际高度按宽度比例放大，另加缓冲避免内容翻到第二页
-function setReceiptPageHeight() {
-    const el = document.getElementById('receipt-content')
-    if (!el) return
-    const heightPx = el.offsetHeight
-    const screenWidthMm = (300 * 25.4) / 96
-    const heightMm = Math.ceil((heightPx * 25.4) / 96 * (screenWidthMm / 57)) + 15
-    let tag = document.getElementById('receipt-page-style')
-    if (!tag) {
-        tag = document.createElement('style')
-        tag.id = 'receipt-page-style'
-        document.head.appendChild(tag)
-    }
-    tag.textContent = `@page { size: 57mm ${Math.max(heightMm, 40)}mm; margin: 0; }`
-}
 
 function handleOverlayClick() {
     // 防止误点击关闭
@@ -576,20 +801,23 @@ function handleOverlayClick() {
 <style>
 /* ============ 打印样式（全局生效） ============ */
 @media print {
+    /* 应用外壳整体不占布局：小票（Teleport 到 body）成为唯一打印内容 */
+    #app {
+        display: none !important;
+    }
     html, body {
         height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
-    }
-    body * {
-        visibility: hidden !important;
+        background: #fff !important;
     }
     .receipt-overlay {
         position: static !important;
+        display: block !important;
         background: none !important;
         padding: 0 !important;
+        margin: 0 !important;
         overflow: visible !important;
-        visibility: visible !important;
         height: auto !important;
         min-height: 0 !important;
     }
@@ -599,21 +827,26 @@ function handleOverlayClick() {
     .receipt-paper,
     .receipt-paper * {
         visibility: visible !important;
+        /* 热敏单色纸：所有文字强制纯黑加粗，浅灰/彩色在热敏纸上浓度太低打不出 */
+        color: #000 !important;
+        font-weight: 700 !important;
     }
     .receipt-paper {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
+        position: static !important;
         width: 57mm !important;
         max-width: none !important;
         padding: 0 !important;
-        margin: 0 !important;
+        margin: 0 auto !important;
         box-shadow: none !important;
         border-radius: 0 !important;
-        font-size: 11px !important;
+        font-size: 12px !important;
         line-height: 1.4 !important;
+        color: #000 !important;
+        font-weight: 600 !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     /* 57mm 窄纸下列宽压缩，避免金额列溢出 */
     .receipt-paper .col-price {
@@ -629,7 +862,13 @@ function handleOverlayClick() {
         width: 46px !important;
     }
     .receipt-paper .shop-name {
-        font-size: 15px !important;
+        font-size: 16px !important;
+    }
+    .receipt-paper .item-sku-code {
+        font-size: 11px !important;
+    }
+    .receipt-paper .items-header {
+        font-size: 11px !important;
     }
     .receipt-paper .amount-row {
         font-size: 12px !important;
@@ -638,7 +877,7 @@ function handleOverlayClick() {
         font-size: 13px !important;
     }
     .receipt-paper .final-price {
-        font-size: 15px !important;
+        font-size: 16px !important;
     }
 }
 

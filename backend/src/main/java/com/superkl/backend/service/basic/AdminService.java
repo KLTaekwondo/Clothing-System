@@ -8,9 +8,12 @@ import com.superkl.backend.entity.basic.Admin;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.basic.AdminInfo;
 import com.superkl.backend.repository.basic.AdminRepository;
+import com.superkl.backend.service.auth.AuthRedisService;
+import com.superkl.backend.utils.AuthContext;
 import com.superkl.backend.utils.JwtUtil;
 import com.superkl.backend.utils.TokenCookieManager;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +34,7 @@ public class AdminService {
     private final AdminRepository adminRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final AuthRedisService authRedisService;
 
     @Value("${auth.cookie.secure}")
     private boolean isSecure;
@@ -70,12 +75,22 @@ public class AdminService {
         String token = jwtUtil.generateToken(adminId, claims);
         Cookie cookie = TokenCookieManager.writeTokenCookie(token, isSecure);
         response.addCookie(cookie);
+        // 4. 登录成功，记录token到Redis
+        authRedisService.recordToken("ROLE_ADMIN", adminId, token, Duration.ofDays(7));
         log.info("管理员登录成功：{}", account);
         return AdminConverter.toInfo(admin);
     }
 
     // 2.管理员退出登录
-    public void logout(HttpServletResponse response) {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        // 从Request中获取token
+        String token = AuthContext.extractTokenFromCookie(request, jwtUtil);
+        Long adminId = RequestUser.notNull().getRequestId();
+        // 从Redis中踢掉当前用户的token，注意token不为空才踢
+        if (token != null) {
+            authRedisService.kick("ROLE_ADMIN", adminId, token);
+        }
+        // 生成新的空token，覆盖旧的token
         Cookie cookie = TokenCookieManager.clearTokenCookie(isSecure);
         response.addCookie(cookie);
         log.info("管理员退出登录");

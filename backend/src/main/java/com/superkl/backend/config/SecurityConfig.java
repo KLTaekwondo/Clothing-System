@@ -1,5 +1,6 @@
 package com.superkl.backend.config;
 
+import com.superkl.backend.service.auth.AuthRedisService;
 import com.superkl.backend.utils.JwtAuthenticationFilter;
 import com.superkl.backend.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
+    private final AuthRedisService authRedisService;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -30,7 +32,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil);
+        return new JwtAuthenticationFilter(jwtUtil, authRedisService);
     }
 
     @Bean// bean注解，告诉 Spring 这是一个 Bean，需要被扫描到

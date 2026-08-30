@@ -15,9 +15,12 @@ import com.superkl.backend.repository.basic.AdminRepository;
 import com.superkl.backend.repository.product.ProductSkuRepository;
 import com.superkl.backend.repository.basic.WareHouseRepository;
 import com.superkl.backend.repository.stock.WareHouseStockRepository;
+import com.superkl.backend.service.auth.AuthRedisService;
+import com.superkl.backend.utils.AuthContext;
 import com.superkl.backend.utils.JwtUtil;
 import com.superkl.backend.utils.TokenCookieManager;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +44,7 @@ public class WareHouseService {
     private final ProductSkuRepository productSkuRepository;
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthRedisService authRedisService;
     private final JwtUtil jwtUtil;
 
     @Value("${auth.cookie.secure}")
@@ -182,13 +187,27 @@ public class WareHouseService {
         Cookie cookie = TokenCookieManager.writeTokenCookie(token, isSecure);
         response.addCookie(cookie);
 
+        // 设置redis
+        authRedisService.recordToken("ROLE_WAREHOUSE", wareHouseId, token, Duration.ofDays(7));
+        RequestUser.log();
         log.info("仓库登录成功：{}", account);
         return WareHouseConverter.toInfo(wareHouse);
     }
 
     // 注销
-    public void logout(HttpServletResponse response) {
+    public void logout(HttpServletRequest request , HttpServletResponse response) {
+        // 从请求中获取token
+        String token = AuthContext.extractTokenFromCookie(request, jwtUtil);
+        Long wareHouseId = RequestUser.notNull().getRequestId();
+        // 从redis中删除token
+        if(token != null) {
+            authRedisService.kick("ROLE_WAREHOUSE", wareHouseId, token);
+        }
+
+        // 清空后再覆盖cookie
         Cookie cookie = TokenCookieManager.clearTokenCookie(isSecure);
         response.addCookie(cookie);
+        RequestUser.log();
+        log.info("仓库注销成功：{}", wareHouseId);
     }
 }

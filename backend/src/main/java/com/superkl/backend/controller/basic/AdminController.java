@@ -5,6 +5,7 @@ import com.superkl.backend.dto.basic.LoginDto;
 import com.superkl.backend.dto.basic.ResetDto;
 import com.superkl.backend.info.basic.AdminInfo;
 import com.superkl.backend.service.basic.AdminService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,8 @@ public class AdminController {
 
     // 2. 管理员退出登录
     @PostMapping("/logout")
-    public Result<Void> logout(HttpServletResponse response) {
-        adminService.logout(response);
+    public Result<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        adminService.logout(request,response);
         return Result.successMessage("退出登录成功！");
     }
 

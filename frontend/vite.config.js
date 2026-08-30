@@ -4,4 +4,6 @@ import vue from '@vitejs/plugin-vue'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  // 相对路径：Electron file:// 加载需要
+  base: './',
 })

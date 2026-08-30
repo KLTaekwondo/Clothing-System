@@ -2,6 +2,7 @@ package com.superkl.backend.utils;
 
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.exception.BusinessException;
+import com.superkl.backend.service.auth.AuthRedisService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +20,8 @@ import java.util.Collections;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
+    private final AuthRedisService authRedisService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -33,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 未登录或 token 无效，不做处理，证明当前请求是不正常的，直接拒绝存入上下文，Spring Security会认为是匿名用户。
             // 直接抛出BusinessException异常，让后续过滤器处理，至于这个异常怎么来的，后面讲喽。
             // 建议加一句日志，记录下异常信息，方便调试。
-            log.debug("JWT authentication failed: {}", e.getMessage());
+            log.info("JWT authentication failed: {}", e.getMessage());
         }
         // 继续执行后续过滤器
         chain.doFilter(request, response);
@@ -42,6 +45,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 从请求中获取认证信息
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         RequestUser requestUser = AuthContext.getRequestUserFromCookie(request, jwtUtil);
+        String token = AuthContext.extractTokenFromCookie(request, jwtUtil);
+        // 校验token是否有效
+        if(authRedisService.isBlacklisted(token)){
+            throw new BusinessException("账号已被踢下线");
+        }
+
+        if(!authRedisService.isCurrentToken(requestUser.getRequestRole(), requestUser.getRequestId(), token)){
+            throw new BusinessException("会话已失效，请重新登录");
+        }
         // 第一个参数 userId：存的是“谁”（principal）。
         // 第二个参数 null：凭证（credentials），这里没有密码之类的，所以填 null。
         // 第三个参数：权限集合（authorities）。这里用了 Collections.singleton(() -> role)，实际上是一个 lambda 表达式实现的 GrantedAuthority，意思是这个用户只有一个角色，就是 role 字符串。

@@ -6,6 +6,7 @@ import com.superkl.backend.dto.basic.WareHouseCreateDto;
 import com.superkl.backend.dto.basic.WareHouseUpdateDto;
 import com.superkl.backend.info.basic.WareHouseInfo;
 import com.superkl.backend.service.basic.WareHouseService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -74,8 +75,8 @@ public class WareHouseController {
     // 纯RESTful风格
     // @PostMapping("/logout")
     @PostMapping("/logout")
-    public Result<Void> logout(HttpServletResponse response) {
-        wareHouseService.logout(response);
+    public Result<Void> logout(HttpServletRequest request , HttpServletResponse response) {
+        wareHouseService.logout(request,response);
         return Result.successMessage("仓库注销成功");
     }
 

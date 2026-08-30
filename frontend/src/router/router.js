@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from 'vue-router'
+import {createRouter, createWebHashHistory} from 'vue-router'
 import { useUserStore } from '../stores/userStore.js'
 import ManageChildren from './ManageChildren.js'
 
@@ -38,7 +38,8 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHistory(),
+    // hash 模式：刷新/直接访问不会因静态服务器缺少 rewrite 而 404
+    history: createWebHashHistory(),
     routes
 })
 

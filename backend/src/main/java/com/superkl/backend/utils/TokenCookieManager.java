@@ -10,9 +10,14 @@ public class TokenCookieManager {
         Cookie cookie = new Cookie("token", token);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setAttribute("SameSite", "Lax");
         cookie.setMaxAge(7 * 24 * 3600);
         cookie.setSecure(IsSecure);
+        // 线上 https：允许桌面端跨站携带登录态；本地 http 开发保持 Lax
+        if (IsSecure) {
+            cookie.setAttribute("SameSite", "None");
+        } else {
+            cookie.setAttribute("SameSite", "Lax");
+        }
         return cookie;
     }
 
@@ -22,7 +27,12 @@ public class TokenCookieManager {
         cookie.setPath("/");
         cookie.setSecure(IsSecure);
         cookie.setHttpOnly(true);
-        cookie.setAttribute("SameSite", "Lax");
+        // 线上 https：允许桌面端跨站携带登录态；本地 http 开发保持 Lax
+        if (IsSecure) {
+            cookie.setAttribute("SameSite", "None");
+        } else {
+            cookie.setAttribute("SameSite", "Lax");
+        }
         return cookie;
     }
 }

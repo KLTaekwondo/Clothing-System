@@ -41,7 +41,7 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
             "WHERE o.createTime >= :startTime " +
             "AND o.createTime < :endTime " +
             "AND o.status = :status " +
-            "AND o.employee.employeeId = :employeeId " +
+            "AND (:employeeId IS NULL OR o.employee.employeeId = :employeeId) " +
             "AND o.wareHouse.wareHouseId = :warehouseId ")
     Page<Order> findPageByTimeAndWId(@Param("startTime") LocalDateTime startTime,
                                     @Param("endTime") LocalDateTime endTime,

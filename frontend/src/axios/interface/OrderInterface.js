@@ -58,8 +58,8 @@ function orderInterface() {
         };
     }
 
-    const searchCurrentCompletePage = async (page = 0, size = 10,startTime = Now,endTime = NowEnd) => {
-        const data = await orderAPI.searchCurrentCompleteOrderPage(page, size,startTime,endTime);
+    const searchCurrentCompletePage = async (page = 0, size = 10, startTime = Now, endTime = NowEnd, employeeId = null) => {
+        const data = await orderAPI.searchCurrentCompleteOrderPage(page, size, startTime, endTime, employeeId);
         return data || {
             content: [],
             totalElements: 0,

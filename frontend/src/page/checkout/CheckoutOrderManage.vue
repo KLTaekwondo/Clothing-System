@@ -41,6 +41,18 @@
                             type="date"
                             @change="applyDateFilter"
                         />
+                        <select
+                            v-model="filterEmployeeId"
+                            class="employee-select"
+                            @change="onEmployeeFilter"
+                        >
+                            <option value="">全部员工</option>
+                            <option
+                                v-for="employee in employees"
+                                :key="employee.id"
+                                :value="employee.id"
+                            >{{ employee.name }}</option>
+                        </select>
                         <button
                             :disabled="loading"
                             class="btn-outline search-button"
@@ -269,6 +281,7 @@ import {useRouter} from 'vue-router'
 import {useToastStore} from '../../stores/toastStore.js'
 import orderInterface from '../../axios/interface/OrderInterface.js'
 import orderDashInterface from '../../axios/interface/OrderDashInterface.js'
+import employeeInterface from '../../axios/interface/EmployeeInterface.js'
 import {PAY_METHOD, PAY_METHOD_LABELS} from '../../constants/payMethod.js'
 import IconGraphic from '../../component/IconGraphic.vue'
 import TablePagination from '../../component/common/TablePagination.vue'
@@ -286,6 +299,9 @@ const orderList = ref([])
 const searchQuery = ref('')
 const startDate = ref(getToday())
 const endDate = ref(getToday())
+// 员工筛选：'' = 全部员工（传 null），其他 = 员工 id
+const employees = ref([])
+const filterEmployeeId = ref('')
 const loading = ref(true)
 const detailTarget = ref(null)
 const detailLoading = ref(false)
@@ -328,14 +344,30 @@ const filteredOrders = computed(() => {
 onMounted(() => {
     fetchOrders()
     fetchPayStats()
+    loadEmployees()
 })
+
+// 当前仓库可用员工（收银端 employee/verify 列表）
+async function loadEmployees() {
+    try {
+        employees.value = await employeeInterface.verifyList()
+    } catch {
+        employees.value = []
+    }
+}
+
+// 员工筛选变化：回到第一页重新查询（'' 传 null = 全部）
+function onEmployeeFilter() {
+    pageInfo.value.page = 0
+    fetchOrders()
+}
 
 async function fetchOrders() {
     const startTime = `${startDate.value}T00:00:00`
     const endTime = `${endDate.value}T23:59:59`
     loading.value = true
     try {
-        const data = await orderInterface.searchCurrentCompletePage(pageInfo.value.page, pageInfo.value.size, startTime, endTime)
+        const data = await orderInterface.searchCurrentCompletePage(pageInfo.value.page, pageInfo.value.size, startTime, endTime, filterEmployeeId.value || null)
         orderList.value = data.content || []
         pageInfo.value = {
             totalElements: data.totalElements || 0,
@@ -489,6 +521,26 @@ function goCheckout() {
 }
 
 .date-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-focus);
+}
+
+/* 员工筛选下拉（胶囊样式，与日期控件一致） */
+.employee-select {
+    width: 128px;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg-card);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.employee-select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--primary-focus);
 }

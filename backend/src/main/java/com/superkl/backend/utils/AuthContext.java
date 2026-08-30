@@ -11,16 +11,7 @@ public class AuthContext {
     private final JwtUtil jwtUtil;
 
     private static String extractTokenAndValidateFromCookie(HttpServletRequest request, JwtUtil jwtUtil) {
-        Cookie[] cookies = request.getCookies();
-        String token = null;
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("token".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    break;
-                }
-            }
-        }
+        String token = extractTokenFromCookie(request, jwtUtil);
         //自动检验token是否为空或过期
         // token为空，说明用户没有登录，抛出异常401，提示用户先登录
         if (token == null) {
@@ -39,5 +30,20 @@ public class AuthContext {
     public static RequestUser getRequestUserFromCookie(HttpServletRequest request, JwtUtil jwtUtil) {
         String token = extractTokenAndValidateFromCookie(request, jwtUtil);
         return jwtUtil.parseRequestUser(token);
+    }
+
+    // 用来从cookie中提取token值，主要用于redis踢人时，需要根据token值来踢人
+    public static String extractTokenFromCookie(HttpServletRequest request, JwtUtil jwtUtil) {
+        Cookie[] cookies = request.getCookies();
+        String token = null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("token".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        return token;
     }
 }

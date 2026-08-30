@@ -3,10 +3,36 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:electron": "vite build --mode electron",
+    "start:electron": "vite build --mode electron && electron .",
+    "pack:electron": "vite build --mode electron && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.klkoole.clothing",
+    "productName": "服装管理系统",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
   },
   "dependencies": {
     "axios": "1.18.0",
@@ -17,6 +43,8 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
+    "electron": "^37.10.3",
+    "electron-builder": "^26.15.3",
     "vite": "8.0.16"
   }
 }
