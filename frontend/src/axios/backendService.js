@@ -45,20 +45,25 @@ backendService.interceptors.response.use(
         const status = error.response?.status;
         // 后端新异常处理：错误响应 = 真实 HTTP 状态码 + body 纯字符串（中文错误消息）
         const data = error.response?.data;
-        const bodyMsg = typeof data === "string" && data.trim() ? data : (data && typeof data === "object" ? data.msg : "");
+        const bodyMsg = typeof data === "string" && data.trim() ? data : "";
         const toast = useToastStore();
 
-        // 401：未登录 / token 过期 / 账号被顶下线 → 清除登录态并回登录页
+        // 401：未登录 / token 过期 / 账号被踢下线 / 会话失效 → 清除登录态并回登录页
         if (status === 401) {
             const userStore = useUserStore();
             userStore.logout();
             router.push("/");
             toast.error(bodyMsg || "未登录或登录已失效，请重新登录");
         } else if (status === 403) {
-            toast.error(bodyMsg || "权限不足，请联系管理员");
+            // 后端已语义化：403 只表示真正的权限不足
+            toast.error("权限不足，请联系管理员");
         } else if (status === 500) {
-            toast.error(bodyMsg || "网络异常，请稍后重试");
+            toast.error("服务器内部错误，请联系管理员");
+        } else if (status === 422) {
+            // 业务规则错误（RULE_* 系列，后端业务主通道）：展示后端具体消息
+            toast.error(bodyMsg || "业务规则错误");
         } else if (bodyMsg) {
+            // 其余错误码：展示后端中文消息
             toast.error(bodyMsg);
         } else if (error.message) {
             toast.error(error.message);

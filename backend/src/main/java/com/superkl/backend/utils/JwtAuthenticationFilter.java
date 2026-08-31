@@ -38,6 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 直接抛出BusinessException异常，让后续过滤器处理，至于这个异常怎么来的，后面讲喽。
             // 建议加一句日志，记录下异常信息，方便调试。
             log.info("JWT authentication failed: {}", e.getMessage());
+            response.setStatus(e.getCode());
+            response.setContentType("text/plain;charset=UTF-8");
+            response.getWriter().write(e.getMessage());
+            return;
         }
         // 继续执行后续过滤器
         chain.doFilter(request, response);
@@ -60,5 +64,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 第三个参数：权限集合（authorities）。这里用了 Collections.singleton(() -> role)，实际上是一个 lambda 表达式实现的 GrantedAuthority，意思是这个用户只有一个角色，就是 role 字符串。
         // 这个 lambda 写法虽然能跑，但一般用 new SimpleGrantedAuthority(role) 更直观。
         return new UsernamePasswordAuthenticationToken(requestUser, null, Collections.singleton(requestUser::getRequestRole));
+    }
+
+    // 不应该拦截的请求
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        // 登录接口不校验：没有 token 是正常状态，直接放行
+        return uri.endsWith("/login");
     }
 }
