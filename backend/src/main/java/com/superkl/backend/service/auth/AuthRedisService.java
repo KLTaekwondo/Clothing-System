@@ -3,6 +3,7 @@ package com.superkl.backend.service.auth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +58,7 @@ public class AuthRedisService {
     public void kick(String role, Long userId, String token) {
         try{
             redis.opsForZSet().remove(sessionKey(role, userId), token);
-        }catch(Exception e){
+        }catch(RedisConnectionFailureException e){
             log.warn("REDIS 踢掉失败，异常信息：{}", e.getMessage());
         }
     }
@@ -66,7 +67,7 @@ public class AuthRedisService {
     public boolean isBlacklisted(String token) {
         try{
             return Boolean.TRUE.equals(redis.hasKey("auth:blacklist:" + token));
-        }catch(Exception e){
+        }catch(RedisConnectionFailureException e){
             log.warn("REDIS 检查是否被拉黑失败，异常信息：{}", e.getMessage());
             return false;
         }
@@ -76,9 +77,9 @@ public class AuthRedisService {
     public boolean isCurrentToken(String role, Long userId, String token) {
         try{
             return redis.opsForZSet().score(sessionKey(role, userId), token) != null;
-        }catch(Exception e){
-            log.warn("REDIS 检查是否是当前用户的token失败，异常信息：{}", e.getMessage());
-            return false;
+        }catch(RedisConnectionFailureException e){
+            log.warn("REDIS 检查是否是当前用户的token失败，暂时放行，异常信息：{}", e.getMessage());
+            return true;
         }
     }
 }
