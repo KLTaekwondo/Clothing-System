@@ -112,6 +112,7 @@ import importOrderIcon from '../../assets/icons/navigation/import-order.svg'
 import transferOrderIcon from '../../assets/icons/navigation/transfer-order.svg'
 import optionIcon from '../../assets/icons/navigation/option.svg'
 import settingsIcon from '../../assets/icons/navigation/settings.svg'
+import aiIcon from '../../assets/icons/navigation/ai.svg'
 import statisticsIcon from '../../assets/icons/trend.svg'
 import logoutIcon from '../../assets/icons/navigation/logout.svg'
 import brandMark from '../../assets/brand-mark.svg'
@@ -141,6 +142,7 @@ const navItems = [
     {path: '/manage/order', label: '订单管理', icon: orderIcon},
     {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon},
     {path: '/manage/statistics', label: '数据统计', icon: statisticsIcon},
+    {path: '/manage/ai', label: 'AI 助手', icon: aiIcon},
     {path: '/manage/setting', label: '系统设置', icon: settingsIcon}
 ]
 
@@ -329,6 +331,7 @@ async function handleLogout() {
 
 .sidebar-nav {
     flex-grow: 1;
+    min-height: 0;
     padding: 16px 8px;
     display: flex;
     flex-direction: column;
@@ -336,6 +339,14 @@ async function handleLogout() {
     box-shadow: 0 2px 7px rgba(22, 83, 78, 0.06) inset;
     border-top: 2px solid var(--border-light);
     border-bottom: 2px solid var(--border-light);
+    /* 菜单多时在导航区内滚动，退出登录始终贴底可见 */
+    overflow-y: auto;
+    /* 隐藏滚动条：导航区可滚动是常识，不需要滚动条占位 */
+    scrollbar-width: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    display: none;
 }
 
 .nav-item {
@@ -773,6 +784,7 @@ async function handleLogout() {
     }
 
     .sidebar-nav {
+        min-height: 0;
         padding-top: 14px;
         overflow-y: auto;
     }

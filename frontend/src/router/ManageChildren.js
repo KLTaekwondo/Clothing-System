@@ -244,6 +244,12 @@ const ManageChildren = [
         name: 'SystemSetting',
         component: () => import('../page/manage/setting/SystemSetting.vue'),
         meta: {title: '系统设置', icon: 'settings'}
+    },
+    {
+        path: 'ai',
+        name: 'AIChat',
+        component: () => import('../page/manage/ai/AIChat.vue'),
+        meta: {title: 'AI 助手', icon: 'ai'}
     }
 ]
 
