@@ -1,0 +1,32 @@
+# 构建上下文过滤：避免把大目录/无用文件传进 Docker 构建
+
+# Git
+.git
+.git.bak
+.git.bak.clean
+
+# 后端构建产物（Dockerfile 只需要 target 里的 jar，但避免整个 target 被传——用 COPY 精确指定即可）
+backend/target/*.class
+backend/target/*.jar.original
+backend/target/maven-*
+# 注意：backend/target/*.jar 不能忽略（Dockerfile 要 COPY 它）
+
+# 前端依赖与构建产物
+frontend/node_modules
+frontend/.vite
+# 注意：frontend/dist 不能忽略（根目录 Dockerfile 需要 COPY frontend/dist/）
+
+# 本地环境
+.idea
+.vscode
+*.iml
+.DS_Store
+Thumbs.db
+
+# 日志与临时文件
+*.log
+docker-cookies.txt
+cookies.txt
+
+# 测试产物
+backend/.mvn
