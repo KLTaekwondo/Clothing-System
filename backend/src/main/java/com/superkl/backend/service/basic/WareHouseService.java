@@ -5,14 +5,12 @@ import com.superkl.backend.converter.basic.WareHouseConverter;
 import com.superkl.backend.dto.basic.LoginDto;
 import com.superkl.backend.dto.basic.WareHouseCreateDto;
 import com.superkl.backend.dto.basic.WareHouseUpdateDto;
-import com.superkl.backend.entity.basic.Admin;
 import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.entity.stock.WareHouseStock;
 import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.basic.WareHouseInfo;
-import com.superkl.backend.repository.basic.AdminRepository;
 import com.superkl.backend.repository.product.ProductSkuRepository;
 import com.superkl.backend.repository.basic.WareHouseRepository;
 import com.superkl.backend.repository.stock.WareHouseStockRepository;
@@ -43,7 +41,6 @@ public class WareHouseService {
     private final WareHouseRepository wareHouseRepository;
     private final WareHouseStockRepository wareHouseStockRepository;
     private final ProductSkuRepository productSkuRepository;
-    private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthRedisService authRedisService;
     private final JwtUtil jwtUtil;
@@ -54,9 +51,6 @@ public class WareHouseService {
     // 新增仓库
     @Transactional
     public void create(WareHouseCreateDto wareHouseCreateDto) {
-        // 先查找管理员是否存在
-        Admin admin = adminRepository.findById(RequestUser.notNull().getRequestId())
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "管理员不存在！"));
         // 检查仓库编号是否已经存在
         if(wareHouseRepository.existsByCode(wareHouseCreateDto.getCode())){
             throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "仓库编号已存在！");
@@ -67,7 +61,7 @@ public class WareHouseService {
         }
 
         // 转换为仓库实体
-        WareHouse wareHouse = WareHouseConverter.toEntity(wareHouseCreateDto, admin);
+        WareHouse wareHouse = WareHouseConverter.toEntity(wareHouseCreateDto);
         // 加密密码
         String encryptedPassword = passwordEncoder.encode(wareHouseCreateDto.getPassword());
         wareHouse.setWareHousePassword(encryptedPassword);

@@ -39,12 +39,6 @@ public class WareHouse extends BaseEntity {
     private CheckEnum checkStatus = CheckEnum.NO_CHECK;// 仓库盘点状态，默认未在盘点
 
 
-    // ===== 关联属性 =====
-    // 关联管理员
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
-    private Admin admin;
-
     // 辅助方法
     public boolean isEnabled() {
         return StatusEnum.ENABLE.equals(status);

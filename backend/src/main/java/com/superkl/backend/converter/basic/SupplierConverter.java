@@ -2,7 +2,6 @@ package com.superkl.backend.converter.basic;
 
 import com.superkl.backend.dto.basic.SupplierCreateDto;
 import com.superkl.backend.dto.basic.SupplierUpdateDto;
-import com.superkl.backend.entity.basic.Admin;
 import com.superkl.backend.entity.basic.Supplier;
 import com.superkl.backend.info.basic.SupplierInfo;
 
@@ -33,13 +32,12 @@ public class SupplierConverter {
     }
 
     // dto转实体
-    public static Supplier toEntity(SupplierCreateDto dto , Admin admin){
+    public static Supplier toEntity(SupplierCreateDto dto){
         return Supplier.builder()
                 .supplierName(dto.getSupplierName())
                 .supplierCode(dto.getSupplierCode())
                 .contactPhone(dto.getContactPhone())
                 .remark(dto.getRemark())
-                .admin(admin)
                 .build();
     }
 

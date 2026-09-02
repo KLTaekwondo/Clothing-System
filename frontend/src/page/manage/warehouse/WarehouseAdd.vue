@@ -3,7 +3,7 @@
         <div class="page-toolbar">
             <div class="page-label">
                 <h2 class="page-label-title">添加仓库</h2>
-                <p class="page-label-desc">创建仓库并自动绑定当前管理员</p>
+                <p class="page-label-desc">创建仓库账号，用于仓库登录与业务记录</p>
                 <hr class="label-hr"/>
             </div>
             <i class="toolbar-divider"></i>

@@ -2,7 +2,6 @@ package com.superkl.backend.converter.basic;
 
 import com.superkl.backend.dto.basic.WareHouseCreateDto;
 import com.superkl.backend.dto.basic.WareHouseUpdateDto;
-import com.superkl.backend.entity.basic.Admin;
 import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.info.basic.WareHouseInfo;
 
@@ -32,11 +31,10 @@ public class WareHouseConverter {
     }
 
     // Dto转实体
-    public static WareHouse toEntity(WareHouseCreateDto wareHouseCreateDto , Admin admin) {
+    public static WareHouse toEntity(WareHouseCreateDto wareHouseCreateDto) {
         return WareHouse.builder()
                 .wareHouseCode(wareHouseCreateDto.getCode())
                 .wareHouseName(wareHouseCreateDto.getName())
-                .admin(admin)
                 .build();
     }
 

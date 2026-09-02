@@ -133,10 +133,10 @@ public class WareHouseStockService {
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
 
         // 锁定库存
-        WareHouseStock wsLocked = wareHouseStockRepository.findByIdForUpdate(ws.getStockId())
+        ws = wareHouseStockRepository.findByIdForUpdate(ws.getStockId())
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "该库存记录已锁定！"));
         // 增加库存
-        Integer beforeQuantity = wsLocked.getStock();
+        Integer beforeQuantity = ws.getStock();
         Integer afterQuantity = beforeQuantity + stock;
         ws.setStock(afterQuantity);
         // 保存库存记录

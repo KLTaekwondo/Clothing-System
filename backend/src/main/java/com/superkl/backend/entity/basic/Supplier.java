@@ -33,10 +33,6 @@ public class Supplier extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private StatusEnum status = StatusEnum.ENABLE;// 状态（默认启用）
-    // 关联属性
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
-    private Admin admin;// 关联的管理员
 
     public boolean isEnabled(){
         return StatusEnum.ENABLE.equals(status);

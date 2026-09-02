@@ -109,14 +109,10 @@
 <script setup>
 import {computed, ref} from 'vue'
 import {onBeforeRouteLeave, useRouter} from 'vue-router'
-import {useToastStore} from '../../../stores/toastStore.js'
-import {useUserStore} from '../../../stores/userStore.js'
 import supplierInterface from '../../../axios/interface/SupplierInterface.js'
 import usePageDraft from '../../../composables/usePageDraft.js'
 
 const router = useRouter()
-const toast = useToastStore()
-const userStore = useUserStore()
 const submitting = ref(false)
 const saved = ref(false)
 const showLeaveConfirm = ref(false)
@@ -159,19 +155,13 @@ onBeforeRouteLeave((to, from, next) => {
 
 async function handleSubmit() {
     if (submitting.value || !canSubmit.value) return
-    const adminId = Number(userStore.userInfo?.id || 0)
-    if (!adminId) {
-        toast.warning('未获取到当前管理员信息')
-        return
-    }
     submitting.value = true
     try {
         await supplierInterface.create({
             supplierCode: form.value.supplierCode.trim(),
             supplierName: form.value.supplierName.trim(),
             contactPhone: form.value.contactPhone.trim(),
-            remark: form.value.remark.trim(),
-            adminId
+            remark: form.value.remark.trim()
         })
         saved.value = true
         supplierDraft.clear()

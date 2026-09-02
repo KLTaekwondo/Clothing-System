@@ -1,16 +1,13 @@
 package com.superkl.backend.service.basic;
 
-import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.basic.SupplierConverter;
 import com.superkl.backend.dto.basic.SupplierCreateDto;
 import com.superkl.backend.dto.basic.SupplierUpdateDto;
-import com.superkl.backend.entity.basic.Admin;
 import com.superkl.backend.entity.basic.Supplier;
 import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.basic.SupplierInfo;
-import com.superkl.backend.repository.basic.AdminRepository;
 import com.superkl.backend.repository.basic.SupplierRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,19 +19,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SupplierService {
     private final SupplierRepository supplierRepository;
-    private final AdminRepository adminRepository;
 
     // 1. 创建供应商
     @Transactional
     public void create (SupplierCreateDto dto){
-        Admin admin = adminRepository.findById(RequestUser.notNull().getRequestId())
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "管理员不存在"));
         // 检查是否已经存在一样的供应商编号
         if(supplierRepository.existsByCode(dto.getSupplierCode())){
             throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "供应商编号已存在！");
         }
 
-        Supplier supplier = SupplierConverter.toEntity(dto , admin);
+        Supplier supplier = SupplierConverter.toEntity(dto);
         supplierRepository.save(supplier);
     }
 

@@ -36,11 +36,9 @@ CREATE TABLE IF NOT EXISTS t_warehouse
     ware_house_code     varchar(255)                     not null,
     ware_house_name     varchar(255)                     not null,
     ware_house_password varchar(255)                     not null,
-    admin_id            bigint                           null,
     check_status        enum ('NO_CHECK', 'UNDER_CHECK') not null,
     constraint UK_ware_house_code unique (ware_house_code),
-    constraint UK_ware_house_name unique (ware_house_name),
-    constraint FK_warehouse_admin foreign key (admin_id) references t_admin (admin_id)
+    constraint UK_ware_house_name unique (ware_house_name)
 )
     engine = InnoDB;
 
@@ -50,15 +48,10 @@ CREATE TABLE IF NOT EXISTS t_warehouse
 INSERT IGNORE INTO t_admin (admin_code, username, password, status)
 VALUES ('admin001', 'System Admin', '$2b$10$Z5eVAh6ANbEH5p2zxf.rLOTLpYqW8MlhH4POuXgFHXchc0.qtegn2', 'ENABLE');
 
-SELECT admin_id INTO @init_admin_id
-FROM t_admin
-WHERE admin_code = 'admin001'
-LIMIT 1;
-
 -- 2. 仓库。仓库密码密文对应明文密码：warehouse
-INSERT IGNORE INTO t_warehouse (ware_house_code, ware_house_name, status, ware_house_password, check_status, admin_id)
+INSERT IGNORE INTO t_warehouse (ware_house_code, ware_house_name, status, ware_house_password, check_status)
 VALUES
-    ('WH001', 'Shanghai WH', 'ENABLE', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'NO_CHECK', @init_admin_id),
-    ('WH002', 'Hangzhou WH', 'ENABLE', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'NO_CHECK', @init_admin_id);
+    ('WH001', 'Shanghai WH', 'ENABLE', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'NO_CHECK'),
+    ('WH002', 'Hangzhou WH', 'ENABLE', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'NO_CHECK');
 
 COMMIT;
