@@ -8,7 +8,6 @@ import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.entity.order.Order;
 import com.superkl.backend.entity.order.OrderItem;
 import com.superkl.backend.enums.DirectionEnum;
-import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.enums.OrderStatusEnum;
 import com.superkl.backend.enums.PayMethodEnum;
 import com.superkl.backend.enums.StatusEnum;
@@ -19,6 +18,7 @@ import com.superkl.backend.repository.order.OrderRepository;
 import com.superkl.backend.service.basic.MemberService;
 import com.superkl.backend.service.dash.CacheDashService;
 import com.superkl.backend.service.stock.WareHouseStockService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,30 +29,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * 教学版测试：OrderService 的订单金额双向校验
- *
- * 套路讲解（三步走）：
- * 1. @ExtendWith(MockitoExtension.class) —— 启用 Mockito，让 @Mock 生效
- * 2. @Mock 声明所有依赖 —— 不连数据库，全部用假对象
- * 3. 每个测试方法 = 准备数据(given) → 调用(when) → 断言结果(then)
- *
- * 为什么这么测：
- * - OrderService 的 applyOrder() 里有"前端金额 vs 后端计算金额"的双向校验，
- *   这是业务核心规则，错一个数就是钱的问题，必须测
- * - 不测 CRUD 查询，因为那是 Spring Data JPA 框架干的活，测了等于白测
- */
 @ExtendWith(MockitoExtension.class)
-class OrderServiceTest {
-
+@Slf4j
+public class OrderServiceTest {
     // ========== 第一步：声明所有依赖（@Mock 生成假对象） ==========
 
     @Mock
@@ -80,8 +67,38 @@ class OrderServiceTest {
     private OrderService orderService;
 
     // 测试用的公共数据
+    // 快捷订单项数据
+    private static final BigDecimal price = new BigDecimal("20.00");
+    private static final BigDecimal normalDiscount = new BigDecimal("1.00");
+    // ===== 启用的仓库 =====
+    private static final String WAREHOUSE_CODE = "WH001";
+    private static final String WAREHOUSE_NAME = "测试仓库";
     private static final Long WAREHOUSE_ID = 1L;
-    private static final Long EMPLOYEE_ID = 10L;
+
+    // ===== 禁用的仓库 =====
+    private static final String D_WAREHOUSE_CODE = "WH002";
+    private static final String D_WAREHOUSE_NAME = "测试仓库2";
+    private static final Long D_WAREHOUSE_ID = 2L;
+
+    // ==== 启动的仓库2 =====
+    private static final String WAREHOUSE2_CODE = "WH003";
+    private static final String WAREHOUSE2_NAME = "测试仓库3";
+    private static final Long WAREHOUSE2_ID = 3L;
+
+    // ===== 测试员工，位于启用仓库中 =====
+    private static final String EWE_EMPLOYEE_NAME = "测试员工";
+    private static final String EWE_EMPLOYEE_CODE = "EMP001";
+    private static final Long EWE_EMPLOYEE_ID = 10L; // 测试员工 ID
+
+    // ===== 测试员工，位于禁用仓库中 =====
+    private static final String DWE_EMPLOYEE_NAME = "测试员工2";
+    private static final String DWE_EMPLOYEE_CODE = "EMP002";
+    private static final Long DWE_EMPLOYEE_ID = 20L; // 测试员工 ID
+
+    // ===== 禁用员工 位于启用仓库中 =====
+    private static final String EWD_EMPLOYEE_NAME = "测试员工3";
+    private static final String EWD_EMPLOYEE_CODE = "EMP003";
+    private static final Long EWD_EMPLOYEE_ID = 30L; // 测试员工 ID
 
     @BeforeEach
     void setUp() {
@@ -96,267 +113,325 @@ class OrderServiceTest {
                 cacheDashService
         );
 
-        // 造一个"当前登录用户"（RequestUser 是静态方法读 SecurityContextHolder）
-        // 不这么做，checkPermission() 里 RequestUser.isAdmin() 会返回 false
-        RequestUser currentUser = RequestUser.builder()
-                .requestId(WAREHOUSE_ID)
-                .requestRole("ROLE_ADMIN")
-                .requestName("测试管理员")
-                .requestCode("ADMIN001")
-                .build();
-        SecurityContextHolder.getContext().setAuthentication(
-                // 注意：必须用三参构造器！两参构造器创建的 token 是未认证状态(isAuthenticated=false)，
-                // RequestUser.current() 第一行就检查 isAuthenticated()，会导致权限校验全部失败
-                new UsernamePasswordAuthenticationToken(currentUser, null, List.of())
-        );
+        // 模拟登录不在此处，而是在测试方法中调用，如果在这里使用，则全部测试用例都使用这个登录用户
+        // 但是可以统一清除 SecurityContextHolder，避免测试用例之间互相污染
+        clearContext();
     }
 
-    // ========== 用例 1：金额一致 → 订单正常完成 ==========
-
+    // 测试用例
+    // 1.测试正常状态下写入订单-> 返回正常的订单号，同时有操作信息
     @Test
-    void complete_whenAmountMatches_shouldSucceed() {
-        // given：准备一个合法的订单请求
-        OrderCreateDto dto = buildOrderDto(
-                new BigDecimal("100.00"),   // 前端实付金额
-                new BigDecimal("100.00")    // 前端总金额
-        );
+    void test_NormalOrder(){
+        // 登录仓库，并创造数据
+        login(WAREHOUSE_ID, WAREHOUSE_NAME, WAREHOUSE_CODE);
+        stubE_E();
+        stubOrderItems(price, 1,0, normalDiscount, normalDiscount);
+        OrderCreateDto dto = buildOrderCreateDto(WAREHOUSE_ID, EWE_EMPLOYEE_ID, new BigDecimal("20.00"), new BigDecimal("20.00"));
 
-        // 员工存在且启用、仓库存在且启用
-        Employee employee = buildEmployee(EMPLOYEE_ID, WAREHOUSE_ID, StatusEnum.ENABLE);
-        WareHouse wareHouse = buildWareHouse(WAREHOUSE_ID, StatusEnum.ENABLE);
-        when(employeeRepository.findById(EMPLOYEE_ID)).thenReturn(Optional.of(employee));
-        when(wareHouseRepository.findById(WAREHOUSE_ID)).thenReturn(Optional.of(wareHouse));
-
-        // 订单项服务返回"销售1件100元"的订单项（金额计算在 OrderItemConverter，这里直接给结果）
-        OrderItem saleItem = buildOrderItem(new BigDecimal("100.00"), 1, DirectionEnum.IN);
-        when(orderItemService.createList(anyList(), any(Order.class), eq(DirectionEnum.IN)))
-                .thenReturn(List.of(saleItem));
-        when(orderItemService.createList(anyList(), any(Order.class), eq(DirectionEnum.OUT)))
-                .thenReturn(List.of());
-
-        // when：调用被测方法（complete = 完成订单）
+        // 断言
         String orderNo = orderService.complete(dto);
 
-        // then：断言返回了订单号，且订单被保存
         assertNotNull(orderNo);
         verify(orderRepository).save(any(Order.class));
     }
 
-    // ========== 用例 2：实付金额不一致 → 抛异常 ==========
-
+    // 2.测试前后端金额错误的情况下写入订单 -> 抛出异常
     @Test
-    void complete_whenActualAmountMismatch_shouldThrow() {
-        // given：前端说实付 90，但订单项算出来是 100 → 必然不一致
-        OrderCreateDto dto = buildOrderDto(
-                new BigDecimal("90.00"),
-                new BigDecimal("100.00")
-        );
-        stubBaseData(dto);
-        stubOrderItems(new BigDecimal("100.00"), 1, List.of());
+    void test_WrongFrontAmount(){
+        // 登录仓库，并创造数据
+        login(WAREHOUSE_ID, WAREHOUSE_NAME, WAREHOUSE_CODE);
+        stubE_E();
+        stubOrderItems(price, 1,0, normalDiscount, normalDiscount);
+        OrderCreateDto dto = buildOrderCreateDto(WAREHOUSE_ID, EWE_EMPLOYEE_ID, new BigDecimal("15.00"), new BigDecimal("15.00"));
 
-        // when + then：调用后必须抛 BusinessException，且消息包含关键词
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> orderService.complete(dto));
-        assertEquals(ErrorCodeEnum.RULE_VALID_ERROR.getCode(), ex.getCode());
-        assertTrue(ex.getMessage().contains("订单金额与商品项金额不一致"));
+        // 断言
+        BusinessException ex = assertThrows(BusinessException.class, () -> orderService.complete(dto));
+        assertEquals("订单金额与后台计算金额不一致！", ex.getMessage());
+        log.warn(ex.getMessage());
 
-        // 关键：金额不一致时，订单绝不能保存（save 不能被调用）
+        // 验证不保存是否生效
+        verify(orderRepository, never()).save(any(Order.class));
+
+    }
+
+    // 3.测试禁用仓库的情况下写入订单 -> 抛出异常
+    @Test
+    void test_DisabledWarehouseComplete() {
+        // 登录仓库，并创造数据
+        login(D_WAREHOUSE_ID, D_WAREHOUSE_NAME, D_WAREHOUSE_CODE);
+        stubD_E();
+        OrderCreateDto dto = buildOrderCreateDto(D_WAREHOUSE_ID, DWE_EMPLOYEE_ID, new BigDecimal("20.00"), new BigDecimal("20.00"));
+
+        // 断言
+        BusinessException ex = assertThrows(BusinessException.class, () -> orderService.complete(dto));
+        assertTrue(ex.getMessage().contains("仓库已禁用！不可创建订单！"));
+        log.warn(ex.getMessage());
+
         verify(orderRepository, never()).save(any(Order.class));
     }
 
-    // ========== 用例 3：总金额不一致 → 抛异常 ==========
-
+    // 4.测试启用仓库，员工禁用的情况下写入订单 -> 抛出异常
     @Test
-    void complete_whenTotalAmountMismatch_shouldThrow() {
-        OrderCreateDto dto = buildOrderDto(
-                new BigDecimal("100.00"),
-                new BigDecimal("80.00")
-        );
-        stubBaseData(dto);
-        stubOrderItems(new BigDecimal("100.00"), 1, List.of());
+    void test_DisabledEmployeeComplete() {
+        // 登录仓库，并创造数据
+        login(WAREHOUSE_ID, WAREHOUSE_NAME, WAREHOUSE_CODE);
+        stubE_D();
+        OrderCreateDto dto = buildOrderCreateDto(WAREHOUSE_ID, EWD_EMPLOYEE_ID, new BigDecimal("20.00"), new BigDecimal("20.00"));
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> orderService.complete(dto));
-        assertTrue(ex.getMessage().contains("订单金额与商品项金额不一致"));
+        // 断言
+        BusinessException ex = assertThrows(BusinessException.class, () -> orderService.complete(dto));
+        assertTrue(ex.getMessage().contains("员工已禁用！不可创建订单！"));
+        log.warn(ex.getMessage());
+
+        verify(orderRepository, never()).save(any(Order.class));
     }
 
-    // ========== 用例 4：混合订单（销售 + 退货）金额加减法正确 ==========
-
+    // 5.测试正常混合模式订单 -> 正常写入
     @Test
-    void complete_whenMixedSaleAndRefund_amountCalculatedCorrectly() {
-        // 销售 1 件 100 元 + 退货 1 件 30 元
-        // 实付 = 100 - 30 = 70，总价 = 100 - 30 = 70
-        OrderCreateDto dto = buildOrderDto(
-                new BigDecimal("70.00"),
-                new BigDecimal("70.00")
-        );
-        stubBaseData(dto);
+    void test_MixedOrderComplete() {
+        // 登录仓库，并创造数据
+        login(WAREHOUSE_ID, WAREHOUSE_NAME, WAREHOUSE_CODE);
+        stubE_E();
+        stubOrderItems(price, 1,1, normalDiscount, normalDiscount);
+        OrderCreateDto dto = buildOrderCreateDto(WAREHOUSE_ID, EWE_EMPLOYEE_ID, new BigDecimal("00.00"), new BigDecimal("00.00"));
 
-        OrderItem saleItem = buildOrderItem(new BigDecimal("100.00"), 1, DirectionEnum.IN);
-        OrderItem refundItem = buildOrderItem(new BigDecimal("30.00"), 1, DirectionEnum.OUT);
-        when(orderItemService.createList(anyList(), any(Order.class), eq(DirectionEnum.IN)))
-                .thenReturn(List.of(saleItem));
-        when(orderItemService.createList(anyList(), any(Order.class), eq(DirectionEnum.OUT)))
-                .thenReturn(List.of(refundItem));
+        // 断言
+        String orderNo = orderService.complete(dto);
 
-        // 正常完成，不抛异常
-        assertDoesNotThrow(() -> orderService.complete(dto));
+        assertNotNull(orderNo);
+        verify(orderRepository).save(any(Order.class));
     }
 
-    // ========== 用例 5：员工不属于该仓库 → 抛异常 ==========
-
+    // 6.测试登录不同仓库情况下，利用其他的仓库创建订单 -> 抛出异常
     @Test
-    void complete_whenEmployeeNotInWarehouse_shouldThrow() {
-        OrderCreateDto dto = buildOrderDto(
-                new BigDecimal("100.00"),
-                new BigDecimal("100.00")
-        );
+    void test_DifferentWarehouseComplete() {
+        // 登录仓库，并创造数据
+        login(WAREHOUSE_ID, WAREHOUSE_NAME, WAREHOUSE_CODE);
+        OrderCreateDto dto = buildOrderCreateDto(WAREHOUSE2_ID, EWE_EMPLOYEE_ID, new BigDecimal("20.00"), new BigDecimal("20.00"));
 
-        // 员工属于仓库 2，但订单要下在仓库 1
-        Employee employee = buildEmployee(EMPLOYEE_ID, 2L, StatusEnum.ENABLE);
-        WareHouse wareHouse = buildWareHouse(WAREHOUSE_ID, StatusEnum.ENABLE);
-        when(employeeRepository.findById(EMPLOYEE_ID)).thenReturn(Optional.of(employee));
-        when(wareHouseRepository.findById(WAREHOUSE_ID)).thenReturn(Optional.of(wareHouse));
+        // 断言
+        BusinessException ex = assertThrows(BusinessException.class, () -> orderService.complete(dto));
+        assertTrue(ex.getMessage().contains("您没有权限操作该订单！"));
+        log.warn(ex.getMessage());
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> orderService.complete(dto));
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    // 7.测试登录相同仓库的情况下，利用其他仓库的员工创建订单 -> 抛出异常
+    @Test
+    void test_DifferentEmployeeComplete() {
+        // 登录仓库，并创造数据
+        login(WAREHOUSE_ID, WAREHOUSE_NAME, WAREHOUSE_CODE);
+        // 情况特殊，手动构造员工所属仓库
+        WareHouse BelongWarehouse = WareHouse.builder()
+                .wareHouseId(WAREHOUSE2_ID)
+                .wareHouseCode(WAREHOUSE2_CODE)
+                .wareHouseName(WAREHOUSE2_NAME)
+                .status(StatusEnum.ENABLE)
+                .build();
+        // 构造测试员工
+        buildEmployee(EWE_EMPLOYEE_ID, EWE_EMPLOYEE_NAME, EWE_EMPLOYEE_CODE, BelongWarehouse, StatusEnum.ENABLE);
+        // 构造登录仓库
+        buildWareHouse(WAREHOUSE_ID, WAREHOUSE_CODE, WAREHOUSE_NAME, StatusEnum.ENABLE);
+        OrderCreateDto dto = buildOrderCreateDto(WAREHOUSE_ID, EWE_EMPLOYEE_ID, new BigDecimal("20.00"), new BigDecimal("20.00"));
+
+        // 断言
+        BusinessException ex = assertThrows(BusinessException.class, () -> orderService.complete(dto));
         assertTrue(ex.getMessage().contains("员工不属于"));
+        log.warn(ex.getMessage());
+
+        verify(orderRepository, never()).save(any(Order.class));
     }
 
-    // ========== 用例 6：员工被禁用 → 抛异常 ==========
-
+    // 8.非草稿订单无法完成 -> 抛出异常
     @Test
-    void complete_whenEmployeeDisabled_shouldThrow() {
-        OrderCreateDto dto = buildOrderDto(
-                new BigDecimal("100.00"),
-                new BigDecimal("100.00")
-        );
-
-        Employee employee = buildEmployee(EMPLOYEE_ID, WAREHOUSE_ID, StatusEnum.DISABLE);
-        WareHouse wareHouse = buildWareHouse(WAREHOUSE_ID, StatusEnum.ENABLE);
-        when(employeeRepository.findById(EMPLOYEE_ID)).thenReturn(Optional.of(employee));
-        when(wareHouseRepository.findById(WAREHOUSE_ID)).thenReturn(Optional.of(wareHouse));
-
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> orderService.complete(dto));
-        assertTrue(ex.getMessage().contains("已禁用"));
-    }
-
-    // ========== 用例 7：订单项为空 → 抛异常 ==========
-
-    @Test
-    void complete_whenOrderItemsEmpty_shouldThrow() {
-        // 销售项和退货项都是空列表
-        OrderCreateDto dto = buildOrderDto(
-                new BigDecimal("0.00"),
-                new BigDecimal("0.00")
-        );
-        dto.setSaleItems(List.of());
-        dto.setRefundItems(List.of());
-        stubBaseData(dto);
-
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> orderService.complete(dto));
-        assertTrue(ex.getMessage().contains("订单项不能为空"));
-    }
-
-    // ========== 用例 8：非草稿订单不可完成 ==========
-
-    @Test
-    void complete_whenOrderNotDraft_shouldThrow() {
-        // 已有订单（orderId 不为空），且状态是已完成 → 不能再次完成
-        OrderCreateDto dto = buildOrderDto(
-                new BigDecimal("100.00"),
-                new BigDecimal("100.00")
-        );
+    void test_NotDraftOrderNotComplete() {
+        // 登录仓库，并创造数据
+        login(WAREHOUSE_ID, WAREHOUSE_NAME, WAREHOUSE_CODE);
+        OrderCreateDto dto = buildOrderCreateDto(WAREHOUSE_ID, EWE_EMPLOYEE_ID, new BigDecimal("20.00"), new BigDecimal("20.00"));
+        // 伪造订单ID
         dto.setOrderId(99L);
 
-        Order existing = Order.builder()
+
+        WareHouse wareHouse = WareHouse.builder()
+                .wareHouseId(WAREHOUSE_ID)
+                .wareHouseCode(WAREHOUSE_CODE)
+                .wareHouseName(WAREHOUSE_NAME)
+                .status(StatusEnum.ENABLE)
+                .build();
+
+        // 伪造已完成订单
+        Order exiting = Order.builder()
                 .orderId(99L)
+                .wareHouse(wareHouse)
                 .status(OrderStatusEnum.COMPLETED)
-                .wareHouse(buildWareHouse(WAREHOUSE_ID, StatusEnum.ENABLE))
                 .build();
-        when(orderRepository.findById(99L)).thenReturn(Optional.of(existing));
+        when(orderRepository.findById(exiting.getOrderId())).thenReturn(Optional.of(exiting));
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> orderService.complete(dto));
-        assertTrue(ex.getMessage().contains("订单不是草稿状态"));
+        // 断言
+        BusinessException ex = assertThrows(BusinessException.class, () -> orderService.complete(dto));
+        log.warn(ex.getMessage());
+        assertTrue(ex.getMessage().contains("订单不是草稿状态，不可完成！"));
+
+
+        verify(orderRepository, never()).save(any(Order.class));
     }
 
-    // ==================================================================
-    // 以下是"造数据"的辅助方法（不包含任何断言，纯工具）
-    // ==================================================================
+    // 9. 订单项为空时，无法完成 -> 抛出异常
+    @Test
+    void test_WithNoItemsComplete() {
+        // 登录仓库，并创造数据
+        login(WAREHOUSE_ID, WAREHOUSE_NAME, WAREHOUSE_CODE);
+        stubE_E();
+        OrderCreateDto dto = buildOrderCreateDto(WAREHOUSE_ID, EWE_EMPLOYEE_ID, new BigDecimal("20.00"), new BigDecimal("20.00"));
+        // 将销售和退回全部设置为空
+        dto.setSaleItems(Collections.emptyList());
+        dto.setRefundItems(Collections.emptyList());
 
-    // 构造一个合法的订单请求 DTO
-    private OrderCreateDto buildOrderDto(BigDecimal actualAmount, BigDecimal totalAmount) {
-        OrderCreateDto dto = new OrderCreateDto();
-        dto.setPayMethod(PayMethodEnum.CASH);
-        dto.setEmployeeId(EMPLOYEE_ID);
-        dto.setWareHouseId(WAREHOUSE_ID);
-        dto.setActualAmount(actualAmount);
-        dto.setTotalAmount(totalAmount);
-        dto.setRemark("单元测试订单");
+        // 断言
+        BusinessException ex = assertThrows(BusinessException.class, () -> orderService.complete(dto));
+        log.warn(ex.getMessage());
+        assertTrue(ex.getMessage().contains("订单项不能为空"));
 
-        // 默认给一条销售项（SKU 编码 TEST001），用例 7 会覆盖成空
-        OrderItemCreateDto itemDto = new OrderItemCreateDto();
-        itemDto.setSkuCode("TEST001");
-        itemDto.setQuantity(1);
-        itemDto.setDiscount(new BigDecimal("1.00"));
-        dto.setSaleItems(new ArrayList<>(List.of(itemDto)));
-        dto.setRefundItems(new ArrayList<>());
-        return dto;
+        verify(orderRepository, never()).save(any(Order.class));
     }
 
-    // 造一个员工实体
-    private Employee buildEmployee(Long employeeId, Long wareHouseId, StatusEnum status) {
-        return Employee.builder()
-                .employeeId(employeeId)
-                .employeeCode("EMP001")
-                .employeeName("测试员工")
-                .status(status)
-                .wareHouse(buildWareHouse(wareHouseId, StatusEnum.ENABLE))
+    // 辅助方法
+    // 模拟登录
+    private void login(Long RequestId, String Name, String Code) {
+        RequestUser user = RequestUser.builder()
+                .requestId(RequestId)
+                .requestRole("ROLE_WAREHOUSE")// 这里只给仓库角色，管理员可能越权，导致测试失败
+                .requestName(Name)
+                .requestCode(Code)
                 .build();
+
+        // 注入 SecurityContextHolder
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, Collections.singleton(user::getRequestRole))
+        );
     }
 
-    // 造一个仓库实体
-    private WareHouse buildWareHouse(Long wareHouseId, StatusEnum status) {
-        return WareHouse.builder()
+    // 清除 SecurityContextHolder，避免测试用例之间互相污染
+    private void clearContext() {
+        SecurityContextHolder.clearContext();
+    }
+
+    // 构造测试用的仓库
+    private WareHouse buildWareHouse(Long wareHouseId, String wareHouseCode, String wareHouseName, StatusEnum status) {
+        WareHouse wareHouse = WareHouse.builder()
                 .wareHouseId(wareHouseId)
-                .wareHouseCode("WH001")
-                .wareHouseName("测试仓库")
+                .wareHouseCode(wareHouseCode)
+                .wareHouseName(wareHouseName)
                 .status(status)
                 .build();
+
+        // 直接注册仓库，避免在测试中调用 save 方法
+        when(wareHouseRepository.findById(wareHouseId)).thenReturn(Optional.of(wareHouse));
+
+        return wareHouse;
     }
 
-    // 造一个订单项实体（金额已经算好，模拟 OrderItemConverter 的结果）
-    private OrderItem buildOrderItem(BigDecimal price, int quantity, DirectionEnum direction) {
-        return OrderItem.builder()
+    // 构造测试用的员工
+    private Employee buildEmployee(Long employeeId, String employeeName, String employeeCode, WareHouse wareHouse , StatusEnum status) {
+        Employee employee = Employee.builder()
+                .employeeId(employeeId)
+                .employeeName(employeeName)
+                .employeeCode(employeeCode)
+                .wareHouse(wareHouse)
+                .status(status)
+                .build();
+
+        // 直接注册员工，避免在测试中调用 save 方法
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+
+        return employee;
+    }
+
+    // 构造一个订单项实体
+    private List<OrderItem> buildOrderItem(BigDecimal price, Integer quantity, BigDecimal discount, DirectionEnum direction) {
+        OrderItem item = OrderItem.builder()
                 .skuId(1L)
                 .skuCode("TEST001")
                 .skuName("测试SKU")
                 .unitPrice(price)
                 .quantity(quantity)
-                .discount(BigDecimal.ONE)
+                .discount(discount)
                 .totalPrice(price.multiply(BigDecimal.valueOf(quantity)))
                 .actualPrice(price.multiply(BigDecimal.valueOf(quantity)))
                 .direction(direction)
                 .build();
+
+        List<OrderItem> orderItems;
+
+        List<OrderItem> saleItems = new ArrayList<>();
+        List<OrderItem> refundItems = new ArrayList<>();
+        if(DirectionEnum.IN.equals(direction)){
+            // 销售项
+            saleItems.add(item);
+            orderItems = saleItems;
+            when(orderItemService.createList(anyList(), any(Order.class), eq(direction))).thenReturn(saleItems);
+        }else{
+            // 退款项
+            refundItems.add(item);
+            orderItems = refundItems;
+            when(orderItemService.createList(anyList(), any(Order.class), eq(direction))).thenReturn(refundItems);
+        }
+
+        return orderItems;
     }
 
-    // 公共造数据：员工 + 仓库存在且启用
-    private void stubBaseData(OrderCreateDto dto) {
-        when(employeeRepository.findById(EMPLOYEE_ID))
-                .thenReturn(Optional.of(buildEmployee(EMPLOYEE_ID, WAREHOUSE_ID, StatusEnum.ENABLE)));
-        when(wareHouseRepository.findById(WAREHOUSE_ID))
-                .thenReturn(Optional.of(buildWareHouse(WAREHOUSE_ID, StatusEnum.ENABLE)));
+
+    private OrderCreateDto buildOrderCreateDto(Long wareHouseId, Long employeeId, BigDecimal actualAmount, BigDecimal totalAmount) {
+        OrderCreateDto dto = new OrderCreateDto();
+        // 开始设置数据
+        dto.setPayMethod(PayMethodEnum.CASH);
+        dto.setEmployeeId(employeeId);
+        dto.setWareHouseId(wareHouseId);
+        dto.setActualAmount(actualAmount);
+        dto.setTotalAmount(totalAmount);
+        dto.setRemark("单元测试订单");
+
+        // 随便设置一个订单项，因为真正的计算需要自己手动操作
+        OrderItemCreateDto itemDto = new OrderItemCreateDto();
+        itemDto.setSkuCode("TEST001");
+        itemDto.setQuantity(1);
+        itemDto.setDiscount(new BigDecimal("1.00"));
+        dto.setSaleItems(Collections.singletonList(itemDto));
+        dto.setRefundItems(Collections.singletonList(itemDto));
+
+        return dto;
     }
 
-    // 公共造数据：订单项服务返回固定金额的销售项
-    private void stubOrderItems(BigDecimal price, int quantity, List<OrderItem> refundItems) {
-        OrderItem saleItem = buildOrderItem(price, quantity, DirectionEnum.IN);
-        when(orderItemService.createList(anyList(), any(Order.class), eq(DirectionEnum.IN)))
-                .thenReturn(List.of(saleItem));
-        when(orderItemService.createList(anyList(), any(Order.class), eq(DirectionEnum.OUT)))
-                .thenReturn(refundItems);
+    // 生成启用的仓库 + 员工
+    private void stubE_E() {
+        // 构造测试仓库
+        WareHouse E_WAREHOUSE = buildWareHouse(WAREHOUSE_ID, WAREHOUSE_CODE, WAREHOUSE_NAME, StatusEnum.ENABLE);
+        // 构造测试员工，未使用变量，为了直观展示参数
+        Employee EWE_EMPLOYEE = buildEmployee(EWE_EMPLOYEE_ID, EWE_EMPLOYEE_NAME, EWE_EMPLOYEE_CODE, E_WAREHOUSE, StatusEnum.ENABLE);
+
+    }
+
+    // 生成禁用的仓库 + 启用的员工
+    private void stubD_E() {
+        // 构造测试仓库
+        WareHouse D_WAREHOUSE = buildWareHouse(D_WAREHOUSE_ID, D_WAREHOUSE_CODE, D_WAREHOUSE_NAME, StatusEnum.DISABLE);
+        // 构造测试员工，未使用变量，为了直观展示参数
+        Employee DWE_EMPLOYEE = buildEmployee(DWE_EMPLOYEE_ID, DWE_EMPLOYEE_NAME, DWE_EMPLOYEE_CODE, D_WAREHOUSE, StatusEnum.ENABLE);
+    }
+
+    // 生成启用的仓库 + 禁用的员工
+    private void stubE_D() {
+        // 构造测试仓库
+        WareHouse E_WAREHOUSE = buildWareHouse(WAREHOUSE_ID, WAREHOUSE_CODE, WAREHOUSE_NAME, StatusEnum.ENABLE);
+        // 构造测试员工，未使用变量，为了直观展示参数
+        Employee EWD_EMPLOYEE = buildEmployee(EWD_EMPLOYEE_ID, EWD_EMPLOYEE_NAME, EWD_EMPLOYEE_CODE, E_WAREHOUSE, StatusEnum.DISABLE);
+    }
+
+
+    // 一次装配订单项
+    private void stubOrderItems(BigDecimal price , Integer S_Quantity , Integer R_Quantity , BigDecimal S_Discount , BigDecimal R_Discount) {
+        List<OrderItem> saleItems = buildOrderItem(price, S_Quantity, S_Discount, DirectionEnum.IN);
+        List<OrderItem> refundItems = buildOrderItem(price, R_Quantity, R_Discount, DirectionEnum.OUT);
     }
 }

@@ -282,7 +282,7 @@ public class OrderService {
 
         // 校验金额是否一致
         if (f_ActualAmount.compareTo(b_ActualAmount) != 0 || f_TotalAmount.compareTo(b_TotalAmount) != 0) {
-            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单金额与商品项金额不一致");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单金额与后台计算金额不一致！");
         }
 
         // 整合订单项
