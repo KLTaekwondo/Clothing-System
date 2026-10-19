@@ -7,16 +7,19 @@ import com.superkl.backend.dto.product.ProductCreateDto;
 import com.superkl.backend.dto.product.ProductUpdateDto;
 import com.superkl.backend.entity.product.Product;
 import com.superkl.backend.enums.ErrorCodeEnum;
+import com.superkl.backend.enums.KindOfDirEnum;
 import com.superkl.backend.enums.StatusEnum;
 import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.product.ProductInfo;
 import com.superkl.backend.repository.product.ProductRepository;
+import com.superkl.backend.utils.FileUploadUtil;
 import com.superkl.backend.utils.SkuUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +32,7 @@ import java.util.Map;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductSkuService productSkuService;
+    private final FileUploadUtil fileUploadUtil;
 
     // 创建商品（重中之重）
     @Transactional
@@ -96,6 +100,21 @@ public class ProductService {
         product.setStatus(StatusEnum.DISABLE);
         productRepository.save(product);
         log.info("禁用商品：{}", product.getProductName());
+        RequestUser.log();
+    }
+
+    // 上传图片
+    @Transactional
+    public void uploadImg(Long id , MultipartFile file) {
+        // 1.先查一下，看是否存在商品
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品不存在"));
+        // 2.上传图片
+        String imgUrl = fileUploadUtil.uploadFile(file, KindOfDirEnum.PRODUCT);
+        product.setImgUrl(imgUrl);
+        productRepository.save(product);
+        log.info("上传商品图片：{}，编码：{}", product.getProductName(),
+                product.getProductCode());
         RequestUser.log();
     }
 

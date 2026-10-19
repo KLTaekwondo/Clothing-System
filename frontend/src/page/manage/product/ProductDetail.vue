@@ -43,6 +43,42 @@
 
         <!-- 基本信息 Tab -->
         <template v-if="activeTab === 'info' && product">
+            <div class="image-card">
+                <div class="image-preview">
+                    <a
+                        v-if="product.imgUrl"
+                        :href="toImageUrl(product.imgUrl)"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        <img
+                            :alt="product.name"
+                            :src="toImageUrl(product.imgUrl)"
+                        />
+                    </a>
+                    <span v-else class="image-placeholder">暂无图片</span>
+                </div>
+                <div class="image-side">
+                    <span class="image-title">商品图片</span>
+                    <span class="image-hint">支持 jpg / png / gif / webp，单张不超过 5MB</span>
+                    <div class="image-actions">
+                        <button
+                            :disabled="uploading"
+                            class="btn-primary"
+                            type="button"
+                            @click="triggerPick"
+                        >{{ uploading ? '上传中...' : (product.imgUrl ? '更换图片' : '上传图片') }}</button>
+                    </div>
+                </div>
+                <input
+                    ref="fileInput"
+                    :accept="IMAGE_ACCEPT"
+                    class="image-input"
+                    type="file"
+                    @change="handleFileChange"
+                />
+            </div>
+
             <div class="info-grid">
                 <div class="info-card">
                     <span class="info-label">商品编码</span>
@@ -229,6 +265,7 @@ import productInterface from '../../../axios/interface/ProductInterface.js'
 import productSkuInterface from '../../../axios/interface/ProductSkuInterface.js'
 import {SEASON_LABELS, SEASON_OPTIONS} from '../../../constants/season.js'
 import {STATUS, STATUS_LABELS, STATUS_OPTIONS} from '../../../constants/status.js'
+import {IMAGE_ACCEPT, IMAGE_MAX_SIZE, toImageUrl} from '../../../constants/image.js'
 import {useProductOptions} from './composables/useProductOptions.js'
 import OptionValuePicker from '../../../component/product/OptionValuePicker.vue'
 
@@ -255,6 +292,8 @@ const yearPicker = ref(null)
 const form = ref({})
 const formBackup = ref(null)
 const activeTab = ref('info')
+const fileInput = ref(null)
+const uploading = ref(false)
 const {
     typeOptions,
     categoryOptions,
@@ -278,6 +317,37 @@ async function fetchDetail() {
     } finally {
         loading.value = false
         skuLoading.value = false
+    }
+}
+
+// 打开系统选图窗口
+function triggerPick() {
+    if (uploading.value) return
+    fileInput.value?.click()
+}
+
+// 选图后前端先校验，再上传（后端按商品 id 落库 imgUrl，成功后重新拉详情）
+async function handleFileChange(event) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+        toast.warning('请选择图片文件')
+        return
+    }
+    if (file.size > IMAGE_MAX_SIZE) {
+        toast.warning('图片不能超过 5MB')
+        return
+    }
+    uploading.value = true
+    try {
+        await productInterface.uploadImage(product.value.id, file)
+        product.value = await productInterface.search(route.params.id)
+        toast.success('图片上传成功')
+    } catch {
+        // 请求错误由 Axios 拦截器统一提示
+    } finally {
+        uploading.value = false
     }
 }
 
@@ -368,6 +438,77 @@ function goBack() {
 .product-detail-page {
     width: 100%;
     min-width: 0;
+}
+
+.image-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 18px;
+    padding: 18px;
+    background: linear-gradient(145deg, var(--bg-card), var(--bg-subtle));
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+}
+
+.image-preview {
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.image-preview a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-placeholder {
+    color: var(--text-muted);
+    font-size: var(--font-sm);
+}
+
+.image-side {
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.image-title {
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.image-hint {
+    color: var(--text-muted);
+    font-size: var(--font-sm);
+}
+
+.image-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.image-input {
+    display: none;
 }
 
 .page-title {

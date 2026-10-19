@@ -29,4 +29,5 @@ public class ProductInfo extends BaseInfo {
     private BigDecimal salePrice; // 商品销售价格
     private boolean special; // 是否特价
     private StatusEnum status; // 商品状态
+    private String imgUrl; // 商品图片Url,可为空
 }

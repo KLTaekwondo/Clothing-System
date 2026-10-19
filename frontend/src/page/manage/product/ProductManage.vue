@@ -51,6 +51,7 @@
             <table v-else class="data-table">
                 <thead>
                 <tr>
+                    <th>图片</th>
                     <th>编码</th>
                     <th>商品名称</th>
                     <th>类型</th>
@@ -64,7 +65,24 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="item in filteredList" :key="item.id" style="cursor:pointer" @dblclick="goDetail(item)">
+                <tr
+                    v-for="item in filteredList"
+                    :key="item.id"
+                    style="cursor:pointer"
+                    @dblclick="goDetail(item)"
+                    @mouseenter="showPreview(item, $event)"
+                    @mousemove="movePreview($event)"
+                    @mouseleave="hidePreview"
+                >
+                    <td>
+                        <img
+                            v-if="item.imgUrl"
+                            :alt="item.name"
+                            :src="toImageUrl(item.imgUrl)"
+                            class="row-thumb"
+                        />
+                        <span v-else class="row-thumb-empty">-</span>
+                    </td>
                     <td><code>{{ item.code }}</code></td>
                     <td><strong>{{ item.name }}</strong></td>
                     <td>{{ item.type || '-' }}</td>
@@ -114,6 +132,17 @@
             @cancel="showDelete = false"
             @confirm="handleDelete"
         />
+
+        <div
+            v-if="previewItem"
+            :style="previewStyle"
+            class="image-zoom"
+        >
+            <img
+                :alt="previewItem.name"
+                :src="toImageUrl(previewItem.imgUrl)"
+            />
+        </div>
     </div>
 </template>
 
@@ -127,6 +156,7 @@ import DeleteConfirmDialog from '../../../component/DeleteConfirmDialog.vue'
 import TablePagination from '../../../component/common/TablePagination.vue'
 import {SEASON_LABELS} from '../../../constants/season.js'
 import {STATUS, STATUS_LABELS} from '../../../constants/status.js'
+import {toImageUrl} from '../../../constants/image.js'
 
 const router = useRouter()
 const toast = useToastStore()
@@ -140,6 +170,8 @@ const loading = ref(true)
 const showDelete = ref(false)
 const deleteTarget = ref(null)
 const deleting = ref(false)
+const previewItem = ref(null)
+const previewPos = ref({x: 0, y: 0})
 
 const pageInfo = ref({
     totalElements: 0,
@@ -160,7 +192,37 @@ const filteredList = computed(() => {
     )
 })
 
+// 放大图跟随光标：默认贴右下方，靠近视口边缘时翻到另一侧，避免被裁掉
+const previewStyle = computed(() => {
+    const size = 220
+    const gap = 18
+    const flipX = previewPos.value.x + gap + size > window.innerWidth
+    const flipY = previewPos.value.y + gap + size > window.innerHeight
+    const left = flipX ? previewPos.value.x - gap - size : previewPos.value.x + gap
+    const top = flipY ? previewPos.value.y - gap - size : previewPos.value.y + gap
+    return {
+        left: Math.max(gap, left) + 'px',
+        top: Math.max(gap, top) + 'px'
+    }
+})
+
 onMounted(fetchList)
+
+// 悬停商品行时展示放大图（没有图片的商品不弹）
+function showPreview(item, event) {
+    if (!item.imgUrl) return
+    previewItem.value = item
+    movePreview(event)
+}
+
+function movePreview(event) {
+    if (!previewItem.value) return
+    previewPos.value = {x: event.clientX, y: event.clientY}
+}
+
+function hidePreview() {
+    previewItem.value = null
+}
 
 // 导出商品列表 CSV
 async function handleExport() {
@@ -257,6 +319,42 @@ async function handleDelete() {
     background: var(--bg-hover);
 }
 
+.row-thumb {
+    width: 44px;
+    height: 44px;
+    display: block;
+    margin: 0 auto;
+    object-fit: cover;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.row-thumb-empty {
+    color: var(--text-muted);
+}
+
+.image-zoom {
+    position: fixed;
+    z-index: 900;
+    width: 220px;
+    height: 220px;
+    padding: 6px;
+    box-sizing: border-box;
+    pointer-events: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+}
+
+.image-zoom img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
 .special-status,
 .regular-status {
     display: inline-block;
@@ -289,7 +387,7 @@ tr:hover .actions {
 
 @media (max-width: 900px) {
     .data-table {
-        min-width: 980px;
+        min-width: 1060px;
     }
 
     .card {

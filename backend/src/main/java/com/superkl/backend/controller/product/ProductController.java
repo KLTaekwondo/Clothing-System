@@ -10,6 +10,7 @@ import com.superkl.backend.service.product.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/product")
@@ -48,5 +49,12 @@ public class ProductController {
     @GetMapping("/page")
     public Result<PageResult<ProductInfo>> searchPage(@Valid PageParam param) {
         return Result.success(productService.searchPage(param.toPageable()));
+    }
+
+    // 上传图片
+    @PostMapping("/upload/{id}")
+    public Result<Void> uploadImg(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        productService.uploadImg(id, file);
+        return Result.successMessage("上传成功");
     }
 }

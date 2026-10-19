@@ -60,7 +60,7 @@ public class SecurityConfig {
                 // hasRole("role") 表示该路径的全部请求需要登录，且用户角色必须是 role 角色。
                 .authorizeHttpRequests(auth -> auth
                         // 公开接口
-                        .requestMatchers("/api/admin/login", "/api/warehouse/login").permitAll()
+                        .requestMatchers("/api/admin/login", "/api/warehouse/login","/images/**").permitAll()
                         // 仓库仅有接口
                         .requestMatchers("/api/order/search/wareHouse/**",
                                 "/api/dash/order/checkout/**").hasRole("WAREHOUSE")

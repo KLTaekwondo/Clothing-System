@@ -63,6 +63,8 @@ public class Product extends BaseEntity {
     @Builder.Default
     private boolean special = false;// 是否特价
 
+    private String imgUrl;// 图片Url,可为空
+
     // 关联字段
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     @Builder.Default
