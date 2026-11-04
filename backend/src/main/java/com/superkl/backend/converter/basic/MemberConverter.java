@@ -4,6 +4,7 @@ import com.superkl.backend.dto.basic.MemberCreateDto;
 import com.superkl.backend.dto.basic.MemberMaxCreateDto;
 import com.superkl.backend.dto.basic.MemberUpdateDto;
 import com.superkl.backend.entity.basic.Member;
+import com.superkl.backend.enums.MemberLevelEnum;
 import com.superkl.backend.info.basic.MemberInfo;
 
 import java.math.BigDecimal;
@@ -55,18 +56,18 @@ public class MemberConverter {
                 .build();
 
         // 1.3 设置会员折扣率
-        // 1.3.1 普通会员默认折扣率0.88
+        // 1.3.1 普通会员默认折扣率0.85
         if(member.isCOMMON()){
-            member.setMemberDiscount(BigDecimal.valueOf(0.85));
+            member.setMemberDiscount(MemberLevelEnum.COMMON.getDiscount());
         }
-        // 1.3.2 VIP会员默认折扣率0.85
+        // 1.3.2 VIP会员默认折扣率0.83
         if (member.isVIP()){
-            member.setMemberDiscount(BigDecimal.valueOf(0.83));
+            member.setMemberDiscount(MemberLevelEnum.VIP.getDiscount());
         }
 
         // 1.3.3 MVP会员默认折扣率0.8
         if (member.isMVP()){
-            member.setMemberDiscount(BigDecimal.valueOf(0.8));
+            member.setMemberDiscount(MemberLevelEnum.MVP.getDiscount());
         }
 
         // 1.3.4 自定义会员折扣率根据Dto中的折扣率

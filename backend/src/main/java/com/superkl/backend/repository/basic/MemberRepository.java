@@ -14,6 +14,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("select m from Member m where m.memberPhone = :phone")
     Optional<Member> findMemberByPhone(@Param("phone") String phone);
 
+    @Query(value = "select * from t_member m where member_phone = :phone for update",nativeQuery = true)
+    Optional<Member> findMemberByPhoneForUpdate(@Param("phone") String phone);
+
     @Query("select count(m)>0 from Member m where m.memberPhone = :phone")
     boolean existsMemberByPhone(@Param("phone") String phone);
 }

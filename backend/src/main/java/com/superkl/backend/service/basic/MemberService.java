@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Slf4j
@@ -74,60 +75,66 @@ public class MemberService {
         log.info("管理员更新会员成功，会员姓名：{}，会员手机号：{}", member.getMemberName(), member.getMemberPhone());
     }
 
-    // 4.管理员增加会员积分点
     @Transactional
-    public void increasePoints(Long id, Integer points) {
-        // 1.1 检查会员是否存在
-        Member member = memberRepository.findById(id)
+    public void managePoints(String phoneNumber, BigDecimal actualPrice) {
+        // 先查出会员，看是否存在
+        Member member = memberRepository.findMemberByPhoneForUpdate(phoneNumber)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
 
-        if(points == null || points < 0){
-            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "增加积分点不能小于0");
+        // 检查金额是否存在，避免null调用
+        if (actualPrice == null){
+            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "订单金额不能为空");
         }
 
-        // 1.2 增加会员积分点
-        member.setMemberPoints(member.getMemberPoints() + points);
-        // 1.3 更新会员等级点，检查是否达到升级标准
-        Long newLevelPoints = member.getMemberLevelPoints() + points;
-        if(member.isCOMMON() && newLevelPoints >= 50000) {
+        Integer points = 0;
+
+        // 情况一：订单金额大于0
+        if(actualPrice.compareTo(BigDecimal.ZERO) > 0){
+            // 增加会员积分点
+            points = actualPrice.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.DOWN).intValueExact();
+            member.setMemberPoints(member.getMemberPoints() + points);
+            // 检查是否升级
+            checkUpgrade(member, points);
+        }
+
+        // 情况二：订单金额小于等于0
+        if(actualPrice.compareTo(BigDecimal.ZERO) < 0){
+            // 减少会员积分点
+            points = actualPrice.multiply(BigDecimal.valueOf(-100)).setScale(0, RoundingMode.DOWN).intValueExact();
+            // 稽查积分是否足够
+            // 不足够直接为0，不报错
+            // 足够则正常减少
+            if (member.getMemberPoints() < points) {
+                member.setMemberPoints(0L);
+            }else{
+                member.setMemberPoints(member.getMemberPoints() - points);
+            }
+        }
+
+        memberRepository.save(member);
+        RequestUser.log();
+        log.info("会员积分点管理成功，会员姓名：{}，会员手机号：{}，订单金额：{}，变化积分点：{}", member.getMemberName(), member.getMemberPhone(), actualPrice, points);
+    }
+
+    //升级逻辑：注，无事务，直接加入会员等级点更新事务
+    public void checkUpgrade(Member member , Integer points) {
+        // 判断,自定义直接返回
+        if(member.isCUSTOMER()) return;
+
+        // 先赋值，并准备变量包装
+        long newLevelPoints = member.getMemberLevelPoints() + points;
+        // 检查是否升级为普通会员
+        if(newLevelPoints >= MemberLevelEnum.VIP.getLevelPoints() && newLevelPoints <= MemberLevelEnum.MVP.getLevelPoints()){
             member.setMemberLevel(MemberLevelEnum.VIP);
-            member.setMemberDiscount(BigDecimal.valueOf(0.83));
-            log.info("会员升级为普通会员，会员姓名：{}，会员手机号：{}", member.getMemberName(), member.getMemberPhone());
+            member.setMemberDiscount(MemberLevelEnum.VIP.getDiscount());
         }
 
-        if(member.isVIP() && newLevelPoints >= 500000) {
+        if(newLevelPoints >= MemberLevelEnum.MVP.getLevelPoints()){
             member.setMemberLevel(MemberLevelEnum.MVP);
-            member.setMemberDiscount(BigDecimal.valueOf(0.8));
-            log.info("会员升级为高级会员，会员姓名：{}，会员手机号：{}", member.getMemberName(), member.getMemberPhone());
+            member.setMemberDiscount(MemberLevelEnum.MVP.getDiscount());
         }
 
         member.setMemberLevelPoints(newLevelPoints);
-        memberRepository.save(member);
-
-        RequestUser.log();
-        log.info("管理员增加会员积分点成功，会员姓名：{}，会员手机号：{}，增加积分点：{}", member.getMemberName(), member.getMemberPhone(), points);
-    }
-
-    // 5.管理员减少会员积分点
-    @Transactional
-    public void decreasePoints(Long id, Integer points) {
-        // 1.1 检查会员是否存在
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
-
-        if(points == null || points < 0){
-            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "减少积分点不能小于0");
-        }
-
-        // 1.2 减少会员积分点
-        if (member.getMemberPoints() < points) {
-            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "会员积分不足");
-        }
-        member.setMemberPoints(member.getMemberPoints() - points);
-        memberRepository.save(member);
-
-        RequestUser.log();
-        log.info("管理员减少会员积分点成功，会员姓名：{}，会员手机号：{}，减少积分点：{}", member.getMemberName(), member.getMemberPhone(), points);
     }
 
     // 查询单个会员
@@ -143,9 +150,4 @@ public class MemberService {
         return MemberConverter.toInfoList(members);
     }
 
-    // 不外放，只用于内部调用的查询方法
-    public Member getFromPhone(String phone) {
-        return memberRepository.findMemberByPhone(phone)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
-    }
 }

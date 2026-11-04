@@ -1,8 +1,8 @@
 package com.superkl.backend.exception;
 
-import com.superkl.backend.common.Result;
 import com.superkl.backend.enums.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
@@ -79,6 +79,14 @@ public class GlobalExceptionHandler {
         log.warn("键重复异常：{}", e.getMessage());
         return ResponseEntity.status(ErrorCodeEnum.PARAM_VALUE_DUPLICATE_ERROR.getCode())
                 .body("数据已存在或违反约束，请检查后重试");
+    }
+
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<String> handleLockTimeout(PessimisticLockingFailureException e) {
+        log.warn("获取锁超时：{}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header("Retry-After", "1")
+                .body("操作繁忙，请稍后重试");
     }
 
     // 其他未预期异常

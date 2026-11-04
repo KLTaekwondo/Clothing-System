@@ -29,11 +29,18 @@ public interface WareHouseStockRepository extends CrudRepository<WareHouseStock,
     Optional<WareHouseStock> findBySkuIdAndWarehouseId(@Param("skuId") Long skuId,
                                                        @Param("warehouseId") Long warehouseId);
 
-    // 处理并发，悲观锁，确保查询到的库存记录是最新版本
-    @Query(value = "SELECT * FROM t_ware_house_stock " +
+    // 上锁：通过skuId和wareHouseId锁定库存记录
+    @Query(value = "SELECT stock FROM t_ware_house_stock " +
+            "WHERE sku_id = :skuId AND ware_house_id = :warehouseId FOR UPDATE",
+            nativeQuery = true)
+    Optional<Integer> lockStockBySkuIdAndWarehouseId(@Param("skuId") Long skuId,
+                             @Param("warehouseId") Long warehouseId);
+
+    // 上锁：通过stockId锁定库存记录
+    @Query(value = "SELECT stock FROM t_ware_house_stock " +
             "WHERE stock_id = :stockId FOR UPDATE",
             nativeQuery = true)
-    Optional<WareHouseStock> findByIdForUpdate(@Param("stockId") Long stock);
+    Optional<Integer> lockStockById(@Param("stockId") Long stockId);
 
     @Query("SELECT ws FROM WareHouseStock ws " +
             "JOIN FETCH ws.productSku sku " +

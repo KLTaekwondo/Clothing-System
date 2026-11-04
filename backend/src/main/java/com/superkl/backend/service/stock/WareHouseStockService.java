@@ -40,15 +40,19 @@ public class WareHouseStockService {
     @Transactional
     public void batchUpdate(List<WarehouseStockUpdateDto> dtos) {
         for (WarehouseStockUpdateDto dto : dtos) {
+            Integer beforeQuantity = wareHouseStockRepository.lockStockById(dto.getStockId())
+                    .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "该库存记录已锁定"));
             WareHouseStock ws = wareHouseStockRepository.findByStockId(dto.getStockId())
                     .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
-            Integer beforeQuantity = ws.getStock();
             Integer afterQuantity = dto.getStock();
             Integer changeQuantity = afterQuantity - beforeQuantity;
 
             // 检查库存数量是否小于0
             if(afterQuantity < 0) {
                 throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "库存数量不得少于0");
+            }
+            if(ws.getWareHouse().isUnderCheck()){
+                throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "仓库在盘点状态！不可修改库存！");
             }
 
             // 如果库存数量没有变化，不保存库存记录
@@ -96,17 +100,20 @@ public class WareHouseStockService {
         if (stock == null || stock <= 0) {
             throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "库存数量必须大于0");
         }
+        // 并发锁定库存
+        Integer beforeQuantity = wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(skuId, wareHouseId)
+                .orElseThrow(()-> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
 
         // 查询库存记录是否存在
         WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
 
-        // 并发锁定
-        ws = wareHouseStockRepository.findByIdForUpdate(ws.getStockId())
-                .orElseThrow(()-> new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "该库存记录已锁定"));
+        // 检查仓库是否在盘点状态
+        if(ws.getWareHouse().isUnderCheck()){
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "仓库在盘点状态！不可扣减库存！");
+        }
 
         // 检查库存是否足够
-        Integer beforeQuantity = ws.getStock();
         Integer afterQuantity = beforeQuantity - stock;
         if (afterQuantity < 0) {
             throw new BusinessException(ErrorCodeEnum.RULE_ERROR, ws.getProductSku().getSkuName()+"库存不足");
@@ -128,15 +135,20 @@ public class WareHouseStockService {
             throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "库存数量必须大于0");
         }
 
+        // 锁定库存
+        Integer beforeQuantity = wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(skuId, wareHouseId)
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
+
         // 查询库存记录是否存在
         WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
 
-        // 锁定库存
-        ws = wareHouseStockRepository.findByIdForUpdate(ws.getStockId())
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "该库存记录已锁定！"));
+        // 检查仓库是否在盘点状态
+        if(ws.getWareHouse().isUnderCheck()){
+            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "仓库在盘点状态！不可增加库存！");
+        }
+
         // 增加库存
-        Integer beforeQuantity = ws.getStock();
         Integer afterQuantity = beforeQuantity + stock;
         ws.setStock(afterQuantity);
         // 保存库存记录
@@ -151,6 +163,10 @@ public class WareHouseStockService {
     @Transactional
     public void checkUpdateStock(Long stockId, StockCheckItem item , StockContext stockContext) {
         // 查询库存记录是否存在(这里直接使用stockId查找，精确，不像上面需要两个定位独立的字段)
+        // 这里不返回值，但是锁定库存记录
+        wareHouseStockRepository.lockStockById(stockId)
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
+
         WareHouseStock ws = wareHouseStockRepository.findByStockId(stockId)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
 

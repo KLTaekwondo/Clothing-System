@@ -33,7 +33,8 @@ public enum ErrorCodeEnum {
 
 
     // 系统错误
-    SYSTEM_ERROR(500, "系统错误");
+    SYSTEM_ERROR(500, "系统错误"),
+    RULE_CONCURRENT_MODIFICATION(503, "并发请求过期，请稍后重试");
 
     private final int code;
     private final String desc;

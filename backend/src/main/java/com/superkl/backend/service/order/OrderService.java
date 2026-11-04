@@ -126,19 +126,7 @@ public class OrderService {
         // 8.处理用户积分
         // 如果不是空，才处理会员积分，否则不处理
         if(order.getMemberPhone() != null && !order.getMemberPhone().isBlank()) {
-            // 先拿取会员信息，避免链式调用过长
-            Member member = memberService.getFromPhone(order.getMemberPhone());
-            Long memberId = member.getMemberId();
-            // 如果订单总价大于0，才处理会员积分
-            if(order.getActualPrice().compareTo(BigDecimal.ZERO) > 0) {
-                Integer points = order.getActualPrice().multiply(BigDecimal.valueOf(100)).intValueExact();
-                memberService.increasePoints(memberId, points);
-            }
-
-            if(order.getActualPrice().compareTo(BigDecimal.ZERO) < 0){
-                Integer points = order.getActualPrice().multiply(BigDecimal.valueOf(-100)).intValueExact();
-                memberService.decreasePoints(memberId, points);
-            }
+            memberService.managePoints(order.getMemberPhone(),order.getActualPrice());
         }
 
         // 日志记录
