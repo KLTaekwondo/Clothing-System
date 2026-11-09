@@ -80,10 +80,19 @@ public class MemberConverter {
 
     // 更新会员信息
     public static void updateEntity(MemberUpdateDto dto, Member member) {
+        MemberLevelEnum level = dto.getLevel();
+        Long levelPoints;
+        if(level == MemberLevelEnum.COMMON || level == MemberLevelEnum.CUSTOMER){
+            levelPoints = 0L;
+        }else{
+            levelPoints = level.getLevelPoints();
+        }
+        // 检查点数是否达到等级的标准，没有的话就更新到等级的最低标准
+        member.setMemberLevelPoints(Math.max(dto.getLevelPoints(), levelPoints));
+
         member.setMemberName(dto.getName());
-        member.setMemberLevel(dto.getLevel());
+        member.setMemberLevel(level);
         member.setMemberPoints(dto.getPoints());
-        member.setMemberLevelPoints(dto.getLevelPoints());
         member.setMemberBirthday(dto.getBirthday());
         member.setMemberDiscount(dto.getDiscount());
     }

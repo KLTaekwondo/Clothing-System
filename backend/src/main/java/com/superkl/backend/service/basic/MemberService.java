@@ -69,6 +69,8 @@ public class MemberService {
 
         // 1.2 更新会员信息
         MemberConverter.updateEntity(dto, member);
+        // 检查是否升级,因为是设置，所以没有提升的积分点，故参数为0
+        levelOf(member);
         memberRepository.save(member);
 
         RequestUser.log();
@@ -136,6 +138,31 @@ public class MemberService {
 
         member.setMemberLevelPoints(newLevelPoints);
     }
+
+    public void levelOf(Member member) {
+        // 自定义会员直接返回
+        if(member.isCUSTOMER()) return;
+        Long levelPoints = member.getMemberLevelPoints();
+
+        // 检查是否升级为高级会员
+        if(levelPoints >= MemberLevelEnum.MVP.getLevelPoints()){
+            member.setMemberLevel(MemberLevelEnum.MVP);
+            member.setMemberDiscount(MemberLevelEnum.MVP.getDiscount());
+        }
+        // 检查是否升级为普通会员
+        if(levelPoints >= MemberLevelEnum.VIP.getLevelPoints() &&  levelPoints < MemberLevelEnum.MVP.getLevelPoints()){
+            member.setMemberLevel(MemberLevelEnum.VIP);
+            member.setMemberDiscount(MemberLevelEnum.VIP.getDiscount());
+        }
+
+        // 检查是否升级为普通会员
+        if(levelPoints < MemberLevelEnum.VIP.getLevelPoints()){
+            member.setMemberLevel(MemberLevelEnum.COMMON);
+            member.setMemberDiscount(MemberLevelEnum.COMMON.getDiscount());
+        }
+    }
+
+
 
     // 查询单个会员
     public MemberInfo search(String phone) {
