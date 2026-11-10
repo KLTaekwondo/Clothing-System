@@ -15,7 +15,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e " +
             "JOIN fetch e.wareHouse w " +
             "WHERE w.wareHouseId = :wareHouseId AND e.status = :status")
-    List<Employee> findByWareHouseId(@Param("wareHouseId") Long wareHouseId,
+    List<Employee> listByWareHouseAndStatus(@Param("wareHouseId") Long wareHouseId,
                                      @Param("status") StatusEnum status);
 
     @Query("SELECT COUNT(e) > 0 FROM Employee e WHERE e.employeeCode = :employeeCode")

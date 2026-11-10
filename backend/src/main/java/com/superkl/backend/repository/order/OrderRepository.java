@@ -12,10 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order,Long> {
@@ -23,9 +20,9 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
             "JOIN FETCH o.employee " +
             "JOIN FETCH o.wareHouse " +
             "WHERE o.wareHouse.wareHouseId = :warehouseId AND o.status = :status")
-    Page<Order> findStatusByWareHouseId(@Param("warehouseId") Long warehouseId ,
-                                        @Param("status") OrderStatusEnum status ,
-                                        Pageable pageable);
+    Page<Order> pageByWareHouseAndStatus(@Param("warehouseId") Long warehouseId ,
+                                         @Param("status") OrderStatusEnum status ,
+                                         Pageable pageable);
 
     // 后端总返回订单分页
     @Query("SELECT o FROM Order o " +
@@ -43,12 +40,12 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
             "AND o.status = :status " +
             "AND (:employeeId IS NULL OR o.employee.employeeId = :employeeId) " +
             "AND o.wareHouse.wareHouseId = :warehouseId ")
-    Page<Order> findPageByTimeAndWId(@Param("startTime") LocalDateTime startTime,
-                                    @Param("endTime") LocalDateTime endTime,
-                                    @Param("status") OrderStatusEnum status,
-                                    @Param("employeeId") Long employeeId,
-                                    @Param("warehouseId") Long warehouseId,
-                                    Pageable pageable);
+    Page<Order> findPageCheckOut(@Param("startTime") LocalDateTime startTime,
+                                 @Param("endTime") LocalDateTime endTime,
+                                 @Param("status") OrderStatusEnum status,
+                                 @Param("employeeId") Long employeeId,
+                                 @Param("warehouseId") Long warehouseId,
+                                 Pageable pageable);
 
     // 后端查看总订单销售额汇总
     @Query("SELECT COALESCE(SUM(" +
@@ -62,14 +59,14 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
             "AND (:employeeId IS NULL OR oi.order.employee.employeeId = :employeeId) " +
             "AND (:wareHouseId IS NULL OR oi.order.wareHouse.wareHouseId = :wareHouseId) " +
             "AND oi.createTime >= :start AND oi.createTime < :end")
-    BigDecimal sumTotalAmountByTime(@Param("start") LocalDateTime start,
-                                    @Param("end") LocalDateTime end,
-                                    @Param("dirIn") DirectionEnum dirIn,
-                                    @Param("dirOut") DirectionEnum dirOut,
-                                    @Param("status") OrderStatusEnum status,
-                                    @Param("payMethodEnum") PayMethodEnum payMethodEnum,
-                                    @Param("wareHouseId") Long wareHouseId,
-                                    @Param("employeeId") Long employeeId);
+    BigDecimal sumTotalAmount(@Param("start") LocalDateTime start,
+                              @Param("end") LocalDateTime end,
+                              @Param("dirIn") DirectionEnum dirIn,
+                              @Param("dirOut") DirectionEnum dirOut,
+                              @Param("status") OrderStatusEnum status,
+                              @Param("payMethodEnum") PayMethodEnum payMethodEnum,
+                              @Param("wareHouseId") Long wareHouseId,
+                              @Param("employeeId") Long employeeId);
 
 
 
@@ -87,14 +84,14 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
             "AND (:wareHouseId IS NULL OR oi.order.wareHouse.wareHouseId = :wareHouseId) " +
             "AND (:payMethodEnum IS NULL OR oi.order.payMethod = :payMethodEnum) " +
             "AND oi.createTime >= :start AND oi.createTime < :end")
-    BigDecimal sumImportAmountByTime(@Param("start") LocalDateTime start,
-                                     @Param("end")   LocalDateTime end,
-                                     @Param("dirIn")  DirectionEnum dirIn,
-                                     @Param("dirOut") DirectionEnum dirOut,
-                                     @Param("status") OrderStatusEnum status,
-                                     @Param("payMethodEnum") PayMethodEnum payMethodEnum,
-                                     @Param("wareHouseId") Long wareHouseId,
-                                     @Param("employeeId") Long employeeId);
+    BigDecimal sumImportAmount(@Param("start") LocalDateTime start,
+                               @Param("end")   LocalDateTime end,
+                               @Param("dirIn")  DirectionEnum dirIn,
+                               @Param("dirOut") DirectionEnum dirOut,
+                               @Param("status") OrderStatusEnum status,
+                               @Param("payMethodEnum") PayMethodEnum payMethodEnum,
+                               @Param("wareHouseId") Long wareHouseId,
+                               @Param("employeeId") Long employeeId);
 
     // 收银端直接返回汇总
     @Query("SELECT COALESCE(SUM(" +
@@ -107,11 +104,11 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
             "AND oi.order.wareHouse.wareHouseId = :wareHouseId " +
             "AND (:payMethod IS NULL OR oi.order.payMethod = :payMethod) " +
             "AND oi.createTime >= :start AND oi.createTime < :end")
-    BigDecimal sumAmountByTimeAndWId (@Param("start") LocalDateTime start,
-                                      @Param("end") LocalDateTime end,
-                                      @Param("dirIn") DirectionEnum dirIn,
-                                      @Param("dirOut") DirectionEnum dirOut,
-                                      @Param("status") OrderStatusEnum status,
-                                      @Param("wareHouseId") Long wareHouseId,
-                                      @Param("payMethod") PayMethodEnum payMethod);
+    BigDecimal sumAmountCheckOut(@Param("start") LocalDateTime start,
+                                 @Param("end") LocalDateTime end,
+                                 @Param("dirIn") DirectionEnum dirIn,
+                                 @Param("dirOut") DirectionEnum dirOut,
+                                 @Param("status") OrderStatusEnum status,
+                                 @Param("wareHouseId") Long wareHouseId,
+                                 @Param("payMethod") PayMethodEnum payMethod);
 }

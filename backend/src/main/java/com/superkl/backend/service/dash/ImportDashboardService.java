@@ -65,29 +65,30 @@ public class ImportDashboardService {
     private BigDecimal sumCustomImportAmount(LocalDate start , LocalDate end) {
         LocalDateTime startDateTime = start.atStartOfDay();
         LocalDateTime endDateTime = end.atStartOfDay();
-        return importOrderRepository.sumAmountByStatusAndTime(DirectionEnum.IN,
+        return importOrderRepository.sumAmount(DirectionEnum.IN,
                 DirectionEnum.OUT,
                 AuditStatusEnum.APPROVED,
                 startDateTime,
-                endDateTime);
+                endDateTime, null);
     }
 
     // 自定义查询进货数量
     private Long sumCustomImportQuantity(LocalDate start , LocalDate end) {
         LocalDateTime startDateTime = start.atStartOfDay();
         LocalDateTime endDateTime = end.atStartOfDay();
-        return importOrderItemRepository.sumQuantityByStatusAndTime(DirectionEnum.IN,
+        return importOrderItemRepository.sumQuantity(DirectionEnum.IN,
                 DirectionEnum.OUT,
                 AuditStatusEnum.APPROVED,
                 startDateTime,
-                endDateTime);
+                endDateTime,
+                null);
     }
 
     // 自定义查询进货金额（按供应商）
     private BigDecimal sumCustomImportAmountBySupplier(LocalDate start , LocalDate end, Long supplierId) {
         LocalDateTime startDateTime = start.atStartOfDay();
         LocalDateTime endDateTime = end.atStartOfDay();
-        return importOrderRepository.sumAmountByStatusAndSupplierAndTime(DirectionEnum.IN,
+        return importOrderRepository.sumAmount(DirectionEnum.IN,
                 DirectionEnum.OUT,
                 AuditStatusEnum.APPROVED,
                 startDateTime,
@@ -99,7 +100,7 @@ public class ImportDashboardService {
     private Long sumCustomImportQuantityBySupplier(LocalDate start , LocalDate end, Long supplierId) {
         LocalDateTime startDateTime = start.atStartOfDay();
         LocalDateTime endDateTime = end.atStartOfDay();
-        return importOrderItemRepository.sumQuantityByStatusAndSupplierAndTime(DirectionEnum.IN,
+        return importOrderItemRepository.sumQuantity(DirectionEnum.IN,
                 DirectionEnum.OUT,
                 AuditStatusEnum.APPROVED,
                 startDateTime,

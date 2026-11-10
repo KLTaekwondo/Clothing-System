@@ -76,10 +76,10 @@ class WareHouseStockServiceTest {
     @Test
     void decreaseStock_whenNormal_shouldDeductAndSaveRecord() {
         // 锁出来是 10，实体也是 10
-        when(wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.lockStockBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(10));
         WareHouseStock ws = buildStock(10);
-        when(wareHouseStockRepository.findBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.findBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(ws));
 
         wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 3, buildContext());
@@ -114,7 +114,7 @@ class WareHouseStockServiceTest {
 
     @Test
     void decreaseStock_whenLockReturnsEmpty_shouldThrow() {
-        when(wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.lockStockBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.empty());
 
         BusinessException ex = assertThrows(BusinessException.class,
@@ -122,7 +122,7 @@ class WareHouseStockServiceTest {
         assertTrue(ex.getMessage().contains("库存记录不存在"));
 
         // 锁都没拿到，不该再发第二条查询
-        verify(wareHouseStockRepository, never()).findBySkuIdAndWarehouseId(any(), any());
+        verify(wareHouseStockRepository, never()).findBySkuAndWareHouse(any(), any());
         verify(stockRecordRepository, never()).save(any());
     }
 
@@ -130,9 +130,9 @@ class WareHouseStockServiceTest {
 
     @Test
     void decreaseStock_whenEntityMissingAfterLock_shouldThrow() {
-        when(wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.lockStockBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(10));
-        when(wareHouseStockRepository.findBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.findBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.empty());
 
         BusinessException ex = assertThrows(BusinessException.class,
@@ -146,10 +146,10 @@ class WareHouseStockServiceTest {
 
     @Test
     void decreaseStock_whenInsufficientStock_shouldThrowAndNotSave() {
-        when(wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.lockStockBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(2));
         WareHouseStock ws = buildStock(2);
-        when(wareHouseStockRepository.findBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.findBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(ws));
 
         BusinessException ex = assertThrows(BusinessException.class,
@@ -165,10 +165,10 @@ class WareHouseStockServiceTest {
 
     @Test
     void decreaseStock_whenWareHouseUnderCheck_shouldThrow() {
-        when(wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.lockStockBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(10));
         WareHouseStock ws = buildStock(10, CheckEnum.UNDER_CHECK);
-        when(wareHouseStockRepository.findBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.findBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(ws));
 
         BusinessException ex = assertThrows(BusinessException.class,
@@ -184,10 +184,10 @@ class WareHouseStockServiceTest {
 
     @Test
     void increaseStock_whenNormal_shouldAddAndSaveRecord() {
-        when(wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.lockStockBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(10));
         WareHouseStock ws = buildStock(10);
-        when(wareHouseStockRepository.findBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.findBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(ws));
 
         wareHouseStockService.increaseStock(WAREHOUSE_ID, SKU_ID, 5, buildContext());
@@ -204,10 +204,10 @@ class WareHouseStockServiceTest {
 
     @Test
     void increaseStock_whenWareHouseUnderCheck_shouldThrow() {
-        when(wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.lockStockBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(10));
         WareHouseStock ws = buildStock(10, CheckEnum.UNDER_CHECK);
-        when(wareHouseStockRepository.findBySkuIdAndWarehouseId(SKU_ID, WAREHOUSE_ID))
+        when(wareHouseStockRepository.findBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(ws));
 
         assertThrows(BusinessException.class,

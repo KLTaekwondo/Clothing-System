@@ -58,14 +58,14 @@ public class ImportOrderItemService {
 
     // 3.根据进货订单ID查询订单项列表
     public List<ImportOrderItemInfo> findByImportOrderId(Long importOrderId){
-        List<ImportOrderItem> importOrderItems = importOrderItemRepository.findByImportOrderId(importOrderId);
+        List<ImportOrderItem> importOrderItems = importOrderItemRepository.listByImportOrder(importOrderId);
         return ImportOrderItemConverter.toInfoList(importOrderItems);
     }
 
     // 4.删除订单项（用于更新覆盖，不会提供删除接口）
     @Transactional
     public void updateDelete(Long importOrderId){
-        List<ImportOrderItem> importOrderItems = importOrderItemRepository.findByImportOrderId(importOrderId);
+        List<ImportOrderItem> importOrderItems = importOrderItemRepository.listByImportOrder(importOrderId);
         importOrderItemRepository.deleteAll(importOrderItems);
         log.info("更新删除进货订单项成功，进货订单编号：{} , 商品数量：{}", importOrderId, importOrderItems.size());
     }

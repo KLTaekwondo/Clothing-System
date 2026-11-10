@@ -28,29 +28,12 @@ public interface ImportOrderRepository extends JpaRepository<ImportOrder, Long> 
             "ELSE 0 END), 0) " +
             "FROM ImportOrder i " +
             "WHERE i.status = :status " +
+            "AND (:supplierId IS NULL OR i.supplier.supplierId = :supplierId) " +
             "AND i.createTime >= :startTime AND i.createTime < :endTime")
-    BigDecimal sumAmountByStatusAndTime(@Param("dirIn") DirectionEnum dirIn,
-                                        @Param("dirOut") DirectionEnum dirOut,
-                                        @Param("status") AuditStatusEnum status,
-                                        @Param("startTime") LocalDateTime startTime,
-                                        @Param("endTime") LocalDateTime endTime);
-
-    // 查询指定供应商的进货金额
-    @Query("SELECT COALESCE(SUM(" +
-            "CASE WHEN i.direction = :dirIn THEN i.totalAmount " +
-            "     WHEN i.direction = :dirOut THEN -i.totalAmount " +
-            "ELSE 0 END), 0) " +
-            "FROM ImportOrder i " +
-            "WHERE i.status = :status " +
-            "AND i.supplier.supplierId = :supplierId " +
-            "AND i.createTime >= :startTime AND i.createTime < :endTime")
-    BigDecimal sumAmountByStatusAndSupplierAndTime(@Param("dirIn") DirectionEnum dirIn,
-                                                @Param("dirOut") DirectionEnum dirOut,
-                                                @Param("status") AuditStatusEnum status,
-                                                @Param("startTime") LocalDateTime startTime,
-                                                @Param("endTime") LocalDateTime endTime,
-                                                @Param("supplierId") Long supplierId);
-
-
-
+    BigDecimal sumAmount(@Param("dirIn") DirectionEnum dirIn,
+                         @Param("dirOut") DirectionEnum dirOut,
+                         @Param("status") AuditStatusEnum status,
+                         @Param("startTime") LocalDateTime startTime,
+                         @Param("endTime") LocalDateTime endTime,
+                         @Param("supplierId") Long supplierId);
 }

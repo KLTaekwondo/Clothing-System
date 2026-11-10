@@ -57,7 +57,7 @@ public class SupplierService {
 
     // 4. 查询单个供应商
     public SupplierInfo search (String supplierCode){
-        Supplier supplier = supplierRepository.findBySupplierCode(supplierCode)
+        Supplier supplier = supplierRepository.findByCode(supplierCode)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "供应商不存在"));
         return SupplierConverter.toInfo(supplier);
     }

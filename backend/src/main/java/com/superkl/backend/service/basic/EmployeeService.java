@@ -131,7 +131,7 @@ public class EmployeeService {
         // 查询所有员工
         // 从RequestUser中获取当前仓库ID
         Long wareHouseId = RequestUser.notNull().getRequestId();
-        List<Employee> employees = employeeRepository.findByWareHouseId(wareHouseId, StatusEnum.ENABLE);
+        List<Employee> employees = employeeRepository.listByWareHouseAndStatus(wareHouseId, StatusEnum.ENABLE);
         // 转换信息
         return EmployeeConverter.toInfoList(employees);
     }

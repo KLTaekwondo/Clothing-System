@@ -98,7 +98,7 @@ public class ImportOrderService {
         }
         // 增加/减少库存
         Long wareHouseId = importOrder.getWareHouse().getWareHouseId();
-        List<ImportOrderItem> items = importOrderItemRepository.findByImportOrderId(importOrderId);
+        List<ImportOrderItem> items = importOrderItemRepository.listByImportOrder(importOrderId);
         DirectionEnum direction = importOrder.getDirection();
 
         StockContext context = StockContext.builder()

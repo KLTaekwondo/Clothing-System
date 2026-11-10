@@ -153,7 +153,7 @@ public class ProductSkuService {
         }
 
         // 2. 没查到，当商品编码查
-        Product product = productRepository.findByProductCode(code)
+        Product product = productRepository.findByCode(code)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品不存在"));
 
         if (!product.isEnabled()) {
@@ -161,7 +161,7 @@ public class ProductSkuService {
         }
 
         // 只返回启用状态的商品SKU列表
-        List<ProductSku> productSkus = productSkuRepository.findByProductCodeAndStatus(code, StatusEnum.ENABLE);
+        List<ProductSku> productSkus = productSkuRepository.listByProductCodeAndStatus(code, StatusEnum.ENABLE);
         if (productSkus.isEmpty()) {
             throw new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, product.getProductName()+"该商品下没有可用SKU");
         }

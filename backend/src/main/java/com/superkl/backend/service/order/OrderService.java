@@ -6,7 +6,6 @@ import com.superkl.backend.converter.order.OrderConverter;
 import com.superkl.backend.dto.order.OrderCreateDto;
 import com.superkl.backend.dto.stock.StockContext;
 import com.superkl.backend.entity.basic.Employee;
-import com.superkl.backend.entity.basic.Member;
 import com.superkl.backend.entity.order.Order;
 import com.superkl.backend.entity.order.OrderItem;
 import com.superkl.backend.entity.basic.WareHouse;
@@ -199,7 +198,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public PageResult<OrderInfo> searchDraftByWareHouseId(Pageable pageable) {
         Long wareHouseId = RequestUser.notNull().getRequestId();
-        Page<Order> orders = orderRepository.findStatusByWareHouseId(wareHouseId,OrderStatusEnum.DRAFT,pageable);
+        Page<Order> orders = orderRepository.pageByWareHouseAndStatus(wareHouseId,OrderStatusEnum.DRAFT,pageable);
         return OrderConverter.toInfoPage(orders);
     }
 
@@ -210,7 +209,7 @@ public class OrderService {
                                                                  Long employeeId,
                                                                  Pageable pageable) {
         Long wareHouseId = RequestUser.notNull().getRequestId();
-        Page<Order> orders = orderRepository.findPageByTimeAndWId(startTime, endTime,
+        Page<Order> orders = orderRepository.findPageCheckOut(startTime, endTime,
                 OrderStatusEnum.COMPLETED,employeeId,wareHouseId,pageable);
         return OrderConverter.toInfoPage(orders);
     }

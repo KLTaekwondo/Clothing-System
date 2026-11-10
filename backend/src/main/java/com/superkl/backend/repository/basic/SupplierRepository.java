@@ -11,7 +11,8 @@ import java.util.Optional;
 
 @Repository
 public interface SupplierRepository extends JpaRepository<Supplier, Long> {
-    Optional<Supplier> findBySupplierCode(String supplierCode);
+    @Query("select s from Supplier s where s.supplierCode = :supplierCode")
+    Optional<Supplier> findByCode(String supplierCode);
 
     // 检查供应商编号是否已经存在
     @Query("SELECT COUNT(s) > 0 FROM Supplier s WHERE s.supplierCode = :supplierCode")

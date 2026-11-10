@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface StockCheckItemRepository extends JpaRepository<StockCheckItem, Long> {
     @Query("SELECT s FROM StockCheckItem s WHERE s.stockCheck.stockCheckId = :stockCheckId")
-    List<StockCheckItem> findByStockCheckId(@Param("stockCheckId") Long stockCheckId);
+    List<StockCheckItem> listByStockCheck(@Param("stockCheckId") Long stockCheckId);
 }

@@ -13,7 +13,8 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     // 根据产品编码查询商品
-    Optional<Product> findByProductCode(String productCode);
+    @Query("SELECT p FROM Product p WHERE p.productCode = :productCode")
+    Optional<Product> findByCode(String productCode);
 
     @Query("SELECT p FROM Product p ORDER BY p.createTime DESC")
     Page<Product> findPage(Pageable pageable);

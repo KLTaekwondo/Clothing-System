@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface TransferOrderItemRepository extends CrudRepository<TransferOrderItem, Long> {
     @Query("SELECT t FROM TransferOrderItem t WHERE t.transferOrder.transferOrderId = :transferOrderId")
-    List<TransferOrderItem> findByTransferOrderId(@Param("transferOrderId") Long transferOrderId);
+    List<TransferOrderItem> listByTransferOrder(@Param("transferOrderId") Long transferOrderId);
 }

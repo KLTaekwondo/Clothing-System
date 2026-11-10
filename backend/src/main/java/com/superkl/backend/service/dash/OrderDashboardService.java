@@ -1,6 +1,5 @@
 package com.superkl.backend.service.dash;
 
-import com.superkl.backend.common.ManageQueryParams;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.OrderStatusEnum;
@@ -132,7 +131,7 @@ public class OrderDashboardService {
     private BigDecimal sumSaleAmountByTimeAndStatus(LocalDate start,
                                                     LocalDate end ,
                                                     OrderStatusEnum status){
-        return orderRepository.sumTotalAmountByTime(start.atStartOfDay(),
+        return orderRepository.sumTotalAmount(start.atStartOfDay(),
                 end.atStartOfDay(),
                 DirectionEnum.IN,
                 DirectionEnum.OUT,
@@ -146,7 +145,7 @@ public class OrderDashboardService {
     private BigDecimal sumImportAmountByTimeAndStatus(LocalDate start,
                                                       LocalDate end ,
                                                       OrderStatusEnum status){
-        return orderRepository.sumImportAmountByTime(start.atStartOfDay(),
+        return orderRepository.sumImportAmount(start.atStartOfDay(),
                 end.atStartOfDay(),
                 DirectionEnum.IN,
                 DirectionEnum.OUT,
@@ -160,7 +159,7 @@ public class OrderDashboardService {
     private BigDecimal sumAmountByTimeAndWIdAndPayMethod(LocalDate start, LocalDate end, PayMethodEnum payMethod){
         Long wareHouseId = RequestUser.notNull().getRequestId();
 
-        return orderRepository.sumAmountByTimeAndWId(start.atStartOfDay(),
+        return orderRepository.sumAmountCheckOut(start.atStartOfDay(),
                 end.atStartOfDay(),
                 DirectionEnum.IN,
                 DirectionEnum.OUT,

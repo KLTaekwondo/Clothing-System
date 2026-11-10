@@ -17,8 +17,8 @@ public interface WareHouseStockRepository extends CrudRepository<WareHouseStock,
     @Query("SELECT ws FROM WareHouseStock ws " +
             "JOIN fetch ws.productSku sku " +
             "WHERE sku.product.productId = :productId AND ws.wareHouse.wareHouseId = :warehouseId")
-    List<WareHouseStock> findByProductIdAndWareHouseId(@Param("productId") Long productId,
-                                                       @Param("warehouseId") Long warehouseId);
+    List<WareHouseStock> listByProductAndWareHouse(@Param("productId") Long productId,
+                                                   @Param("warehouseId") Long warehouseId);
 
     // 根据skuId查询库存记录
     @Query("SELECT ws FROM WareHouseStock ws " +
@@ -26,15 +26,15 @@ public interface WareHouseStockRepository extends CrudRepository<WareHouseStock,
             "JOIN fetch sku.product p " +
             "JOIN fetch ws.wareHouse wh " +
             "WHERE sku.skuId = :skuId AND wh.wareHouseId = :warehouseId")
-    Optional<WareHouseStock> findBySkuIdAndWarehouseId(@Param("skuId") Long skuId,
-                                                       @Param("warehouseId") Long warehouseId);
+    Optional<WareHouseStock> findBySkuAndWareHouse(@Param("skuId") Long skuId,
+                                                   @Param("warehouseId") Long warehouseId);
 
     // 上锁：通过skuId和wareHouseId锁定库存记录
     @Query(value = "SELECT stock FROM t_ware_house_stock " +
             "WHERE sku_id = :skuId AND ware_house_id = :warehouseId FOR UPDATE",
             nativeQuery = true)
-    Optional<Integer> lockStockBySkuIdAndWarehouseId(@Param("skuId") Long skuId,
-                             @Param("warehouseId") Long warehouseId);
+    Optional<Integer> lockStockBySkuAndWareHouse(@Param("skuId") Long skuId,
+                                                 @Param("warehouseId") Long warehouseId);
 
     // 上锁：通过stockId锁定库存记录
     @Query(value = "SELECT stock FROM t_ware_house_stock " +
@@ -55,6 +55,6 @@ public interface WareHouseStockRepository extends CrudRepository<WareHouseStock,
             "JOIN fetch sku.product p " +
             "JOIN fetch ws.wareHouse wh " +
             "WHERE wh.wareHouseId = :warehouseId")
-    Page<WareHouseStock> findPageByWareHouseId(@Param("warehouseId") Long warehouseId,
-                                           Pageable pageable);
+    Page<WareHouseStock> pageByWareHouse(@Param("warehouseId") Long warehouseId,
+                                         Pageable pageable);
 }

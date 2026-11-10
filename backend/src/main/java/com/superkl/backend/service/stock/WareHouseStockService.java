@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,7 +79,7 @@ public class WareHouseStockService {
         if (!RequestUser.isCurrentWareHouse(warehouseId) && !RequestUser.isAdmin()) {
             throw new BusinessException(ErrorCodeEnum.FORBIDDEN, "您没有权限查询该仓库的库存记录");
         }
-        return WareHouseStockConverter.toInfoList(wareHouseStockRepository.findByProductIdAndWareHouseId(productId, warehouseId));
+        return WareHouseStockConverter.toInfoList(wareHouseStockRepository.listByProductAndWareHouse(productId, warehouseId));
     }
 
     // 分页查询某一个仓库的商品库存记录
@@ -89,7 +88,7 @@ public class WareHouseStockService {
         if (!RequestUser.isCurrentWareHouse(warehouseId) && !RequestUser.isAdmin()) {
             throw new BusinessException(ErrorCodeEnum.FORBIDDEN, "您没有权限查询该仓库的库存记录");
         }
-        Page<WareHouseStock> wareHouseStockPage = wareHouseStockRepository.findPageByWareHouseId(warehouseId, pageable);
+        Page<WareHouseStock> wareHouseStockPage = wareHouseStockRepository.pageByWareHouse(warehouseId, pageable);
         return WareHouseStockConverter.toInfoPage(wareHouseStockPage);
     }
 
@@ -101,11 +100,11 @@ public class WareHouseStockService {
             throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "库存数量必须大于0");
         }
         // 并发锁定库存
-        Integer beforeQuantity = wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(skuId, wareHouseId)
+        Integer beforeQuantity = wareHouseStockRepository.lockStockBySkuAndWareHouse(skuId, wareHouseId)
                 .orElseThrow(()-> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
 
         // 查询库存记录是否存在
-        WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
+        WareHouseStock ws = wareHouseStockRepository.findBySkuAndWareHouse(skuId, wareHouseId)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
 
         // 检查仓库是否在盘点状态
@@ -136,11 +135,11 @@ public class WareHouseStockService {
         }
 
         // 锁定库存
-        Integer beforeQuantity = wareHouseStockRepository.lockStockBySkuIdAndWarehouseId(skuId, wareHouseId)
+        Integer beforeQuantity = wareHouseStockRepository.lockStockBySkuAndWareHouse(skuId, wareHouseId)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
 
         // 查询库存记录是否存在
-        WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(skuId, wareHouseId)
+        WareHouseStock ws = wareHouseStockRepository.findBySkuAndWareHouse(skuId, wareHouseId)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
 
         // 检查仓库是否在盘点状态

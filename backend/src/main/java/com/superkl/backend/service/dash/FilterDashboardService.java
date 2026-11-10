@@ -102,7 +102,7 @@ public class FilterDashboardService {
         if(params.getWareHouseId() != null && !params.getWareHouseId().equals(wareHouseId) && params.getEmployeeId() != null) {
             throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "员工和仓库不匹配，建议修改查询条件");
         }
-        return orderRepository.sumTotalAmountByTime(params.getStart().atStartOfDay(),
+        return orderRepository.sumTotalAmount(params.getStart().atStartOfDay(),
                 params.getEnd().atStartOfDay(),
                 DirectionEnum.IN,
                 DirectionEnum.OUT,
@@ -125,7 +125,7 @@ public class FilterDashboardService {
         if(params.getWareHouseId() != null && !params.getWareHouseId().equals(wareHouseId) && params.getEmployeeId() != null) {
             throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "员工和仓库不匹配，建议修改查询条件");
         }
-        return orderRepository.sumImportAmountByTime(params.getStart().atStartOfDay(),
+        return orderRepository.sumImportAmount(params.getStart().atStartOfDay(),
                 params.getEnd().atStartOfDay(),
                 DirectionEnum.IN,
                 DirectionEnum.OUT,

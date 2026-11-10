@@ -20,7 +20,7 @@ public class CacheDashService {
 
     @Cacheable(cacheNames = "DaysCache", key = "#day")
     public BigDecimal sumSomeDaySaleAmount(LocalDate day){
-        return orderRepository.sumTotalAmountByTime(day.atStartOfDay(),
+        return orderRepository.sumTotalAmount(day.atStartOfDay(),
                 day.plusDays(1).atStartOfDay(),
                 DirectionEnum.IN,
                 DirectionEnum.OUT,

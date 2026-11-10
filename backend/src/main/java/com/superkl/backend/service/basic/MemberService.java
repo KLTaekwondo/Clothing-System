@@ -31,7 +31,7 @@ public class MemberService {
     @Transactional
     public void create_checkout(MemberCreateDto memberCreateDto) {
         // 1.1 检查会员是否存在
-        if (memberRepository.existsMemberByPhone(memberCreateDto.getPhone())) {
+        if (memberRepository.existsByPhone(memberCreateDto.getPhone())) {
             throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "会员已存在");
         }
 
@@ -47,7 +47,7 @@ public class MemberService {
     @Transactional
     public void create_manage(MemberMaxCreateDto dto) {
         // 1.1 检查会员是否存在
-        if (memberRepository.existsMemberByPhone(dto.getPhone())) {
+        if (memberRepository.existsByPhone(dto.getPhone())) {
             throw new BusinessException(ErrorCodeEnum.RULE_CONFLICT, "会员已存在");
         }
 
@@ -80,7 +80,7 @@ public class MemberService {
     @Transactional
     public void managePoints(String phoneNumber, BigDecimal actualPrice) {
         // 先查出会员，看是否存在
-        Member member = memberRepository.findMemberByPhoneForUpdate(phoneNumber)
+        Member member = memberRepository.lockByPhoneForUpdate(phoneNumber)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
 
         // 检查金额是否存在，避免null调用
@@ -166,7 +166,7 @@ public class MemberService {
 
     // 查询单个会员
     public MemberInfo search(String phone) {
-        Member member = memberRepository.findMemberByPhone(phone)
+        Member member = memberRepository.findByPhone(phone)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "会员不存在"));
         return MemberConverter.toInfo(member);
     }

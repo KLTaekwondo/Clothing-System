@@ -14,7 +14,6 @@ import com.superkl.backend.repository.product.ProductSkuRepository;
 import com.superkl.backend.repository.stock.WareHouseStockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class StockCheckItemService {
         ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode())
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品编码不存在"));
         // 查出系统中该商铺记录的商品数量
-        WareHouseStock ws = wareHouseStockRepository.findBySkuIdAndWarehouseId(productSku.getSkuId(), targetWareHouseId)
+        WareHouseStock ws = wareHouseStockRepository.findBySkuAndWareHouse(productSku.getSkuId(), targetWareHouseId)
                 .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品库存记录不存在"));
 
         // 检查商品状态是否正常
@@ -72,14 +71,14 @@ public class StockCheckItemService {
     // 根据盘点单Id查询盘点项列表
     @Transactional(readOnly = true)
     public List<StockCheckItemInfo> findByStockCheckId(Long stockCheckId) {
-        List<StockCheckItem> stockCheckItemList = stockCheckItemRepository.findByStockCheckId(stockCheckId);
+        List<StockCheckItem> stockCheckItemList = stockCheckItemRepository.listByStockCheck(stockCheckId);
         return StockCheckItemConverter.toInfoList(stockCheckItemList);
     }
 
     // 更新盘点项
     @Transactional
     public void updateDelete(Long stockCheckId) {
-        List<StockCheckItem> stockCheckItemList = stockCheckItemRepository.findByStockCheckId(stockCheckId);
+        List<StockCheckItem> stockCheckItemList = stockCheckItemRepository.listByStockCheck(stockCheckId);
         stockCheckItemRepository.deleteAll(stockCheckItemList);
     }
 }
