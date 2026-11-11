@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -106,14 +107,31 @@ public class TransferOrderService {
                         .sourceType(StockSourceTypeEnum.TRANSFER_ORDER)
                         .build();
 
-        RequestUser.log();
-        for(TransferOrderItem item : items){
-            // 先扣除源仓库库存
-            context1.setChangeType(StockChangeTypeEnum.TRANSFER_OUT);
-            wareHouseStockService.decreaseStock(sourceWareHouseId, item.getSkuId(), item.getQuantity(),context1);
-            // 再增加目标仓库库存
-            context1.setChangeType(StockChangeTypeEnum.TRANSFER_IN);
-            wareHouseStockService.increaseStock(targetWareHouseId, item.getSkuId(), item.getQuantity(),context1);
+        // 先判断源仓库是否在前面
+        boolean isSourceFirst = sourceWareHouseId.compareTo(targetWareHouseId) < 0;
+        // 排序Items，以防顺序死锁
+        List<TransferOrderItem> sorted = items.stream()
+                .sorted(Comparator.comparing(TransferOrderItem::getSkuId))
+                .toList();
+
+        for(TransferOrderItem item : sorted){
+            // 根据先后顺序，决定是先减后加还是先加后减
+            if (isSourceFirst) {
+                // 源仓库在前面，先减后加
+                context1.setChangeType(StockChangeTypeEnum.TRANSFER_OUT);
+                wareHouseStockService.decreaseStock(sourceWareHouseId, item.getSkuId(), item.getQuantity(), context1);
+
+                context1.setChangeType(StockChangeTypeEnum.TRANSFER_IN);
+                wareHouseStockService.increaseStock(targetWareHouseId, item.getSkuId(), item.getQuantity(), context1);
+            } else {
+                // 目标仓库在前面，先加后减
+                context1.setChangeType(StockChangeTypeEnum.TRANSFER_IN);
+                wareHouseStockService.increaseStock(targetWareHouseId, item.getSkuId(), item.getQuantity(), context1);
+
+                context1.setChangeType(StockChangeTypeEnum.TRANSFER_OUT);
+                wareHouseStockService.decreaseStock(sourceWareHouseId, item.getSkuId(), item.getQuantity(), context1);
+            }
+
             log.info("调货：SKU={}，从仓库{}到仓库{}，数量={}", item.getSkuId(), sourceWareHouseId, targetWareHouseId, item.getQuantity());
         }
         // 设置为通过状态

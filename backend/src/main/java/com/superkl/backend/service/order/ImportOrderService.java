@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -105,7 +106,13 @@ public class ImportOrderService {
                 .sourceNo(importOrder.getImportOrderNo())
                 .sourceType(StockSourceTypeEnum.IMPORT_ORDER)
                 .build();
-        for(ImportOrderItem item : items) {
+
+        // 提前处理资源顺序，避免死锁，以skuId进行排序
+        List<ImportOrderItem> sorted = items.stream()
+                .sorted(Comparator.comparing(ImportOrderItem::getSkuId))
+                .toList();
+
+        for(ImportOrderItem item : sorted) {
             // 增加库存
             if(DirectionEnum.IN.equals(direction)){
                 context.setChangeType(StockChangeTypeEnum.IMPORT_IN);

@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -83,7 +84,14 @@ public class StockCheckService {
                 .changeType(StockChangeTypeEnum.STOCK_CHECK)
                 .sourceType(StockSourceTypeEnum.STOCK_CHECK)
                 .build();
-        for (StockCheckItem stockCheckItem : stockCheckItems) {
+
+        // 提前处理资源顺序，避免死锁，以skuId进行排序
+        List<StockCheckItem> sorted = stockCheckItems.stream()
+                .sorted(Comparator.comparing(StockCheckItem::getSkuId))
+                .toList();
+
+        // 更新库存数量
+        for (StockCheckItem stockCheckItem : sorted) {
             wareHouseStockService.checkUpdateStock(stockCheckItem.getStockId(), stockCheckItem, stockContext);
         }
 

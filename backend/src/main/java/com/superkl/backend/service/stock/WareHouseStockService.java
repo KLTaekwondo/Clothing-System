@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,11 +39,17 @@ public class WareHouseStockService {
     // 修改仓库某一件个SKU的库存
     @Transactional
     public void batchUpdate(List<WarehouseStockUpdateDto> dtos) {
-        for (WarehouseStockUpdateDto dto : dtos) {
+        // 按库存Id排序，确保按顺序处理
+        List<WarehouseStockUpdateDto> sorted = dtos.stream()
+                .sorted(Comparator.comparing(WarehouseStockUpdateDto::getStockId))
+                .toList();
+
+        for (WarehouseStockUpdateDto dto : sorted) {
             Integer beforeQuantity = wareHouseStockRepository.lockStockById(dto.getStockId())
-                    .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "该库存记录已锁定"));
+                    .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "该库存记录不存在"));
             WareHouseStock ws = wareHouseStockRepository.findByStockId(dto.getStockId())
-                    .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "库存记录不存在"));
+                    .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "该库存记录不存在"));
+
             Integer afterQuantity = dto.getStock();
             Integer changeQuantity = afterQuantity - beforeQuantity;
 

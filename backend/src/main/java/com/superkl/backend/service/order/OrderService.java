@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -290,7 +291,12 @@ public class OrderService {
 
     // 库存管理
     private void stockManage(List<OrderItem> orderItems, Long wareHouseId , StockContext context) {
-        for (OrderItem orderItem : orderItems) {
+        // 先处理顺序，以免互相请求死锁，以skuId进行排序
+        List<OrderItem> sorted = orderItems.stream()
+                .sorted(Comparator.comparing(OrderItem::getSkuId))
+                .toList();
+
+        for (OrderItem orderItem : sorted) {
             if(DirectionEnum.IN.equals(orderItem.getDirection())) {
                 // 出售商品（正向业务），更新库存状态
                 context.setChangeType(StockChangeTypeEnum.SALE_OUT);
