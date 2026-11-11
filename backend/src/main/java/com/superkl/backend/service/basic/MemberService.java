@@ -39,7 +39,6 @@ public class MemberService {
         Member member = MemberConverter.toEntity(memberCreateDto);
         memberRepository.save(member);
 
-        RequestUser.log();
         log.info("收银台创建会员成功，会员姓名：{}，会员手机号：{}", member.getMemberName(), member.getMemberPhone());
     }
 
@@ -56,7 +55,6 @@ public class MemberService {
         // 最后保存
         memberRepository.save(member);
 
-        RequestUser.log();
         log.info("管理员创建会员成功，会员姓名：{}，会员手机号：{}", member.getMemberName(), member.getMemberPhone());
     }
 
@@ -73,7 +71,6 @@ public class MemberService {
         levelOf(member);
         memberRepository.save(member);
 
-        RequestUser.log();
         log.info("管理员更新会员成功，会员姓名：{}，会员手机号：{}", member.getMemberName(), member.getMemberPhone());
     }
 
@@ -114,7 +111,6 @@ public class MemberService {
         }
 
         memberRepository.save(member);
-        RequestUser.log();
         log.info("会员积分点管理成功，会员姓名：{}，会员手机号：{}，订单金额：{}，变化积分点：{}", member.getMemberName(), member.getMemberPhone(), actualPrice, points);
     }
 

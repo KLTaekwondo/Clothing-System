@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.basic;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.basic.LoginDto;
 import com.superkl.backend.dto.basic.WareHouseCreateDto;
@@ -23,6 +24,7 @@ public class WareHouseController {
     // 1.新增仓库
     // 纯RESTful风格
     // @PostMapping
+    @OpLogs(module = "仓库", description = "新增仓库")
     @PostMapping("/create")
     public Result<Void> create(@Valid @RequestBody WareHouseCreateDto wareHouseCreateDto) {
         wareHouseService.create(wareHouseCreateDto);
@@ -32,6 +34,7 @@ public class WareHouseController {
     // 2.更新仓库
     // 纯RESTful风格
     // @PutMapping("/{id}")
+    @OpLogs(module = "仓库", description = "更新仓库信息")
     @PutMapping("/update/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody WareHouseUpdateDto wareHouseUpdateDto) {
         wareHouseService.update(id,wareHouseUpdateDto);
@@ -41,6 +44,7 @@ public class WareHouseController {
     // 3.删除仓库
     // 纯RESTful风格
     // @DeleteMapping("/{id}")
+    @OpLogs(module = "仓库", description = "删除仓库")
     @DeleteMapping("/delete/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         wareHouseService.delete(id);
@@ -74,6 +78,7 @@ public class WareHouseController {
     // 7.注销
     // 纯RESTful风格
     // @PostMapping("/logout")
+    @OpLogs(module = "仓库", description = "仓库注销")
     @PostMapping("/logout")
     public Result<Void> logout(HttpServletRequest request , HttpServletResponse response) {
         wareHouseService.logout(request,response);

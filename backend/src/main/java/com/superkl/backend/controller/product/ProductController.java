@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.product;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
@@ -19,6 +20,7 @@ public class ProductController {
     private final ProductService productService;
 
     // 创建商品
+    @OpLogs(module = "商品", description = "创建商品")
     @PostMapping("/create")
     public Result<Void> create(@Valid @RequestBody ProductCreateDto dto) {
         productService.create(dto);
@@ -26,6 +28,7 @@ public class ProductController {
     }
 
     // 更新商品
+    @OpLogs(module = "商品", description = "更新商品")
     @PutMapping("/update/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody ProductUpdateDto dto) {
         productService.update(id, dto);
@@ -33,6 +36,7 @@ public class ProductController {
     }
 
     // 删除商品
+    @OpLogs(module = "商品", description = "删除商品")
     @DeleteMapping("/delete/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         productService.delete(id);
@@ -52,6 +56,7 @@ public class ProductController {
     }
 
     // 上传图片
+    @OpLogs(module = "商品", description = "上传商品图片")
     @PostMapping("/upload/{id}")
     public Result<Void> uploadImg(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         productService.uploadImg(id, file);

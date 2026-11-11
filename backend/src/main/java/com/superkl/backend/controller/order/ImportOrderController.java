@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.order;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
@@ -20,6 +21,7 @@ public class ImportOrderController {
     private final ImportOrderService importOrderService;
 
     //1. 新增进货订单
+    @OpLogs(module = "订单", description = "新增进货订单")
     @PostMapping("/create")
     public Result<Void> create(@Valid @RequestBody ImportOrderDraftDto importOrder){
         importOrderService.create(importOrder);
@@ -27,6 +29,7 @@ public class ImportOrderController {
     }
 
     //2. 更新草稿
+    @OpLogs(module = "订单", description = "更新进货订单草稿")
     @PutMapping("/update/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody ImportOrderDraftDto importOrder){
         importOrderService.update(id, importOrder);
@@ -34,6 +37,7 @@ public class ImportOrderController {
     }
 
     //3. 提交订单
+    @OpLogs(module = "订单", description = "提交进货订单")
     @PutMapping("/check/{id}")
     public Result<Void> check(@PathVariable Long id){
         importOrderService.check(id);
@@ -41,6 +45,7 @@ public class ImportOrderController {
     }
 
     //4. 通过订单
+    @OpLogs(module = "订单", description = "通过进货订单")
     @PutMapping("/approve/{id}")
     public Result<Void> approve(@PathVariable Long id){
         importOrderService.approve(id);
@@ -48,6 +53,7 @@ public class ImportOrderController {
     }
 
     //5. 拒绝订单
+    @OpLogs(module = "订单", description = "拒绝进货订单")
     @PutMapping("/reject/{id}")
     public Result<Void> reject(@PathVariable Long id){
         importOrderService.reject(id);
@@ -67,6 +73,7 @@ public class ImportOrderController {
     }
 
     //8. 删除订单
+    @OpLogs(module = "订单", description = "删除进货订单草稿")
     @DeleteMapping("/delete/{id}")
     public Result<Void> delete(@PathVariable Long id){
         importOrderService.delete(id);

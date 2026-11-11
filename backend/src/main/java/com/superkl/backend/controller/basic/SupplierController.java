@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.basic;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.basic.SupplierCreateDto;
 import com.superkl.backend.dto.basic.SupplierUpdateDto;
@@ -18,13 +19,15 @@ public class SupplierController {
     private final SupplierService supplierService;
 
     // 创建供应商
+    @OpLogs(module = "供应商", description = "创建供应商")
     @PostMapping("/create")
     public Result<Void> create(@Valid @RequestBody SupplierCreateDto dto) {
         supplierService.create(dto);
         return Result.successMessage("创建供应商成功！");
     }
 
-    // 更新供应商
+    // 更新供应商信息
+    @OpLogs(module = "供应商", description = "更新供应商信息")
     @PutMapping("/update/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody SupplierUpdateDto dto) {
         supplierService.update(id, dto);
@@ -32,6 +35,7 @@ public class SupplierController {
     }
 
     // 删除供应商
+    @OpLogs(module = "供应商", description = "删除供应商")
     @DeleteMapping("/delete/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         supplierService.delete(id);

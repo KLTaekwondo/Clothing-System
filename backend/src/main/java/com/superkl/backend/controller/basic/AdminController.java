@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.basic;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.basic.LoginDto;
 import com.superkl.backend.dto.basic.ResetDto;
@@ -24,6 +25,7 @@ public class AdminController {
     }
 
     // 2. 管理员退出登录
+    @OpLogs(module = "管理员", description = "退出登录")
     @PostMapping("/logout")
     public Result<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         adminService.logout(request,response);
@@ -31,6 +33,7 @@ public class AdminController {
     }
 
     // 3.管理员修改密码
+    @OpLogs(module = "管理员", description = "修改密码")
     @PutMapping("/reset-password")
     public Result<Void> resetPassword(@Valid @RequestBody ResetDto resetDto) {
         adminService.resetPassword(resetDto);

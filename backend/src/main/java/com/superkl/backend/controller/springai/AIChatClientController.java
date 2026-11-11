@@ -1,6 +1,7 @@
 package com.superkl.backend.controller.springai;
 
 import com.superkl.backend.annotation.LimitRate;
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.service.springai.AIChatClientService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class AIChatClientController {
 
     // 通用问答
     @LimitRate(limitCount = 20 , limitTime = 60*60*24)
+    @OpLogs(module = "AI问答", description = "通用问答")
     @PostMapping("/chat")
     public Result<String> chat(@RequestBody Map<String, String> body) {
         return Result.success(aiChatClientService.chat(body.get("question")));

@@ -83,7 +83,6 @@ public class ImportOrderService {
         importOrderRepository.save(importOrder);
 
         // 日志记录
-        RequestUser.log();
         log.info("进货订单审核中，订单编号：{}", importOrder.getImportOrderNo());
     }
 
@@ -128,7 +127,6 @@ public class ImportOrderService {
         // 审核通过
         importOrder.setStatus(AuditStatusEnum.APPROVED);
 
-        RequestUser.log();
         log.info("进货订单审核通过，订单编号：{}", importOrder.getImportOrderNo());
     }
 
@@ -147,7 +145,6 @@ public class ImportOrderService {
         // 更新订单
         importOrderRepository.save(importOrder);
 
-        RequestUser.log();
         log.info("进货订单审核拒绝，订单编号：{}", importOrder.getImportOrderNo());
     }
 
@@ -164,7 +161,6 @@ public class ImportOrderService {
         // 删除订单
         importOrderRepository.deleteById(importOrderId);
         // 日志记录
-        RequestUser.log();
         log.info("删除进货订单，订单编号：{}", importOrder.getImportOrderNo());
     }
 
@@ -225,7 +221,6 @@ public class ImportOrderService {
         importOrder.setRemark(dto.getRemark());
         importOrderRepository.save(importOrder);
 
-        RequestUser.log();
         log.info("保存进货订单成功，订单编号：{} , 进货总金额：{} , 进货仓库：{}"
                 , importOrder.getImportOrderNo(), b_totalPrice, warehouse.getWareHouseName());
     }

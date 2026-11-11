@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.order;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
@@ -19,6 +20,7 @@ public class StockCheckController {
     private final StockCheckService stockCheckService;
 
     // 1. 创建库存盘点单
+    @OpLogs(module = "库存盘点", description = "创建库存盘点单")
     @PostMapping("/create")
     public Result<Void> create(@Valid @RequestBody StockCheckDraftDto dto) {
         stockCheckService.create(dto);
@@ -26,6 +28,7 @@ public class StockCheckController {
     }
 
     // 2.提交库存盘点单（更新盘点状态为审查中）
+    @OpLogs(module = "库存盘点", description = "提交库存盘点单")
     @PutMapping("/check/{id}")
     public Result<Void> check(@PathVariable Long id) {
         stockCheckService.check(id);
@@ -33,6 +36,7 @@ public class StockCheckController {
     }
 
     // 3. 审核库存盘点单（更新盘点状态为已完成）
+    @OpLogs(module = "库存盘点", description = "审核库存盘点单")
     @PutMapping("/approve/{id}")
     public Result<Void> approve(@PathVariable Long id) {
         stockCheckService.approve(id);
@@ -40,6 +44,7 @@ public class StockCheckController {
     }
 
     // 4. 拒绝库存盘点单（更新盘点状态为已拒绝）
+    @OpLogs(module = "库存盘点", description = "拒绝库存盘点单")
     @PutMapping("/reject/{id}")
     public Result<Void> reject(@PathVariable Long id) {
         stockCheckService.reject(id);
@@ -47,6 +52,7 @@ public class StockCheckController {
     }
 
     // 5. 更新库存盘点单信息
+    @OpLogs(module = "库存盘点", description = "更新库存盘点单信息")
     @PutMapping("/update/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody StockCheckDraftDto dto) {
         stockCheckService.update(id, dto);
@@ -67,6 +73,7 @@ public class StockCheckController {
     }
 
     // 8. 删除草稿
+    @OpLogs(module = "库存盘点", description = "删除库存盘点单草稿")
     @DeleteMapping("/delete/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         stockCheckService.delete(id);

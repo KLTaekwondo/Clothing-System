@@ -68,7 +68,6 @@ public class WareHouseService {
         // 保存仓库实体
         wareHouseRepository.save(wareHouse);
         log.info("新增仓库：{}", wareHouse.getWareHouseName());
-        RequestUser.log();
 
         // 处理库存问题
         List<WareHouseStock> stocks = new ArrayList<>();
@@ -115,7 +114,6 @@ public class WareHouseService {
         // 保存更新后的仓库实体
         wareHouseRepository.save(wareHouse);
         log.info("更新仓库：{}", wareHouse.getWareHouseName());
-        RequestUser.log();
     }
 
     // 删除仓库(物理删除，等级危险)
@@ -129,7 +127,6 @@ public class WareHouseService {
         wareHouse.setStatus(StatusEnum.DISABLE);
         wareHouseRepository.save(wareHouse);
         log.info("禁用仓库：{}", wareHouse.getWareHouseName());
-        RequestUser.log();
     }
 
     // 查询单个仓库
@@ -184,7 +181,6 @@ public class WareHouseService {
 
         // 设置redis
         authRedisService.recordToken("ROLE_WAREHOUSE", wareHouseId, token, Duration.ofDays(7));
-        RequestUser.log();
         log.info("仓库登录成功：{}", account);
         return WareHouseConverter.toInfo(wareHouse);
     }
@@ -202,7 +198,6 @@ public class WareHouseService {
         // 清空后再覆盖cookie
         Cookie cookie = TokenCookieManager.clearTokenCookie(isSecure);
         response.addCookie(cookie);
-        RequestUser.log();
         log.info("仓库注销成功：{}", wareHouseId);
     }
 }

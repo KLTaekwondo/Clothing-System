@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.basic;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.basic.EmployeeCreateDto;
 import com.superkl.backend.dto.basic.EmployeeUpdateDto;
@@ -20,6 +21,7 @@ public class EmployeeController {
     // 1.新增员工
     // 纯RESTful风格
     // @PostMapping
+    @OpLogs(module = "员工", description = "新增")
     @PostMapping("/create")
     public Result<Void> create(@Valid @RequestBody EmployeeCreateDto employeeCreateDto) {
         employeeService.create(employeeCreateDto);
@@ -29,6 +31,7 @@ public class EmployeeController {
     // 2.更新员工
     // 纯RESTful风格
     // @PutMapping("/{id}")
+    @OpLogs(module = "员工", description = "更新")
     @PutMapping("/update/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody EmployeeUpdateDto employeeUpdateDto) {
         employeeService.update(id, employeeUpdateDto);
@@ -38,6 +41,7 @@ public class EmployeeController {
     // 3.删除员工
     // 纯RESTful风格
     // @DeleteMapping("/{id}")
+    @OpLogs(module = "员工", description = "删除")
     @DeleteMapping("/delete/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         employeeService.delete(id);

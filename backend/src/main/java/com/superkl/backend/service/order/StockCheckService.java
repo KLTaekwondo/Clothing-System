@@ -45,7 +45,6 @@ public class StockCheckService {
         applyStockCheck(stockCheck, stockCheckDraftDto);
 
         // 日志记录
-        RequestUser.log();
         log.info("创建库存盘点单，库存盘点单号：{}, 目标仓库：{}-{} , 盘点数量：{}",
                 stockCheck.getStockCheckNo(),
                 stockCheck.getTargetWarehouse().getWareHouseCode(),
@@ -64,7 +63,6 @@ public class StockCheckService {
         stockCheck.setStatus(AuditStatusEnum.CHECKING);
         stockCheckRepository.save(stockCheck);
         // 日志记录
-        RequestUser.log();
         log.info("提交库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
 
     }
@@ -101,7 +99,6 @@ public class StockCheckService {
         // 保存库存盘点单
         stockCheckRepository.save(stockCheck);
         // 日志记录
-        RequestUser.log();
         log.info("审批通过库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
     }
 
@@ -118,7 +115,6 @@ public class StockCheckService {
         stockCheck.getTargetWarehouse().setCheckStatus(CheckEnum.NO_CHECK);
         stockCheckRepository.save(stockCheck);
         // 日志记录
-        RequestUser.log();
         log.info("拒绝库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
     }
 
@@ -139,7 +135,6 @@ public class StockCheckService {
         // 保存库存盘点单
         stockCheckRepository.save(stockCheck);
         // 日志记录
-        RequestUser.log();
         log.info("更新库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
     }
 
@@ -169,7 +164,6 @@ public class StockCheckService {
         stockCheck.getTargetWarehouse().setCheckStatus(CheckEnum.NO_CHECK);
         stockCheckRepository.delete(stockCheck);
         // 日志记录
-        RequestUser.log();
         log.info("删除库存盘点单，库存盘点单号：{}", stockCheck.getStockCheckNo());
     }
 

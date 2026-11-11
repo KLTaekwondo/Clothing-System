@@ -42,7 +42,6 @@ public class EmployeeService {
         Employee employee = EmployeeConverter.toEntity(employeeCreateDto , wareHouse);
         employeeRepository.save(employee);
         log.info("新增员工：{}，所属仓库：{}", employee.getEmployeeName(), wareHouse.getWareHouseName());
-        RequestUser.log();
     }
 
     // 更新员工
@@ -71,7 +70,6 @@ public class EmployeeService {
         EmployeeConverter.updateEntity(employee, employeeUpdateDto);
         employeeRepository.save(employee);
         log.info("更新员工：{}", employee.getEmployeeName());
-        RequestUser.log();
     }
 
     // 删除员工（物理删除！极其严重操作！谨慎使用！）
@@ -84,7 +82,6 @@ public class EmployeeService {
         employee.setStatus(StatusEnum.DISABLE);
         employeeRepository.save(employee);
         log.info("禁用员工：{}", employee.getEmployeeName());
-        RequestUser.log();
     }
 
     // 查询员工

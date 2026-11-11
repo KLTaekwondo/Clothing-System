@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.stock;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
@@ -26,6 +27,8 @@ public class WareHouseStockController {
         return Result.success(wareHouseStockService.findByWareHouseIdAndProductId(warehouseId, productId));
     }
 
+    // 批量更新商品库存
+    @OpLogs(module = "商品库存", description = "手动调整商品库存")
     @PutMapping("/batch-update")
     public Result<Void> batchUpdate(@RequestBody @Valid List<WarehouseStockUpdateDto> dtos) {
         wareHouseStockService.batchUpdate(dtos);

@@ -94,8 +94,6 @@ public class AdminService {
         // 生成新的空token，覆盖旧的token
         Cookie cookie = TokenCookieManager.clearTokenCookie(isSecure);
         response.addCookie(cookie);
-        log.info("管理员退出登录");
-        RequestUser.log();
     }
 
     // 3.管理员重置密码
@@ -127,7 +125,5 @@ public class AdminService {
         String newEncodedPassword = passwordEncoder.encode(newPassword);
         admin.setPassword(newEncodedPassword);
         adminRepository.save(admin);
-        log.info("管理员密码已重置：{}", account);
-        RequestUser.log();
     }
 }

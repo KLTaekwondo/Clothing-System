@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.product;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.product.ProductSkuCreateDto;
 import com.superkl.backend.dto.product.ProductSkuUpdateDto;
@@ -19,6 +20,7 @@ public class ProductSkuController {
     private final ProductSkuService productSkuService;
 
     //1. 创建商品SKU
+    @OpLogs(module = "商品SKU", description = "创建商品SKU")
     @PostMapping("/create")
     public Result<Void> create(@Valid @RequestBody ProductSkuCreateDto dto) {
         productSkuService.create(dto);
@@ -26,6 +28,7 @@ public class ProductSkuController {
     }
 
     //2. 更新商品SKU
+    @OpLogs(module = "商品SKU", description = "更新商品SKU")
     @PutMapping("/update/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody ProductSkuUpdateDto dto) {
         productSkuService.update(id, dto);
@@ -33,6 +36,7 @@ public class ProductSkuController {
     }
 
     //3. 删除商品SKU
+    @OpLogs(module = "商品SKU", description = "删除商品SKU")
     @DeleteMapping("/delete/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         productSkuService.delete(id);

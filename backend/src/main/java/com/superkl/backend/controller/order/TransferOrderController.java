@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.order;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
@@ -20,6 +21,7 @@ public class TransferOrderController {
     private final TransferOrderService transferOrderService;
 
     // 创建订单
+    @OpLogs(module = "库存调拨订单", description = "创建库存调拨订单")
     @PostMapping("/create")
     public Result<Void> create(@Valid @RequestBody TransferOrderDraftDto transferOrderDraftDto) {
         transferOrderService.create(transferOrderDraftDto);
@@ -27,6 +29,7 @@ public class TransferOrderController {
     }
 
     // 更新订单
+    @OpLogs(module = "库存调拨订单", description = "更新库存调拨订单信息")
     @PutMapping("/update/{transferOrderId}")
     public Result<Void> update(@PathVariable Long transferOrderId,
                                @Valid @RequestBody TransferOrderDraftDto transferOrderDraftDto) {
@@ -35,6 +38,7 @@ public class TransferOrderController {
     }
 
     // 提交订单
+    @OpLogs(module = "库存调拨订单", description = "提交库存调拨订单")
     @PutMapping("/check/{transferOrderId}")
     public Result<Void> check(@PathVariable Long transferOrderId) {
         transferOrderService.check(transferOrderId);
@@ -42,6 +46,7 @@ public class TransferOrderController {
     }
 
     // 审核(确认订单)
+    @OpLogs(module = "库存调拨订单", description = "审核库存调拨订单")
     @PutMapping("/approve/{transferOrderId}")
     public Result<Void> approve(@PathVariable Long transferOrderId) {
         transferOrderService.approve(transferOrderId);
@@ -49,6 +54,7 @@ public class TransferOrderController {
     }
 
     // 拒绝订单
+    @OpLogs(module = "库存调拨订单", description = "拒绝库存调拨订单")
     @PutMapping("/reject/{transferOrderId}")
     public Result<Void> reject(@PathVariable Long transferOrderId) {
         transferOrderService.reject(transferOrderId);
@@ -56,6 +62,7 @@ public class TransferOrderController {
     }
 
     // 删除订单
+    @OpLogs(module = "库存调拨订单", description = "删除库存调拨订单")
     @DeleteMapping("/delete/{transferOrderId}")
     public Result<Void> delete(@PathVariable Long transferOrderId) {
         transferOrderService.delete(transferOrderId);

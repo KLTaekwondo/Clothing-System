@@ -59,7 +59,6 @@ public class OrderService {
         order.setStatus(OrderStatusEnum.DRAFT);
         orderRepository.save(order);
         // 日志记录
-        RequestUser.log();
         log.info("挂单订单，订单编号：{} ，订单总价：{} ，数量：{}",
                 order.getOrderNo(),order.getTotalPrice(),order.getOrderItems().size());
     }
@@ -130,7 +129,6 @@ public class OrderService {
         }
 
         // 日志记录
-        RequestUser.log();
         log.info("完成订单，订单编号：{} ，订单总价：{} ，数量：{}",
                 order.getOrderNo(),order.getActualPrice(),order.getOrderItems().size());
         return order.getOrderNo();
@@ -159,7 +157,6 @@ public class OrderService {
         orderRepository.save(order);
 
         // 日志记录
-        RequestUser.log();
         log.info("更新订单，订单编号：{} ，订单总价：{} ，数量：{}",
                 order.getOrderNo(),order.getTotalPrice(),order.getOrderItems().size());
     }
@@ -191,7 +188,6 @@ public class OrderService {
         }
         orderRepository.delete(order);
         // 日志记录
-        RequestUser.log();
         log.info("删除订单，订单编号：{}", order.getOrderNo());
     }
 

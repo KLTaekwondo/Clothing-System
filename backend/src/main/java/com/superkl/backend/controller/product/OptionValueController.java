@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.product;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.product.OptionValueCreateDto;
 import com.superkl.backend.dto.product.OptionValueUpdateDto;
@@ -18,6 +19,7 @@ public class OptionValueController {
     private final OptionValueService optionValueService;
 
     // 1. 创建选项值
+    @OpLogs(module = "选项值", description = "创建选项值")
     @PostMapping("/create")
     public Result<Void> create(@Valid @RequestBody OptionValueCreateDto dto) {
         optionValueService.create(dto);
@@ -25,6 +27,7 @@ public class OptionValueController {
     }
 
     // 2. 更新选项值
+    @OpLogs(module = "选项值", description = "更新选项值")
     @PutMapping("/update/{id}")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody OptionValueUpdateDto dto) {
         optionValueService.update(id, dto);
@@ -32,6 +35,7 @@ public class OptionValueController {
     }
 
     // 3. 删除选项值
+    @OpLogs(module = "选项值", description = "删除选项值")
     @DeleteMapping("/delete/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         optionValueService.delete(id);

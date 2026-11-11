@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.dash;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.info.dash.OrderDashInfo;
 import com.superkl.backend.info.product.ProductInfo;
@@ -25,6 +26,7 @@ public class ExportController {
     private final OrderDashboardService orderDashboardService;
     private final ProductService productService;
 
+    @OpLogs(module = "订单", description = "导出订单总计")
     @GetMapping("/export-between")
     public void exportBetween(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to,
@@ -49,6 +51,7 @@ public class ExportController {
         writer.flush();
     }
 
+    @OpLogs(module = "商品", description = "导出商品列表")
     @GetMapping("/products")
     public void exportProducts(HttpServletResponse response) throws Exception {
         CSVUtil.setResponseHeaders(response, "商品列表_" + LocalDate.now());

@@ -76,7 +76,6 @@ public class WareHouseStockService {
             saveRecord(ws, beforeQuantity, afterQuantity, changeQuantity, stockContext);
             wareHouseStockRepository.save(ws);
             log.info("管理员手动修改库存：stockId={}，新库存={}", dto.getStockId(), dto.getStock());
-            RequestUser.log();
         }
     }
 
@@ -130,7 +129,6 @@ public class WareHouseStockService {
         saveRecord(ws, beforeQuantity, afterQuantity, -stock, stockContext);
         wareHouseStockRepository.save(ws);
         log.info("扣减库存：仓库{}，SKU{}，数量{}，剩余{}", wareHouseId, skuId, stock, afterQuantity);
-        RequestUser.log();
     }
 
     // 增加库存
@@ -161,7 +159,6 @@ public class WareHouseStockService {
         saveRecord(ws, beforeQuantity, afterQuantity, stock, stockContext);
         wareHouseStockRepository.save(ws);
         log.info("增加库存：仓库{}，SKU{}，数量{}，剩余{}", wareHouseId, skuId, stock, afterQuantity);
-        RequestUser.log();
     }
 
 
@@ -192,7 +189,6 @@ public class WareHouseStockService {
         saveRecord(ws, item.getSystemQuantity(), item.getActualQuantity(), item.getDiffQuantity(), stockContext);
         wareHouseStockRepository.save(ws);
         log.info("盘点更新库存：stockId={}，新库存={}", stockId, item.getActualQuantity());
-        RequestUser.log();
     }
 
     // 保存库存记录

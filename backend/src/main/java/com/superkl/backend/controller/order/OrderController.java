@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.order;
 
+import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
@@ -21,6 +22,7 @@ public class OrderController {
     private final OrderService orderService;
 
     // 1.完成订单
+    @OpLogs(module = "订单", description = "完成订单")
     @PostMapping("/complete")
     public Result<String> complete(@Valid @RequestBody OrderCreateDto dto) {
         String orderNo = orderService.complete(dto);
@@ -28,6 +30,7 @@ public class OrderController {
     }
 
     // 2.挂单订单
+    @OpLogs(module = "订单", description = "挂单订单")
     @PostMapping("/draft")
     public Result<Void> draft(@Valid @RequestBody OrderCreateDto dto) {
         orderService.draft(dto);
@@ -35,6 +38,7 @@ public class OrderController {
     }
 
     // 3.创建订单
+    @OpLogs(module = "订单", description = "创建订单")
     @PostMapping("/draft/update")
     public Result<Void> updateDraft(@Valid @RequestBody OrderCreateDto dto) {
         orderService.update(dto);
@@ -42,6 +46,7 @@ public class OrderController {
     }
 
     // 4.查询单个订单
+    @OpLogs(module = "订单", description = "查询单个订单")
     @GetMapping("/search/{orderId}")
     public Result<OrderWithItemsInfo> search(@PathVariable Long orderId) {
         return Result.success(orderService.search(orderId));
@@ -55,6 +60,7 @@ public class OrderController {
     }
 
     // 6.删除草稿订单
+    @OpLogs(module = "订单", description = "删除订单草稿")
     @DeleteMapping("/delete/{orderId}")
     public Result<Void> deleteDraft(@PathVariable Long orderId) {
         orderService.deleteDraft(orderId);

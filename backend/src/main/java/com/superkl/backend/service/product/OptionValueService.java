@@ -36,7 +36,6 @@ public class OptionValueService {
         // 3. 保存选项值
         optionValueRepository.save(optionValue);
         log.info("新增选项值：{}，类型：{}", optionValue.getOptionValue(), optionValue.getOptionType());
-        RequestUser.log();
     }
 
     // 2. 更新选项值
@@ -59,7 +58,6 @@ public class OptionValueService {
         // 3. 保存更新后的选项值
         optionValueRepository.save(optionValue);
         log.info("更新选项值：ID={}", id);
-        RequestUser.log();
     }
 
     // 3. 删除选项值
@@ -75,7 +73,6 @@ public class OptionValueService {
         // 3. 删除选项值
         optionValueRepository.deleteById(id);
         log.info("删除选项值：ID={}", id);
-        RequestUser.log();
     }
 
     // 4. 查询选项值

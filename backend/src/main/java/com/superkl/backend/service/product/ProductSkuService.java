@@ -57,7 +57,6 @@ public class ProductSkuService {
         //保存商品SKU实体
         productSkuRepository.save(productSku);
         log.info("新增SKU：{}，所属商品ID：{}", productSku.getSkuName(), dto.getProductId());
-        RequestUser.log();
 
         //添加库存
         wareHouseRepository.findAll().forEach(wareHouse -> {
@@ -81,7 +80,6 @@ public class ProductSkuService {
         ProductSkuConverter.updateEntity(productSku, dto);
         productSkuRepository.save(productSku);
         log.info("更新SKU：{}", productSku.getSkuName());
-        RequestUser.log();
     }
 
     //3. 删除商品SKU
@@ -95,7 +93,6 @@ public class ProductSkuService {
         productSku.setStatus(StatusEnum.DISABLE);
         productSkuRepository.save(productSku);
         log.info("禁用SKU：{}", productSku.getSkuName());
-        RequestUser.log();
     }
 
     // 4. 特殊创建方法
@@ -113,7 +110,6 @@ public class ProductSkuService {
                 .build();
         productSkuRepository.save(sku);
         log.info("从商品创建SKU：{}", sku.getSkuName());
-        RequestUser.log();
 
         // 初始化库存为0
         wareHouseRepository.findAll().forEach(wareHouse -> {

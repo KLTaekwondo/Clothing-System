@@ -46,7 +46,6 @@ public class TransferOrderService {
         TransferOrder transferOrder = TransferOrderConverter.toEntity();
         applyTransferOrder(transferOrder,dto);
         // 日志记录
-        RequestUser.log();
         log.info("创建转移订单，订单编号：{} ，订单总价：{} ，数量：{}",
                 transferOrder.getTransferOrderNo(),transferOrder.getTotalPrice(),transferOrder.getTransferOrderItems().size());
     }
@@ -65,7 +64,6 @@ public class TransferOrderService {
         // 填充新的订单
         applyTransferOrder(transferOrder,dto);
         // 日志记录
-        RequestUser.log();
         log.info("更新转移订单，订单编号：{} ，订单总价：{} ，数量：{}",
                 transferOrder.getTransferOrderNo(),transferOrder.getTotalPrice(),transferOrder.getTransferOrderItems().size());
     }
@@ -84,7 +82,6 @@ public class TransferOrderService {
         transferOrderRepository.save(transferOrder);
 
         // 日志记录
-        RequestUser.log();
         log.info("提交转移订单，订单编号：{}", transferOrder.getTransferOrderNo());
     }
 
@@ -139,7 +136,6 @@ public class TransferOrderService {
         transferOrderRepository.save(transferOrder);
 
         // 日志记录
-        RequestUser.log();
         log.info("通过转移订单，订单编号：{}", transferOrder.getTransferOrderNo());
 
     }
@@ -157,7 +153,6 @@ public class TransferOrderService {
         transferOrderRepository.save(transferOrder);
 
         // 日志记录
-        RequestUser.log();
         log.info("拒绝转移订单，订单编号：{}", transferOrder.getTransferOrderNo());
     }
 
@@ -172,7 +167,6 @@ public class TransferOrderService {
         transferOrderRepository.delete(transferOrder);
 
         // 日志记录
-        RequestUser.log();
         log.info("删除转移订单草稿，订单编号：{}", transferOrder.getTransferOrderNo());
     }
 
