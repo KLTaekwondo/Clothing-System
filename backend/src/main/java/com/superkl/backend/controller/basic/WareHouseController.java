@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.basic;
 
+import com.superkl.backend.annotation.LimitRate;
 import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.basic.LoginDto;
@@ -70,6 +71,7 @@ public class WareHouseController {
     // 6.登录
     // 纯RESTful风格
     // @PostMapping
+    @LimitRate(limitCount = 10)
     @PostMapping("/login")
     public Result<WareHouseInfo> login(@Valid @RequestBody LoginDto loginDto, HttpServletResponse response) {
         return Result.success(wareHouseService.login(loginDto,response));

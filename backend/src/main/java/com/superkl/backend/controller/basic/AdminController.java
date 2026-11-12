@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.basic;
 
+import com.superkl.backend.annotation.LimitRate;
 import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.basic.LoginDto;
@@ -19,6 +20,7 @@ public class AdminController {
     private final AdminService adminService;
 
     // 1.管理员登录
+    @LimitRate(limitCount = 10)
     @PostMapping("/login")
     public Result<AdminInfo> login(@Valid @RequestBody LoginDto loginDto , HttpServletResponse response) {
         return Result.success(adminService.login(loginDto,response));

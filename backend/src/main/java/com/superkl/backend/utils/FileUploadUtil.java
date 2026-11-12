@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
@@ -36,6 +37,9 @@ public class FileUploadUtil {
 
         // 检查文件后缀是否为图片类型
         String suffix = isImageFile(fileName);
+
+        // 再校验文件头，防止改个后缀就传上来
+        checkMagic(file);
 
         // 检查无误后，重命名
         String newFileName = LocalDate.now() + "_" + UUID.randomUUID().toString().replace("-", "") + suffix;
@@ -74,6 +78,49 @@ public class FileUploadUtil {
         }
 
         return suffix;
+    }
+
+    // 校验文件头（魔数）。不用 ImageIO，因为它默认不支持 webp
+    private void checkMagic(MultipartFile file) {
+        byte[] head = new byte[12];
+        try (InputStream in = file.getInputStream()) {
+            if (in.readNBytes(head, 0, 12) < 12) {
+                throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "文件内容不完整");
+            }
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCodeEnum.SYSTEM_ERROR, "文件读取失败");
+        }
+
+        // JPEG: FF D8 FF
+        boolean jpeg = (head[0] & 0xFF) == 0xFF
+                && (head[1] & 0xFF) == 0xD8
+                && (head[2] & 0xFF) == 0xFF;
+
+        // PNG: 89 50 4E 47
+        boolean png = (head[0] & 0xFF) == 0x89
+                && head[1] == 'P'
+                && head[2] == 'N'
+                && head[3] == 'G';
+
+        // GIF: GIF8
+        boolean gif = head[0] == 'G'
+                && head[1] == 'I'
+                && head[2] == 'F'
+                && head[3] == '8';
+
+        // WEBP: RIFF....WEBP
+        boolean webp = head[0] == 'R'
+                && head[1] == 'I'
+                && head[2] == 'F'
+                && head[3] == 'F'
+                && head[8] == 'W'
+                && head[9] == 'E'
+                && head[10] == 'B'
+                && head[11] == 'P';
+
+        if (!jpeg && !png && !gif && !webp) {
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "文件内容不是有效的图片");
+        }
     }
 
 }

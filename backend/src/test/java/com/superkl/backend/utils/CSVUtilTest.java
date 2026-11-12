@@ -94,4 +94,36 @@ public class CSVUtilTest {
         verify(response).setHeader(eq("Content-Disposition"),
                 contains("attachment;filename=%E5%BA%93%E5%AD%98%E6%8A%A5%E8%A1%A8.csv"));
     }
+
+    // 公式注入：等号开头的单元格必须加单引号前缀
+    @Test
+    public void test_FormulaInjectionWithEquals(){
+        CSVUtil.writeLine(pw, "=SUM(A1:A9)");
+        pw.flush();
+        assertEquals("'=SUM(A1:A9)", sw.toString().trim());
+    }
+
+    // 公式注入：@ 和 + 开头同样处理
+    @Test
+    public void test_FormulaInjectionWithAtAndPlus(){
+        CSVUtil.writeLine(pw, "@cmd", "+86");
+        pw.flush();
+        assertEquals("'@cmd,'+86", sw.toString().trim());
+    }
+
+    // 负数不是攻击，不能被加前缀，否则金额列会变文本
+    @Test
+    public void test_NegativeNumberNotEscaped(){
+        CSVUtil.writeLine(pw, "-12.50");
+        pw.flush();
+        assertEquals("-12.50", sw.toString().trim());
+    }
+
+    // 以减号开头的普通文本要防
+    @Test
+    public void test_DashTextEscaped(){
+        CSVUtil.writeLine(pw, "-1+1");
+        pw.flush();
+        assertEquals("'-1+1", sw.toString().trim());
+    }
 }
