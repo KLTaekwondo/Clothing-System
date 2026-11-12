@@ -185,6 +185,14 @@
                                         type="button"
                                         @click="toggleOption(group.type, opt.optionValue)">{{ opt.optionValue }}
                                 </button>
+                                <button v-if="addingType !== group.type" class="tag-add" type="button"
+                                        @click="startAddOption(group.type)">+
+                                </button>
+                                <input v-else v-model="addValue" class="tag-input" type="text"
+                                       :placeholder="'新增' + group.label + '，回车确认'"
+                                       @keyup.enter="confirmAddOption(group.type)"
+                                       @keyup.esc="cancelAddOption"
+                                       @blur="cancelAddOption"/>
                                 <div v-if="group.items.length === 0" class="no-options">暂无可用选项</div>
                             </div>
                         </div>
@@ -218,10 +226,11 @@
 </template>
 
 <script setup>
-import {computed, ref, watch} from 'vue'
+import {computed, nextTick, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
+import optionValueInterface from '../../../axios/interface/OptionValueInterface.js'
 import {SEASON_OPTIONS} from '../../../constants/season.js'
 import {OPTION_TYPE} from '../../../constants/optionType.js'
 import {useProductOptions} from './composables/useProductOptions.js'
@@ -253,7 +262,8 @@ const {
     compositionOptions,
     yearOptions,
     colorOptions,
-    sizeOptions
+    sizeOptions,
+    loadOptions
 } = useProductOptions(true)
 
 const form = ref({
@@ -325,6 +335,49 @@ function toggleOption(type, value) {
     if (idx === -1) arr.push(value)
     else arr.splice(idx, 1)
     selectedOptions.value = {...selectedOptions.value}
+}
+
+// ===== 新增规格值（颜色 / 尺码） =====
+const addingType = ref('')
+const addValue = ref('')
+
+function startAddOption(type) {
+    addingType.value = type
+    addValue.value = ''
+    nextTick(() => {
+        const input = document.querySelector('.tag-input')
+        if (input) input.focus()
+    })
+}
+
+function cancelAddOption() {
+    addingType.value = ''
+    addValue.value = ''
+}
+
+async function confirmAddOption(type) {
+    const value = addValue.value.trim()
+    if (!value) {
+        cancelAddOption()
+        return
+    }
+
+    const group = skuOptionGroups.value.find(item => item.type === type)
+    const exists = group ? group.items.some(item => item.optionValue === value) : false
+    if (exists) {
+        toggleOption(type, value)
+        cancelAddOption()
+        return
+    }
+
+    try {
+        await optionValueInterface.create({optionType: type, optionValue: value})
+        await loadOptions()
+        toggleOption(type, value)
+        toast.success('已新增规格值：' + value)
+    } finally {
+        cancelAddOption()
+    }
 }
 
 const selectedCount = computed(() => Object.values(selectedOptions.value).reduce((sum, arr) => sum + arr.length, 0))
@@ -636,6 +689,31 @@ function goBack() {
     border-color: var(--primary);
     color: var(--primary);
     font-weight: 600;
+}
+
+.tag-add {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px dashed var(--border-light);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    line-height: normal;
+}
+
+.tag-add:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.tag-input {
+    width: 130px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--primary);
+    font-size: 13px;
+    outline: none;
 }
 
 .option-summary {
