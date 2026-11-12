@@ -152,7 +152,7 @@ public class WareHouseService {
 
         // 先查找仓库是否存在
         WareHouse wareHouse = wareHouseRepository.findByAccount(account)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "仓库不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "账号或密码错误"));
 
         // 校验密码
         String dbPassword = wareHouse.getWareHousePassword();
@@ -160,7 +160,7 @@ public class WareHouseService {
 
         // 校验密码是否正确
         if(!passwordEncoder.matches(password, dbPassword)) {
-            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "密码错误");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "账号或密码错误");
         }
 
         // 校验仓库状态是否启用

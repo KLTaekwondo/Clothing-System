@@ -48,12 +48,12 @@ public class AdminService {
 
         // 先查找管理员是否存在
         Admin admin = adminRepository.findByAccount(account)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "账号不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR,"账号或密码错误"));
 
         // 检查两部分是否匹配
         // 1. 密码是否匹配
         if (!passwordEncoder.matches(password, admin.getPassword())) {
-            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "密码错误");
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "账号或密码错误");
         }
 
         // 2. 账号状态是否启用
