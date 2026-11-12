@@ -11,6 +11,7 @@ import com.superkl.backend.service.order.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -78,7 +79,7 @@ public class OrderController {
     @GetMapping("/search/wareHouse/complete")
     public Result<PageResult<OrderInfo>> searchCompletePage(@RequestParam LocalDateTime startTime,
                                                             @RequestParam LocalDateTime endTime,
-                                                            @RequestParam Long employeeId,
+                                                            @RequestParam(required = false) Long employeeId,
                                                             @Valid PageParam pageParam) {
         Pageable pageable = pageParam.toPageable();
         return Result.success(orderService.searchCompletePageByWareHouseId(startTime, endTime,employeeId,pageable));
