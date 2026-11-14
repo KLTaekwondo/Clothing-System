@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.io.ByteArrayOutputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 // createWorkbook / writeToResponse 的生成行为
 class ExcelUtilCreateTest {
 
-    private static final String[] HEADERS = {"商品编码", "商品名称", "季节"};
-    private static final int[] WIDTHS = {16, 26, 12};
+    private static final List<String> HEADERS = List.of("商品编码", "商品名称", "季节");
+    private static final List<Integer> WIDTHS = List.of(16, 26, 12);
 
     // 表头内容、列宽、冻结窗格
     @Test
@@ -46,10 +47,7 @@ class ExcelUtilCreateTest {
     // 下拉框：公式指向隐藏表、范围落位正确
     @Test
     void createWorkbook_dropdown() throws Exception {
-        ExcelPullList season = ExcelPullList.builder()
-                .startRow(1).endRow(500).startColumn(2).endColumn(2)
-                .list(new String[]{"春款", "夏款", "秋款"})
-                .build();
+        ExcelPullList season = new ExcelPullList(1, 500, 2, 2, List.of("春款", "夏款", "秋款"));
 
         XSSFWorkbook wb = ExcelUtil.createWorkbook("t", HEADERS, WIDTHS,
                 new ExcelPullList[]{season});
@@ -74,12 +72,8 @@ class ExcelUtilCreateTest {
     // 多个下拉各占一列，互不覆盖
     @Test
     void createWorkbook_multipleDropdowns() throws Exception {
-        ExcelPullList season = ExcelPullList.builder()
-                .startRow(1).endRow(500).startColumn(2).endColumn(2)
-                .list(new String[]{"春款", "夏款"}).build();
-        ExcelPullList special = ExcelPullList.builder()
-                .startRow(1).endRow(500).startColumn(10).endColumn(10)
-                .list(new String[]{"是", "否"}).build();
+        ExcelPullList season = new ExcelPullList(1, 500, 2, 2, List.of("春款", "夏款"));
+        ExcelPullList special = new ExcelPullList(1, 500, 10, 10, List.of("是", "否"));
 
         XSSFWorkbook wb = ExcelUtil.createWorkbook("t", HEADERS, WIDTHS,
                 new ExcelPullList[]{season, special});
@@ -96,9 +90,7 @@ class ExcelUtilCreateTest {
     // 空列表：不生成下拉，也不能抛异常
     @Test
     void createWorkbook_emptyListIgnored() throws Exception {
-        ExcelPullList empty = ExcelPullList.builder()
-                .startRow(1).endRow(10).startColumn(2).endColumn(2)
-                .list(new String[]{}).build();
+        ExcelPullList empty = new ExcelPullList(1, 10, 2, 2, List.of());
 
         XSSFWorkbook wb = ExcelUtil.createWorkbook("t", HEADERS, WIDTHS,
                 new ExcelPullList[]{empty});
@@ -146,9 +138,7 @@ class ExcelUtilCreateTest {
     // 生成的字节流能被重新打开，结构完整
     @Test
     void createWorkbook_outputCanBeReopened() throws Exception {
-        ExcelPullList season = ExcelPullList.builder()
-                .startRow(1).endRow(500).startColumn(2).endColumn(2)
-                .list(new String[]{"春款", "夏款"}).build();
+        ExcelPullList season = new ExcelPullList(1, 500, 2, 2, List.of("春款", "夏款"));
 
         XSSFWorkbook wb = ExcelUtil.createWorkbook("商品导入", HEADERS, WIDTHS,
                 new ExcelPullList[]{season});

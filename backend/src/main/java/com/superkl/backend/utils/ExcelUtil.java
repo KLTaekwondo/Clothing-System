@@ -23,7 +23,7 @@ public class ExcelUtil {
     } // 私有化构造方法，防止外部实例化
 
     // 创建工作簿
-    public static XSSFWorkbook createWorkbook(String sheetName, String[] headers, int[] columnWidths, ExcelPullList[] pullLists) throws IOException {
+    public static XSSFWorkbook createWorkbook(String sheetName, List<String> headers, List<Integer> columnWidths, ExcelPullList[] pullLists) throws IOException {
         XSSFWorkbook wb = new XSSFWorkbook();
         Sheet sheet = wb.createSheet(sheetName); // sheet表名称
         // 建立隐藏表
@@ -120,7 +120,7 @@ public class ExcelUtil {
 
     // === 辅助方法 ===
     // 创建表头样式
-    private static void headerSetter(XSSFWorkbook wb, String[] headers, Sheet sheet) {
+    private static void headerSetter(XSSFWorkbook wb, List<String> headers, Sheet sheet) {
         // new一个新的样式对象
         CellStyle headerStyle = wb.createCellStyle();
         // 1.字体
@@ -146,18 +146,18 @@ public class ExcelUtil {
 
         // 5.表头内容
         Row row = sheet.createRow(0); // 创建第一行
-        for (int i = 0; i < headers.length; i++) {
+        for (int i = 0; i < headers.size(); i++) {
             Cell cell = row.createCell(i);
-            cell.setCellValue(headers[i]);
+            cell.setCellValue(headers.get(i));
             cell.setCellStyle(headerStyle);
         }
 
     }
 
     // 设置列宽
-    private static void setColumnWidths(Sheet sheet, int[] columnWidths) {
-        for (int i = 0; i < columnWidths.length; i++) {
-            sheet.setColumnWidth(i, columnWidths[i] * 256);
+    private static void setColumnWidths(Sheet sheet, List<Integer> columnWidths) {
+        for (int i = 0; i < columnWidths.size(); i++) {
+            sheet.setColumnWidth(i, columnWidths.get(i) * 256);
         }
     }
 
@@ -172,8 +172,8 @@ public class ExcelUtil {
     // 获取下拉框验证
     private static DataValidation getValidation(ExcelPullList pullList, Sheet sourceSheet) {
         // 提前校验，避免后续消耗和报错
-        String[] list = pullList.getList();
-        if(list == null || list.length == 0) return null;
+        List<String> list = pullList.getList();
+        if (list == null || list.isEmpty()) return null;
 
         // 取出必要数据
         int startRow = pullList.getStartRow();
@@ -187,7 +187,7 @@ public class ExcelUtil {
         // 获取隐藏表名称
         String sheetName = sourceSheet.getSheetName();
         // 计算下拉框范围的Excel公式
-        String format = sheetName + "!$" + column + "$1:$" + column + "$" + list.length;
+        String format = sheetName + "!$" + column + "$1:$" + column + "$" + list.size();
 
         // 设置下拉框约束
         DataValidationHelper helper = sourceSheet.getDataValidationHelper();
@@ -199,12 +199,12 @@ public class ExcelUtil {
         DataValidation validation = helper.createValidation(constraint, range);
 
         // 初始化下拉框
-        for(int index = 0; index < list.length; index++) {
+        for (int index = 0; index < list.size(); index++) {
             Row row = sourceSheet.getRow(index);
             if (row == null) {
                 row = sourceSheet.createRow(index);
             }
-            row.createCell(startColumn).setCellValue(list[index]);
+            row.createCell(startColumn).setCellValue(list.get(index));
         }
 
         validation.setShowErrorBox(true);
