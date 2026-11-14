@@ -70,6 +70,7 @@ public class ExcelUtil {
             // 2. 读取工作表
             Sheet sheet = wb.getSheetAt(0);
             DataFormatter formatter = new DataFormatter();
+            int headerLength = sheet.getRow(0).getLastCellNum();
 
             // 3. 读取数据
             for(int i = 1; i <= sheet.getLastRowNum(); i++ ) {
@@ -88,6 +89,10 @@ public class ExcelUtil {
                 }
 
                 // 读取数据
+                if(lastCellNum < headerLength) {
+                    throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "第 " + (i+1) + " 行数据列数不足");
+                }
+
                 String[] data = new String[lastCellNum];
                 boolean allBlank = true;
 

@@ -32,4 +32,11 @@ public interface OptionValueRepository extends JpaRepository<OptionValue, Long> 
             "AND JSON_SEARCH(spec_attributes, 'one', :value) IS NOT NULL",
             nativeQuery = true)
     boolean existsBySpecExactValue(@Param("value") String value);
+
+    @Query(value="SELECT * FROM t_product_option_value " +
+            "WHERE option_type = :type " +
+            "AND option_value LIKE :value",
+            nativeQuery = true)
+    List<OptionValue> findByOptionTypeLikeValue(@Param("type") OptionTypeEnum type,
+                                                @Param("value") String value);
 }

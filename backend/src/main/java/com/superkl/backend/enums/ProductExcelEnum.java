@@ -20,11 +20,11 @@ public enum ProductExcelEnum {
     UNIT(5, "单位", 10),
     COMPOSITION(6, "面料", 16),
     YEAR(7, "年份", 10),
-    IMPORT_PRICE(8, "进价", 10),
-    SALE_PRICE(9, "售价", 10),
-    SPECIAL(10, "特价", 8),
-    COLORS(11, "颜色", 28),
-    SIZES(12, "尺码", 20);
+    IMPORT_PRICE(8, "进价（使用纯数字）", 10),
+    SALE_PRICE(9, "售价（使用纯数字）", 10),
+    SPECIAL(10, "是否特价", 8),
+    COLORS(11, "颜色(多个种类用逗号隔开)", 35),
+    SIZES(12, "尺码(多个种类用逗号隔开)", 35);
 
     private final int index;
     private final String title;

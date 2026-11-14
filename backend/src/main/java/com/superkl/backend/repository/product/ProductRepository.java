@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,4 +24,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // 检查商品编码是否已经存在
     @Query("SELECT COUNT(p) > 0 FROM Product p WHERE p.productCode = :productCode")
     boolean existsByCode(@Param("productCode") String productCode);
+
+    // ProductRepository
+    @Query("SELECT p.productCode FROM Product p WHERE p.productCode IN :codes")
+    List<String> findExistingCodes(@Param("codes") Collection<String> codes);
 }

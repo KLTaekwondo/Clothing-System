@@ -4,6 +4,8 @@ import com.superkl.backend.common.PageResult;
 import com.superkl.backend.dto.product.ProductCreateDto;
 import com.superkl.backend.dto.product.ProductUpdateDto;
 import com.superkl.backend.entity.product.Product;
+import com.superkl.backend.enums.ErrorCodeEnum;
+import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.product.ProductInfo;
 import org.springframework.data.domain.Page;
 
@@ -49,6 +51,9 @@ public class ProductConverter {
 
     // dto转实体
     public static Product toEntity(ProductCreateDto productCreateDto) {
+        if(productCreateDto.getImportPrice().compareTo(productCreateDto.getSalePrice()) >= 0) {
+            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR,"导入价格不能大于等于销售价格");
+        }
         // 这里不处理SKU，因为比较复杂，转换器无法一口气处理，外部将采用笛卡尔积的方式处理
         return Product.builder()
                 .productCode(productCreateDto.getCode())

@@ -105,4 +105,17 @@ public class OptionValueService {
         // 2. 转换为选项值信息列表
         return OptionValueConverter.toInfoList(optionValueList);
     }
+
+    // 7. 模糊查询选项值列表（内部使用）
+    public List<String> likeSearch(OptionTypeEnum optionType, String value) {
+        // 1. 从数据库中查询选项值列表
+        List<OptionValue> optionValueList = optionValueRepository.findByOptionTypeLikeValue(optionType, value);
+        // 2. 转换为选项值信息列表
+        return optionValueList.stream().map(OptionValue::getOptionValue).toList();
+    }
+
+    // 8. 精确查找（内部使用）
+    public boolean existsByTypeAndValue(OptionTypeEnum optionType, String value) {
+        return optionValueRepository.existsByTypeAndValue(optionType, value);
+    }
 }
