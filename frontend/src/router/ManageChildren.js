@@ -18,6 +18,12 @@ const ManageChildren = [
         meta: {title: '添加商品', icon: 'product'}
     },
     {
+        path: 'product/import',
+        name: 'ProductImport',
+        component: () => import('../page/manage/product/ProductImport.vue'),
+        meta: {title: '商品导入', icon: 'product'}
+    },
+    {
         path: 'product/:id/sku/add',
         name: 'ProductSkuAdd',
         component: () => import('../page/manage/product/ProductSkuAdd.vue'),

@@ -29,6 +29,12 @@
                         >
                             + 添加商品
                         </router-link>
+                        <router-link
+                            class="btn-outline search-button"
+                            to="/manage/product/import"
+                        >
+                            批量导入
+                        </router-link>
                         <button
                             :disabled="exporting"
                             class="btn-outline search-button"
