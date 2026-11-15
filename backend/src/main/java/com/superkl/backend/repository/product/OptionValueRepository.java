@@ -33,10 +33,11 @@ public interface OptionValueRepository extends JpaRepository<OptionValue, Long> 
             nativeQuery = true)
     boolean existsBySpecExactValue(@Param("value") String value);
 
-    @Query(value="SELECT * FROM t_product_option_value " +
-            "WHERE option_type = :type " +
-            "AND option_value LIKE :value",
-            nativeQuery = true)
+    // 改用 JPQL：nativeQuery 会把枚举按序号绑定，MySQL 又按自己的 ENUM 下标解释，查出来是别的类型
+    // 匹配方向保持原设计：库里的值包含输入值（红 → 红色）
+    @Query("SELECT o FROM OptionValue o " +
+            "WHERE o.optionType = :type " +
+            "AND o.optionValue LIKE :value")
     List<OptionValue> findByOptionTypeLikeValue(@Param("type") OptionTypeEnum type,
                                                 @Param("value") String value);
 }
