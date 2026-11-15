@@ -213,7 +213,13 @@ public class ExcelUtil {
         }
 
         validation.setShowErrorBox(true);
-        validation.createErrorBox("取值不存在", "请选择正确的值");
+        if (pullList.isLocked()) {
+            validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+            validation.createErrorBox("取值不存在", "请选择正确的值");
+        } else {
+            validation.setErrorStyle(DataValidation.ErrorStyle.WARNING);
+            validation.createErrorBox("不在候选列表中", "可以继续输入，导入时会自动创建");
+        }
         return validation;
     }
 

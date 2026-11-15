@@ -1,0 +1,83 @@
+package com.superkl.backend.dto.product;
+
+import com.superkl.backend.enums.SeasonEnum;
+import jakarta.validation.constraints.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class ExcelPreProductCreateDto {
+    @NotBlank(message = "商品编码不能为空")
+    @Size(min = 1, max = 20, message = "商品编码长度必须为1-20位")
+    private String code;
+
+    @NotBlank(message = "商品名称不能为空")
+    @Size(min = 1, max = 20, message = "商品名称长度必须为1-20位")
+    private String name;
+
+    @NotNull(message = "季节不能为空")
+    private SeasonEnum season;
+
+    @NotBlank(message = "类型不能为空")
+    @Size(min = 1, max = 20, message = "类型长度必须为1-20位")
+    private String type;
+
+    @NotBlank(message = "种类不能为空")
+    @Size(min = 1, max = 20, message = "种类长度必须为1-20位")
+    private String category;
+
+    @NotBlank(message = "单位不能为空")
+    @Size(min = 1, max = 20, message = "单位长度必须为1-20位")
+    private String unit;
+
+    @NotBlank(message = "面料组合不能为空")
+    @Size(min = 1, max = 20, message = "面料组合长度必须为1-20位")
+    private String composition;
+
+    @NotBlank(message = "年份不能为空！")
+    @Size(min = 4 , max = 4 , message = "年份长度必须为4！")
+    @Pattern(regexp = "\\d{4}", message = "年份长度必须为4位数！")
+    private String year;
+
+    @NotNull(message = "进货价格不能为空")
+    @DecimalMin(value = "0.00", message = "进货价格不得小于0")
+    private BigDecimal importPrice;
+
+    @NotNull(message = "销售价格不能为空")
+    @DecimalMin(value = "0.00", message = "销售价格不得小于0")
+    private BigDecimal salePrice;
+
+    @NotNull(message = "是否特价不能为空")
+    private boolean special;
+
+    @NotNull(message = "颜色不能为空")
+    private List<String> colors;
+
+    @NotNull(message = "尺寸不能为空")
+    private List<String> sizes;
+
+    public ProductCreateDto toProductCreateDto() {
+        Map<String,List<String>> selectedOptions = Map.of("COLOR",colors,"SIZE",sizes);
+        return ProductCreateDto.builder()
+                .code(code)
+                .name(name)
+                .season(season)
+                .type(type)
+                .category(category)
+                .unit(unit)
+                .composition(composition)
+                .year(year)
+                .importPrice(importPrice)
+                .salePrice(salePrice)
+                .special(special)
+                .selectedOptions(selectedOptions)
+                .build();
+    }
+}

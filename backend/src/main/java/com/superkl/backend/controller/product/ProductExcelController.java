@@ -1,5 +1,6 @@
 package com.superkl.backend.controller.product;
 
+import com.superkl.backend.common.ExcelImportResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.service.product.ProductExcelService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +28,14 @@ public class ProductExcelController {
 
     // 检查商品导入模板是否符合要求
     @PostMapping("/validate")
-    public Result<List<String>> validate(MultipartFile file) throws IOException {
+    public Result<ExcelImportResult> validate(MultipartFile file) throws IOException {
         return Result.success(productExcelService.validate(file));
+    }
+
+    // 导入商品
+    @PostMapping("/import")
+    public Result<Void> importProducts(MultipartFile file, boolean autoCreateMissing) throws IOException {
+        productExcelService.importProducts(file, autoCreateMissing);
+        return Result.successMessage("商品导入成功");
     }
 }

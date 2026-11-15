@@ -118,4 +118,13 @@ public class OptionValueService {
     public boolean existsByTypeAndValue(OptionTypeEnum optionType, String value) {
         return optionValueRepository.existsByTypeAndValue(optionType, value);
     }
+
+    // 9. 直接生成，去除查询重复值的操作
+    public void generateOptions(OptionValueCreateDto dto) {
+        // 直接创建选项值
+        OptionValue optionValue = OptionValueConverter.toEntity(dto);
+        // 保存选项值
+        optionValueRepository.save(optionValue);
+        log.info("从一键导入新增选项值：{}，类型：{}", optionValue.getOptionValue(), optionValue.getOptionType());
+    }
 }

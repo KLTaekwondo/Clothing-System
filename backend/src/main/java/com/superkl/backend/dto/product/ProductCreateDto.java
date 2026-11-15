@@ -2,6 +2,7 @@ package com.superkl.backend.dto.product;
 
 import com.superkl.backend.enums.SeasonEnum;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@Builder
 public class ProductCreateDto {
     @NotBlank(message = "商品编码不能为空")
     @Size(min = 1, max = 20, message = "商品编码长度必须为1-20位")

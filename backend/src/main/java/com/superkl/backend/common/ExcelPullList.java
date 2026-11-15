@@ -16,13 +16,31 @@ public class ExcelPullList {
     private int startColumn;
     private int endColumn;
     private List<String> list;
+    private boolean locked;
 
-    // 快捷构造：默认从第 1 行到第 500 行，且只作用于单列
     public ExcelPullList(int column, List<String> list) {
         this.startRow = 1;
         this.endRow = 500;
         this.startColumn = column;
         this.endColumn = column;
         this.list = list;
+        this.locked = false;
     }
+
+    // 指定完整范围，默认不锁
+    public ExcelPullList(int startRow, int endRow, int startColumn, int endColumn, List<String> list) {
+        this(startRow, endRow, startColumn, endColumn, list, false);
+    }
+
+    // 快捷构造：默认从第 1 行到第 500 行，且只作用于单列
+    public ExcelPullList(int column, List<String> list, boolean locked) {
+        this.startRow = 1;
+        this.endRow = 500;
+        this.startColumn = column;
+        this.endColumn = column;
+        this.list = list;
+        this.locked = locked;
+    }
+
+
 }
