@@ -509,6 +509,7 @@ function goBack() {
 
 .field-product {
     width: 432px;
+    max-width: calc(100vw - 32px);
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -522,6 +523,7 @@ function goBack() {
 
 .search-control {
     width: 432px;
+    max-width: calc(100vw - 32px);
     display: flex;
     align-items: stretch;
 }

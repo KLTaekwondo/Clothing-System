@@ -91,6 +91,7 @@ defineEmits(['cancel', 'confirm'])
 <style scoped>
 .confirm-modal {
     width: 400px;
+    max-width: calc(100vw - 32px);
     display: flex;
     flex-direction: column;
     background: var(--bg-card);

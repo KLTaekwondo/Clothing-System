@@ -51,6 +51,7 @@ defineEmits(['close', 'select'])
 <style scoped>
 .draft-modal {
     width: 520px;
+    max-width: calc(100vw - 32px);
     max-height: 560px;
     display: flex;
     flex-direction: column;

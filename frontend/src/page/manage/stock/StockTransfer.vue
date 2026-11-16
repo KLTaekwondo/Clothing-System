@@ -522,6 +522,7 @@ function formatSpec(spec) {
 
 .warehouse-field {
     width: 360px;
+    max-width: calc(100vw - 32px);
 }
 
 .product-field {

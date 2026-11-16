@@ -491,10 +491,12 @@ function goBack() {
 
 .search-field {
     width: 432px;
+    max-width: calc(100vw - 32px);
 }
 
 .search-control {
     width: 432px;
+    max-width: calc(100vw - 32px);
     display: flex;
     align-items: stretch;
 }

@@ -93,6 +93,7 @@ function selectOnlyEmployee() {
 <style scoped>
 .employee-modal {
     width: 440px;
+    max-width: calc(100vw - 32px);
     max-height: 520px;
     display: flex;
     flex-direction: column;

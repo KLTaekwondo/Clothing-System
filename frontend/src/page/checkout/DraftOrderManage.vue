@@ -574,6 +574,7 @@ function goCheckout() {
 
 .confirm-dialog {
     width: 400px;
+    max-width: calc(100vw - 32px);
     overflow: hidden;
     background: var(--bg-card);
     border-radius: 14px;
@@ -633,6 +634,7 @@ function goCheckout() {
 
 .detail-dialog {
     width: 760px;
+    max-width: calc(100vw - 32px);
     max-width: 100%;
     overflow: hidden;
     background: var(--bg-card);

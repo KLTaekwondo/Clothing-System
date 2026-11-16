@@ -314,4 +314,5 @@ function confirmLeave() {
 
 .confirm-modal {
     width: 380px;
+    max-width: calc(100vw - 32px);
 }</style>

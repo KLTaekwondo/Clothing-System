@@ -471,6 +471,7 @@ function goBack() {
 
 .search-field {
     width: 420px;
+    max-width: calc(100vw - 32px);
 }
 
 .candidate-list {

@@ -1449,19 +1449,37 @@ button {
         border-bottom: none;
     }
 
+    /* 移动端：输入框独占一行，按钮保持横向并排，不再一个胶囊占一整行 */
     .manage-container .search-controls {
         align-items: stretch;
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
     }
 
     .manage-container .search-shell {
+        width: 100%;
         min-width: 0;
     }
 
     .manage-container .search-warehouse,
-    .manage-container .search-code-input,
+    .manage-container .search-code-input {
+        width: 100%;
+    }
+
     .manage-container .search-shell .search-button {
-        width: min(100%, 360px);
+        width: auto;
+        padding: 0 16px;
+    }
+
+    /* 竖排后那根 1px 分隔线只剩孤单一条，隐藏 */
+    .manage-container .toolbar-divider {
+        display: none;
+    }
+
+    .manage-container .page-toolbar {
+        gap: 16px;
     }
 }
 

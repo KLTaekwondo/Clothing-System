@@ -228,6 +228,7 @@ async function handleDisable() {
 
 .confirm-modal {
     width: 380px;
+    max-width: calc(100vw - 32px);
 }
 
 @media (max-width: 760px) {

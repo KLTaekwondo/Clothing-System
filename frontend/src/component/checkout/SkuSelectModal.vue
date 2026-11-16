@@ -64,6 +64,7 @@ watch(() => props.visible, async visible => {
 <style scoped>
 .sku-modal {
     width: 400px;
+    max-width: calc(100vw - 32px);
     max-height: 500px;
     display: flex;
     flex-direction: column;
