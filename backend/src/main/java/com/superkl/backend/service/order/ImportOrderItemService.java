@@ -26,18 +26,31 @@ public class ImportOrderItemService {
     private final ProductSkuRepository productSkuRepository;
 
     // 1.创建订单项
-    public ImportOrderItem create(ImportOrderItemCreateDto dto, ImportOrder importOrder){
+    public ImportOrderItem create(ImportOrderItemCreateDto dto, ImportOrder importOrder, List<String> errors){
         // 查找商品SKU是否存在
-        ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode())
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品SKU不存在"));
+        ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode()).orElse(null);
+        if(productSku == null){
+            errors.add("商品SKU[" + dto.getSkuCode() + "]不存在！");
+            return null;
+        }
+
+        String productName = productSku.getProduct().getProductName();
+        String productCode = productSku.getProduct().getProductCode();
+        String skuCode = productSku.getSkuCode();
 
         if(!productSku.getProduct().isEnabled()){
-            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "商品已禁用！请检查后再操作！");
+            errors.add(productName + "[" + productCode + "]商品已禁用！请检查后再操作！");
         }
 
         if(!productSku.isEnabled()){
-            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "商品SKU已禁用！请检查后再操作！");
+            errors.add(productName + "[" + productCode + "]商品SKU[" + skuCode + "]已禁用！请检查后再操作！");
         }
+
+        // 有错误，不创建订单项，返回null，避免调用日志记录
+        if(!errors.isEmpty()) {
+            return null;
+        }
+
         // 转换为实体
         ImportOrderItem importOrderItem = ImportOrderItemConverter.toEntity(dto,productSku);
         importOrderItem.setImportOrder(importOrder);
@@ -48,9 +61,18 @@ public class ImportOrderItemService {
 
     // 2.创建订单项列表
     public List<ImportOrderItem> createList(List<ImportOrderItemCreateDto> dtos, ImportOrder importOrder){
+        List<String> errors = new ArrayList<>();
         List<ImportOrderItem> importOrderItems = new ArrayList<>();
         for (ImportOrderItemCreateDto dto : dtos) {
-            importOrderItems.add(create(dto,importOrder));
+            ImportOrderItem item = create(dto, importOrder, errors);
+            // 保证安全，只添加成功项，反正最后有异常都会抛出
+            if(item != null) {
+                importOrderItems.add(item);
+            }
+        }
+
+        if(!errors.isEmpty()){
+            throw new BusinessException(ErrorCodeEnum.RULE_STOCK_RUNOUT, String.join("\n", errors));
         }
         log.info("创建进货订单项列表成功，订单编号：{} , 商品数量：{}", importOrder.getImportOrderNo(), importOrderItems.size());
         return importOrderItems;

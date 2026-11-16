@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -111,6 +112,8 @@ public class ImportOrderService {
                 .sorted(Comparator.comparing(ImportOrderItem::getSkuId))
                 .toList();
 
+        // 检查库存是否足够
+        List<String> errors = new ArrayList<>();
         for(ImportOrderItem item : sorted) {
             // 增加库存
             if(DirectionEnum.IN.equals(direction)){
@@ -121,12 +124,19 @@ public class ImportOrderService {
             // 减少库存
             if(DirectionEnum.OUT.equals(direction)){
                 context.setChangeType(StockChangeTypeEnum.IMPORT_RETURN);
-                wareHouseStockService.decreaseStock(wareHouseId, item.getSkuId(), item.getQuantity(), context);
+                wareHouseStockService.decreaseStock(wareHouseId, item.getSkuId(), item.getQuantity(), context, errors);
             }
         }
+
+        // 如果存在错误，抛出异常
+        if(!errors.isEmpty()){
+            throw new BusinessException(ErrorCodeEnum.RULE_STOCK_RUNOUT, String.join("\n", errors));
+        }
+
         // 审核通过
         importOrder.setStatus(AuditStatusEnum.APPROVED);
-
+        // 更新订单
+        importOrderRepository.save(importOrder);
         log.info("进货订单审核通过，订单编号：{}", importOrder.getImportOrderNo());
     }
 

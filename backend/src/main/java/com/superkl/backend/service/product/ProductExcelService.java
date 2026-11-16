@@ -189,12 +189,12 @@ public class ProductExcelService {
 
         // 有任何验证问题就不导入商品
         if (!result.getFatalErrors().isEmpty()) {
-            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR , "校验失败，存在严重错误：" + result.getFatalErrors());
+            throw new BusinessException(ErrorCodeEnum.RULE_EXCEL_ERROR , "校验失败，存在严重错误：" + result.getFatalErrors());
         }
 
         // 检查是否自动创建缺失的规格，如果没有直接抛出异常
         if(!autoCreateMissing && !result.getErrors().isEmpty()) {
-            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR , "你未自动创建缺失的规格，存在缺失的规格，无法导入" + result.getErrors());
+            throw new BusinessException(ErrorCodeEnum.RULE_EXCEL_ERROR , "你未自动创建缺失的规格，存在缺失的规格，无法导入" + result.getErrors());
         }
 
         // 启用了自动创建，并且存在缺失的规格，需要先创建缺失的规格，再导入商品
@@ -276,11 +276,11 @@ public class ProductExcelService {
     }
 
     // 数值检查
-    private BigDecimal checkPrice(String value, ExcelRow row, String fieldName, ExcelImportResult result) {        if(value == null || value.isEmpty()){
+    private BigDecimal checkPrice(String value, ExcelRow row, String fieldName, ExcelImportResult result) {
+        if(value == null || value.isEmpty()){
             result.getFatalErrors().add("第 " + row.getRowIndex() + " 行:" + fieldName + " 不能为空");
             return null;
         }
-
 
         try{
             BigDecimal price = new BigDecimal(value);

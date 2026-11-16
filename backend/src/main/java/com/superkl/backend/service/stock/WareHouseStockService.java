@@ -100,7 +100,7 @@ public class WareHouseStockService {
 
     // 减少库存
     @Transactional
-    public void decreaseStock(Long wareHouseId, Long skuId, Integer stock , StockContext stockContext) {
+    public void decreaseStock(Long wareHouseId, Long skuId, Integer stock , StockContext stockContext ,List<String> errors) {
         // 检查库存数量是否大于0
         if (stock == null || stock <= 0) {
             throw new BusinessException(ErrorCodeEnum.RULE_ERROR, "库存数量必须大于0");
@@ -121,7 +121,10 @@ public class WareHouseStockService {
         // 检查库存是否足够
         Integer afterQuantity = beforeQuantity - stock;
         if (afterQuantity < 0) {
-            throw new BusinessException(ErrorCodeEnum.RULE_ERROR, ws.getProductSku().getSkuName()+"库存不足");
+            String productName = ws.getProductSku().getProduct().getProductName();
+            String productCode = ws.getProductSku().getProduct().getProductCode();
+            errors.add(productName + "[" + productCode + "]库存不足：需 " + stock + "，剩 " + beforeQuantity);
+            return;
         }
         // 减少库存
         ws.setStock(afterQuantity);

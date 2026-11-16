@@ -30,10 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -266,7 +263,7 @@ public class OrderService {
 
         // 校验金额是否一致
         if (f_ActualAmount.compareTo(b_ActualAmount) != 0 || f_TotalAmount.compareTo(b_TotalAmount) != 0) {
-            throw new BusinessException(ErrorCodeEnum.RULE_VALID_ERROR, "订单金额与后台计算金额不一致！");
+            throw new BusinessException(ErrorCodeEnum.RULE_AMOUNT_ERROR, "订单金额与后台计算金额不一致！");
         }
 
         // 整合订单项
@@ -292,12 +289,14 @@ public class OrderService {
                 .sorted(Comparator.comparing(OrderItem::getSkuId))
                 .toList();
 
+        // 检查库存是否足够
+        List<String> errors = new ArrayList<>();
         for (OrderItem orderItem : sorted) {
             if(DirectionEnum.IN.equals(orderItem.getDirection())) {
                 // 出售商品（正向业务），更新库存状态
                 context.setChangeType(StockChangeTypeEnum.SALE_OUT);
                 context.setSourceType(StockSourceTypeEnum.ORDER);
-                wareHouseStockService.decreaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity(),context);
+                wareHouseStockService.decreaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity(),context, errors);
             }
 
             if(DirectionEnum.OUT.equals(orderItem.getDirection())) {
@@ -306,6 +305,10 @@ public class OrderService {
                 context.setSourceType(StockSourceTypeEnum.ORDER);
                 wareHouseStockService.increaseStock(wareHouseId, orderItem.getSkuId(), orderItem.getQuantity(),context);
             }
+        }
+        // 如果存在错误，抛出异常
+        if(!errors.isEmpty()){
+            throw new BusinessException(ErrorCodeEnum.RULE_STOCK_RUNOUT, String.join("\n", errors));
         }
     }
 

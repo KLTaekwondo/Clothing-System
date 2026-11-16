@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -111,12 +112,14 @@ public class TransferOrderService {
                 .sorted(Comparator.comparing(TransferOrderItem::getSkuId))
                 .toList();
 
+        // 检查库存是否足够
+        List<String> errors = new ArrayList<>();
         for(TransferOrderItem item : sorted){
             // 根据先后顺序，决定是先减后加还是先加后减
             if (isSourceFirst) {
                 // 源仓库在前面，先减后加
                 context1.setChangeType(StockChangeTypeEnum.TRANSFER_OUT);
-                wareHouseStockService.decreaseStock(sourceWareHouseId, item.getSkuId(), item.getQuantity(), context1);
+                wareHouseStockService.decreaseStock(sourceWareHouseId, item.getSkuId(), item.getQuantity(), context1, errors);
 
                 context1.setChangeType(StockChangeTypeEnum.TRANSFER_IN);
                 wareHouseStockService.increaseStock(targetWareHouseId, item.getSkuId(), item.getQuantity(), context1);
@@ -126,10 +129,13 @@ public class TransferOrderService {
                 wareHouseStockService.increaseStock(targetWareHouseId, item.getSkuId(), item.getQuantity(), context1);
 
                 context1.setChangeType(StockChangeTypeEnum.TRANSFER_OUT);
-                wareHouseStockService.decreaseStock(sourceWareHouseId, item.getSkuId(), item.getQuantity(), context1);
+                wareHouseStockService.decreaseStock(sourceWareHouseId, item.getSkuId(), item.getQuantity(), context1, errors);
             }
-
             log.info("调货：SKU={}，从仓库{}到仓库{}，数量={}", item.getSkuId(), sourceWareHouseId, targetWareHouseId, item.getQuantity());
+        }
+        // 如果存在错误，抛出异常
+        if(!errors.isEmpty()){
+            throw new BusinessException(ErrorCodeEnum.RULE_STOCK_RUNOUT, String.join("\n", errors));
         }
         // 设置为通过状态
         transferOrder.setStatus(AuditStatusEnum.APPROVED);

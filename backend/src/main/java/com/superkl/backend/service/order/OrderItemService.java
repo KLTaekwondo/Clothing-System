@@ -27,18 +27,31 @@ public class OrderItemService {
     private final ProductSkuRepository productSkuRepository;
 
     // 1.创建订单项
-    public OrderItem create(OrderItemCreateDto dto , Order order , DirectionEnum direction){
+    public OrderItem create(OrderItemCreateDto dto , Order order , DirectionEnum direction, List<String> errors){
         // 查找商品SKU是否存在
-        ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode())
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品SKU不存在"));
+        ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode()).orElse(null);
+        if(productSku == null){
+            errors.add("商品SKU[" + dto.getSkuCode() + "]不存在！");
+            return null;
+        }
+
+        String skuCode = productSku.getSkuCode();
+        String productName = productSku.getProduct().getProductName();
+        String productCode = productSku.getProduct().getProductCode();
 
         if(!productSku.getProduct().isEnabled()){
-            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "商品已禁用！不可创建订单项！");
+            errors.add(productName + "[" + productCode + "]商品已禁用！不可创建订单项！");
         }
 
         if(!productSku.isEnabled()){
-            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "商品SKU已禁用！不可创建订单项！");
+            errors.add(productName + "[" + productCode + "]商品SKU[" + skuCode + "]已禁用！不可创建订单项！");
         }
+
+        // 有错误，不创建订单项，返回null，避免调用日志记录
+        if(!errors.isEmpty()) {
+            return null;
+        }
+
         // 转换为实体
         OrderItem orderItem = OrderItemConverter.toEntity(dto,productSku);
         orderItem.setOrder(order);
@@ -51,10 +64,20 @@ public class OrderItemService {
 
     // 2.创建订单项列表
     public List<OrderItem> createList(List<OrderItemCreateDto> dtos, Order order , DirectionEnum direction){
+        List<String> errors = new ArrayList<>();
         List<OrderItem> orderItems = new ArrayList<>();
         for (OrderItemCreateDto dto : dtos) {
-            orderItems.add(create(dto,order,direction));
+            OrderItem item = create(dto, order, direction, errors);
+            // 保证安全，只添加成功项，反正最后有异常都会抛出
+            if(item != null) {
+                orderItems.add(item);
+            }
         }
+
+        if(!errors.isEmpty()){
+            throw new BusinessException(ErrorCodeEnum.RULE_ITEM_FORBIDDEN, String.join("\n", errors));
+        }
+
         return orderItems;
     }
 

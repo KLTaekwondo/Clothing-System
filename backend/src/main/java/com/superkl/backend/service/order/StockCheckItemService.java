@@ -29,21 +29,35 @@ public class StockCheckItemService {
     private final WareHouseStockRepository wareHouseStockRepository;
 
     // 创建盘点项
-    public StockCheckItem create(StockCheckItemCreateDto dto , StockCheck stockCheck) {
+    public StockCheckItem create(StockCheckItemCreateDto dto , StockCheck stockCheck , List<String> errors) {
         Long targetWareHouseId = stockCheck.getTargetWarehouse().getWareHouseId();
         // 先查找需要盘点的商品sku
-        ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode())
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品编码不存在"));
+        ProductSku productSku = productSkuRepository.findBySkuCode(dto.getSkuCode()).orElse(null);
+        if(productSku == null) {
+            errors.add("商品编码["+dto.getSkuCode()+"]不存在");
+            return null;
+        }
         // 查出系统中该商铺记录的商品数量
-        WareHouseStock ws = wareHouseStockRepository.findBySkuAndWareHouse(productSku.getSkuId(), targetWareHouseId)
-                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.RULE_NOT_FOUND, "商品库存记录不存在"));
+        WareHouseStock ws = wareHouseStockRepository.findBySkuAndWareHouse(productSku.getSkuId(), targetWareHouseId).orElse(null);
+        if(ws == null) {
+            errors.add("商品编码["+dto.getSkuCode()+"]的库存记录在仓库["+stockCheck.getTargetWarehouse().getWareHouseName()+"]中不存在");
+            return null;
+        }
 
+        String skuCode = productSku.getSkuCode();
+        String productName = productSku.getProduct().getProductName();
+        String productCode = productSku.getProduct().getProductCode();
         // 检查商品状态是否正常
         if (!productSku.getProduct().isEnabled()) {
-            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "商品并未启用，无法进行盘点");
+            errors.add(productName+"商品["+productCode+"]并未启用，无法进行盘点");
         }
+
         if(!productSku.isEnabled()) {
-            throw new BusinessException(ErrorCodeEnum.RULE_FORBIDDEN, "改商品编码未启用，无法进行盘点");
+            errors.add(productName+"商品["+productCode+"]的SKU["+skuCode+"]未启用，无法进行盘点");
+        }
+        // 存在错误直接返回null
+        if(!errors.isEmpty()){
+            return null;
         }
 
         // 记录数据
@@ -55,6 +69,7 @@ public class StockCheckItemService {
     // 创建盘点项列表
     public List<StockCheckItem> createList(List<StockCheckItemCreateDto> dtos, StockCheck stockCheck) {
         List<StockCheckItem> stockCheckItems = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
         // 校验商品编码是否重复
         Set<String> checkedCodes = new HashSet<>();
         for(StockCheckItemCreateDto dto : dtos) {
@@ -63,8 +78,17 @@ public class StockCheckItemService {
                 continue;
             }
             // 创建盘点项并添加到列表中
-            stockCheckItems.add(create(dto, stockCheck));
+            StockCheckItem item = create(dto, stockCheck, errors);
+
+            if(item!=null) {
+                stockCheckItems.add(item);
+            }
         }
+
+        if(!errors.isEmpty()) {
+            throw new BusinessException(ErrorCodeEnum.RULE_ITEM_FORBIDDEN, String.join("\n", errors));
+        }
+
         return stockCheckItems;
     }
 

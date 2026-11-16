@@ -30,8 +30,12 @@ public enum ErrorCodeEnum {
     RULE_NOT_FOUND(422, "业务资源不存在"),
     RULE_CONFLICT(422, "业务资源冲突"),
     RULE_FORBIDDEN(422, "业务资源被禁用"),
+
+    // 中心弹窗错误
     RULE_EXCEL_ERROR(412, "Excel文件校验错误"),
-    RULE_CHECKOUT_RUNOUT(412, "购物车商品库存不足"),
+    RULE_AMOUNT_ERROR(412, "前后订单金额不一致"),
+    RULE_ITEM_FORBIDDEN(412, "订单相关项禁用"),
+    RULE_STOCK_RUNOUT(412, "商品库存不足"),
 
 
     // 系统错误
