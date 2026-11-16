@@ -25,6 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,8 +83,10 @@ class WareHouseStockServiceTest {
         when(wareHouseStockRepository.findBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(ws));
 
-        wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 3, buildContext());
+        List<String> errors = new ArrayList<>();
+        wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 3, buildContext(), errors);
 
+        assertTrue(errors.isEmpty());
         assertEquals(7, ws.getStock());
         verify(wareHouseStockRepository).save(ws);
 
@@ -100,10 +103,11 @@ class WareHouseStockServiceTest {
 
     @Test
     void decreaseStock_whenQuantityNonPositive_shouldThrow() {
+        List<String> errors = new ArrayList<>();
         assertThrows(BusinessException.class,
-                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 0, buildContext()));
+                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 0, buildContext(), errors));
         assertThrows(BusinessException.class,
-                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, -5, buildContext()));
+                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, -5, buildContext(), errors));
 
         // 数量都不合法，一条查询都不该发
         verifyNoInteractions(wareHouseStockRepository);
@@ -118,7 +122,7 @@ class WareHouseStockServiceTest {
                 .thenReturn(Optional.empty());
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 3, buildContext()));
+                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 3, buildContext(), new ArrayList<>()));
         assertTrue(ex.getMessage().contains("库存记录不存在"));
 
         // 锁都没拿到，不该再发第二条查询
@@ -136,7 +140,7 @@ class WareHouseStockServiceTest {
                 .thenReturn(Optional.empty());
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 3, buildContext()));
+                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 3, buildContext(), new ArrayList<>()));
         assertTrue(ex.getMessage().contains("库存记录不存在"));
 
         verify(wareHouseStockRepository, never()).save(any());
@@ -145,17 +149,19 @@ class WareHouseStockServiceTest {
     // ========== 扣减：库存不足（防超卖核心） ==========
 
     @Test
-    void decreaseStock_whenInsufficientStock_shouldThrowAndNotSave() {
+    void decreaseStock_whenInsufficientStock_shouldCollectErrorAndNotSave() {
         when(wareHouseStockRepository.lockStockBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(2));
         WareHouseStock ws = buildStock(2);
         when(wareHouseStockRepository.findBySkuAndWareHouse(SKU_ID, WAREHOUSE_ID))
                 .thenReturn(Optional.of(ws));
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 5, buildContext()));
-        assertTrue(ex.getMessage().contains("库存不足"));
+        List<String> errors = new ArrayList<>();
+        wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 5, buildContext(), errors);
 
+        // 库存不足不再直接抛，改为记入 errors 交给调用方统一抛
+        assertEquals(1, errors.size());
+        assertTrue(errors.get(0).contains("库存不足"));
         assertEquals(2, ws.getStock());
         verify(wareHouseStockRepository, never()).save(any());
         verify(stockRecordRepository, never()).save(any());
@@ -172,7 +178,7 @@ class WareHouseStockServiceTest {
                 .thenReturn(Optional.of(ws));
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 3, buildContext()));
+                () -> wareHouseStockService.decreaseStock(WAREHOUSE_ID, SKU_ID, 3, buildContext(), new ArrayList<>()));
         assertTrue(ex.getMessage().contains("盘点"));
 
         assertEquals(10, ws.getStock());
