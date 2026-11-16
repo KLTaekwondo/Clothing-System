@@ -53,6 +53,7 @@
                              @click.prevent="openTab(item.path, item.label, item.icon)">
                     <img
                         :src="item.icon"
+                        :style="{ filter: item.tint }"
                         alt=""
                         class="nav-icon"
                     />
@@ -126,24 +127,33 @@ const currentPath = ref('')
 const tabs = ref(loadSavedTabs())
 const currentPageTitle = computed(() => route.meta?.title || '管理后台')
 
+// 图标着色：SVG 原色是黑的，用 filter 转成分类色
+// 放在数据里而不是靠 nth-child，加菜单或调顺序都不会错色
+const TINT_BLUE = 'invert(45%) sepia(91%) saturate(1774%) hue-rotate(202deg) brightness(98%) contrast(94%)'
+const TINT_ORANGE = 'invert(57%) sepia(93%) saturate(1277%) hue-rotate(346deg) brightness(101%) contrast(96%)'
+const TINT_GREEN = 'invert(49%) sepia(61%) saturate(769%) hue-rotate(123deg) brightness(91%) contrast(93%)'
+const TINT_PURPLE = 'invert(45%) sepia(68%) saturate(1230deg) hue-rotate(234deg) brightness(90%) contrast(91%)'
+const TINT_PINK = 'invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%)'
+const TINT_GRAY = 'invert(54%) sepia(11%) saturate(578%) hue-rotate(124deg) brightness(91%) contrast(88%)'
+
 const navItems = [
-    {path: '/manage/dashboard', label: '仪表盘', icon: dashboardIcon},
-    {path: '/manage/product', label: '商品管理', icon: productIcon},
-    {path: '/manage/warehouse', label: '仓库管理', icon: warehouseIcon},
-    {path: '/manage/employee', label: '员工管理', icon: employeeIcon},
-    {path: '/manage/member', label: '会员管理', icon: memberIcon},
-    {path: '/manage/option', label: '选项管理', icon: optionIcon},
-    {path: '/manage/supplier', label: '供应商管理', icon: supplierIcon},
-    {path: '/manage/stock-check', label: '库存盘点', icon: stockCheckIcon},
-    {path: '/manage/import-order', label: '采购订单', icon: importOrderIcon},
-    {path: '/manage/transfer-order', label: '调拨订单', icon: transferOrderIcon},
-    {path: '/manage/stock/view', label: '查看库存', icon: stockViewIcon},
-    {path: '/manage/stock', label: '人工库存调整', icon: stockIcon},
-    {path: '/manage/order', label: '订单管理', icon: orderIcon},
-    {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon},
-    {path: '/manage/statistics', label: '数据统计', icon: statisticsIcon},
-    {path: '/manage/ai', label: 'AI 助手', icon: aiIcon},
-    {path: '/manage/setting', label: '系统设置', icon: settingsIcon}
+    {path: '/manage/dashboard', label: '仪表盘', icon: dashboardIcon, tint: TINT_BLUE},
+    {path: '/manage/product', label: '商品管理', icon: productIcon, tint: TINT_ORANGE},
+    {path: '/manage/warehouse', label: '仓库管理', icon: warehouseIcon, tint: TINT_GREEN},
+    {path: '/manage/employee', label: '员工管理', icon: employeeIcon, tint: TINT_PURPLE},
+    {path: '/manage/member', label: '会员管理', icon: memberIcon, tint: TINT_GREEN},
+    {path: '/manage/option', label: '选项管理', icon: optionIcon, tint: TINT_PINK},
+    {path: '/manage/supplier', label: '供应商管理', icon: supplierIcon, tint: TINT_GRAY},
+    {path: '/manage/stock-check', label: '库存盘点', icon: stockCheckIcon, tint: TINT_GREEN},
+    {path: '/manage/import-order', label: '采购订单', icon: importOrderIcon, tint: TINT_BLUE},
+    {path: '/manage/transfer-order', label: '调拨订单', icon: transferOrderIcon, tint: TINT_ORANGE},
+    {path: '/manage/stock/view', label: '查看库存', icon: stockViewIcon, tint: TINT_PURPLE},
+    {path: '/manage/stock', label: '人工库存调整', icon: stockIcon, tint: TINT_PINK},
+    {path: '/manage/order', label: '订单管理', icon: orderIcon, tint: TINT_PINK},
+    {path: '/manage/stock/record', label: '库存记录', icon: stockRecordIcon, tint: TINT_PINK},
+    {path: '/manage/statistics', label: '数据统计', icon: statisticsIcon, tint: TINT_GRAY},
+    {path: '/manage/ai', label: 'AI 助手', icon: aiIcon, tint: TINT_PURPLE},
+    {path: '/manage/setting', label: '系统设置', icon: settingsIcon, tint: TINT_GRAY}
 ]
 
 function loadSavedTabs() {
@@ -422,70 +432,6 @@ async function handleLogout() {
     transform: scale(1.06);
 }
 
-.sidebar-nav .nav-item:nth-child(1) .nav-icon {
-    filter: invert(45%) sepia(91%) saturate(1774%) hue-rotate(202deg) brightness(98%) contrast(94%);
-}
-
-.sidebar-nav .nav-item:nth-child(2) .nav-icon {
-    filter: invert(57%) sepia(93%) saturate(1277%) hue-rotate(346deg) brightness(101%) contrast(96%);
-}
-
-.sidebar-nav .nav-item:nth-child(3) .nav-icon {
-    filter: invert(49%) sepia(61%) saturate(769%) hue-rotate(123deg) brightness(91%) contrast(93%);
-}
-
-.sidebar-nav .nav-item:nth-child(4) .nav-icon {
-    filter: invert(45%) sepia(68%) saturate(1230%) hue-rotate(234deg) brightness(90%) contrast(91%);
-}
-
-.sidebar-nav .nav-item:nth-child(5) .nav-icon {
-    filter: invert(49%) sepia(61%) saturate(769%) hue-rotate(123deg) brightness(91%) contrast(93%);
-}
-
-.sidebar-nav .nav-item:nth-child(6) .nav-icon {
-    filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
-}
-
-.sidebar-nav .nav-item:nth-child(7) .nav-icon {
-    filter: invert(54%) sepia(11%) saturate(578%) hue-rotate(124deg) brightness(91%) contrast(88%);
-}
-
-.sidebar-nav .nav-item:nth-child(8) .nav-icon {
-    filter: invert(49%) sepia(61%) saturate(769%) hue-rotate(123deg) brightness(91%) contrast(93%);
-}
-
-.sidebar-nav .nav-item:nth-child(9) .nav-icon {
-    filter: invert(45%) sepia(91%) saturate(1774%) hue-rotate(202deg) brightness(98%) contrast(94%);
-}
-
-.sidebar-nav .nav-item:nth-child(10) .nav-icon {
-    filter: invert(57%) sepia(93%) saturate(1277%) hue-rotate(346deg) brightness(101%) contrast(96%);
-}
-
-.sidebar-nav .nav-item:nth-child(11) .nav-icon {
-    filter: invert(45%) sepia(68%) saturate(1230%) hue-rotate(234deg) brightness(90%) contrast(91%);
-}
-
-.sidebar-nav .nav-item:nth-child(12) .nav-icon {
-    filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
-}
-
-.sidebar-nav .nav-item:nth-child(13) .nav-icon {
-    filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
-}
-
-.sidebar-nav .nav-item:nth-child(14) .nav-icon {
-    filter: invert(71%) sepia(85%) saturate(1900%) hue-rotate(358deg) brightness(101%) contrast(96%);
-}
-
-.sidebar-nav .nav-item:nth-child(15) .nav-icon {
-    filter: invert(54%) sepia(11%) saturate(578%) hue-rotate(124deg) brightness(91%) contrast(88%);
-}
-
-.sidebar-nav .nav-item:nth-child(16) .nav-icon {
-    filter: invert(45%) sepia(68%) saturate(1230%) hue-rotate(234deg) brightness(90%) contrast(91%);
-}
-
 .nav-item-active .nav-icon {
     opacity: 1;
 }
@@ -577,8 +523,9 @@ async function handleLogout() {
     display: flex;
     align-items: center;
     gap: 2px;
+    width: 100%;
+    min-width: 0;
     overflow-x: auto;
-    flex: 1;
     scrollbar-width: none;
 }
 
@@ -774,9 +721,9 @@ async function handleLogout() {
     }
 
     .sidebar.collapsed .nav-item-active {
-        background: linear-gradient(90deg, #d9f6f1, #effbf9) !important;
-        border-color: #b9ded7 !important;
-        box-shadow: inset 3px 0 0 #0d9488, 0 4px 12px rgba(13, 148, 136, 0.12);
+        background: linear-gradient(90deg, var(--primary-light), var(--bg-hover)) !important;
+        border-color: var(--border-hover) !important;
+        box-shadow: inset 3px 0 0 var(--primary), 0 4px 12px rgba(13, 148, 136, 0.12);
     }
 
     .sidebar.collapsed .nav-item-active::after {
