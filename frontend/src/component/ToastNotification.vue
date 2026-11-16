@@ -96,7 +96,8 @@ const icons = {
 }
 
 .toast-msg {
-    flex: 1;
+    width: 100%;
+    min-width: 0;
     word-break: break-word;
 }
 

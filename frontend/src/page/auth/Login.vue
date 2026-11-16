@@ -261,7 +261,7 @@ async function handleLogin() {
 }
 
 .role-btn {
-    flex: 1;
+    width: calc(50% - 4px);
     padding: 9px 0;
     border: 1px solid var(--border);
     border-radius: 999px;

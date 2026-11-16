@@ -627,22 +627,26 @@ function handleOverlayClick() {
 }
 
 .col-name {
-    flex: 1;
+    width: 100%;
+    min-width: 0;
     text-align: left;
 }
 
 .col-price {
     width: 52px;
+    flex-shrink: 0;
     text-align: right;
 }
 
 .col-qty {
     width: 36px;
+    flex-shrink: 0;
     text-align: center;
 }
 
 .col-discount {
     width: 42px;
+    flex-shrink: 0;
     text-align: center;
 }
 
@@ -692,11 +696,12 @@ function handleOverlayClick() {
 }
 
 .item-name {
+    width: calc(100% - 22px);
+    min-width: 0;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    flex: 1;
 }
 
 .item-numbers {

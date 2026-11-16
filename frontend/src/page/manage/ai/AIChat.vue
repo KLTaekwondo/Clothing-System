@@ -138,7 +138,8 @@ async function scrollToBottom() {
 }
 
 .chat-messages {
-    flex: 1;
+    height: 100%;
+    min-height: 0;
     overflow-y: auto;
     padding: 20px;
     display: flex;
@@ -320,13 +321,15 @@ async function scrollToBottom() {
 .chat-input-bar {
     display: flex;
     gap: 10px;
+    flex-shrink: 0;
     padding: 14px;
     border-top: 1px solid var(--border);
     background: var(--bg-card);
 }
 
 .chat-input {
-    flex: 1;
+    width: 100%;
+    min-width: 0;
     resize: none;
     padding: 10px 14px;
     border: 1px solid var(--border);
@@ -345,6 +348,7 @@ async function scrollToBottom() {
 
 .chat-send {
     align-self: flex-end;
+    flex-shrink: 0;
     padding: 10px 24px;
     border-radius: 999px;
     white-space: nowrap;
