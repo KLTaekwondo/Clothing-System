@@ -1,6 +1,7 @@
 import axios from "axios";
 import {useToastStore} from "../stores/toastStore.js";
 import {useUserStore} from "../stores/userStore.js";
+import {openErrorDialog} from "../stores/errorDialogStore.js";
 import router from "../router/router.js";
 
 const backendService = axios.create({
@@ -59,6 +60,13 @@ backendService.interceptors.response.use(
             toast.error("权限不足，请联系管理员");
         } else if (status === 500) {
             toast.error("服务器内部错误，请联系管理员");
+        } else if (status === 412) {
+            // 412：后端约定"需要用户停下来处理"的错误（订单项禁用、金额不一致、库存不足）
+            // 一次可能带回多条，用中心弹窗，toast 三秒就没了
+            openErrorDialog({
+                title: "操作未执行",
+                message: bodyMsg || "存在需要处理的问题，请核对后重试"
+            });
         } else if (status === 422) {
             // 业务规则错误（RULE_* 系列，后端业务主通道）：展示后端具体消息
             toast.error(bodyMsg || "业务规则错误");
