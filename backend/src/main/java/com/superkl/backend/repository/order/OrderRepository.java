@@ -1,5 +1,6 @@
 package com.superkl.backend.repository.order;
 
+import com.superkl.backend.common.extralreturn.OrderCounts;
 import com.superkl.backend.entity.order.Order;
 import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.OrderStatusEnum;
@@ -13,9 +14,15 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order,Long> {
+
+    // 按订单状态统计数量（全量，不是当前页）
+    @Query(value = "SELECT status AS orderStatus, COUNT(*) AS mount FROM t_order GROUP BY status", nativeQuery = true)
+    List<OrderCounts> countByStatus();
+
     @Query("SELECT o FROM Order o " +
             "JOIN FETCH o.employee " +
             "JOIN FETCH o.wareHouse " +

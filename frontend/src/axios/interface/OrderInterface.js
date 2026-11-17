@@ -69,6 +69,12 @@ function orderInterface() {
         };
     }
 
+    // 按状态统计订单数量（全量）：[{orderStatus, mount}]
+    const countByStatus = async () => {
+        const data = await orderAPI.countOrderByStatus();
+        return Array.isArray(data) ? data : [];
+    }
+
     return {
         complete,
         draft,
@@ -78,6 +84,7 @@ function orderInterface() {
         searchPage,
         searchCurrentDraftPage,
         searchCurrentCompletePage,
+        countByStatus,
     }
 }
 

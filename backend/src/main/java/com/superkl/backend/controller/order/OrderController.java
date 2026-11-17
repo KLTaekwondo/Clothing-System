@@ -2,8 +2,11 @@ package com.superkl.backend.controller.order;
 
 import com.superkl.backend.annotation.OpLogs;
 import com.superkl.backend.common.extralparams.PageParam;
+import com.superkl.backend.common.extralreturn.OrderCounts;
 import com.superkl.backend.common.PageResult;
+import com.superkl.backend.common.extralreturn.OrderCounts;
 import com.superkl.backend.common.Result;
+import com.superkl.backend.common.extralreturn.OrderCounts;
 import com.superkl.backend.dto.order.OrderCreateDto;
 import com.superkl.backend.enums.OrderStatusEnum;
 import com.superkl.backend.info.order.OrderInfo;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/order")
@@ -87,5 +91,11 @@ public class OrderController {
                                                             @Valid PageParam pageParam) {
         Pageable pageable = pageParam.toPageable();
         return Result.success(orderService.searchCompletePageByWareHouseId(startTime, endTime, employeeId, keyword, pageable));
+    }
+
+    // 9.按状态统计订单数量（全量）
+    @GetMapping("/count")
+    public Result<List<OrderCounts>> countByStatus() {
+        return Result.success(orderService.countByStatus());
     }
 }

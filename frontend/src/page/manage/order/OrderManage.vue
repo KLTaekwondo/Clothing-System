@@ -45,7 +45,7 @@
                 <button
                     class="btn-outline search-button"
                     type="button"
-                    @click="fetchOrders"
+                    @click="refreshAll"
                 >↻ 刷新订单</button>
             </div>
         </div>
@@ -56,34 +56,30 @@
             <div class="order-stat-card">
                 <span class="order-stat-icon"><IconGraphic name="order"/></span>
                 <span class="stats-body">
-<span class="order-stat-value">{{ pageInfo.totalElements }}</span>
-
-                <span class="order-stat-label">全部订单</span>
-</span>
+                    <span class="order-stat-value">{{ totalOrderCount }}</span>
+                    <span class="order-stat-label">全部订单</span>
+                </span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon completed-icon"><IconGraphic name="check"/></span>
                 <span class="stats-body">
-<span class="order-stat-value">{{ completedCount }}</span>
-
-                <span class="order-stat-label">当前页已完成</span>
-</span>
+                    <span class="order-stat-value">{{ completedCount }}</span>
+                    <span class="order-stat-label">已完成</span>
+                </span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon draft-icon"><IconGraphic name="clock"/></span>
                 <span class="stats-body">
-<span class="order-stat-value">{{ draftCount }}</span>
-
-                <span class="order-stat-label">当前页挂单</span>
-</span>
+                    <span class="order-stat-value">{{ draftCount }}</span>
+                    <span class="order-stat-label">挂单</span>
+                </span>
             </div>
             <div class="order-stat-card">
                 <span class="order-stat-icon amount-icon">¥</span>
                 <span class="stats-body">
-<span class="order-stat-value">¥{{ totalAmount.toFixed(2) }}</span>
-
-                <span class="order-stat-label">当前页金额</span>
-</span>
+                    <span class="order-stat-value">¥{{ totalAmount.toFixed(2) }}</span>
+                    <span class="order-stat-label">当前页金额</span>
+                </span>
             </div>
         </div>
 
@@ -166,15 +162,41 @@ const pageInfo = ref({
 const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
 const emptyText = computed(() => (searchQuery.value.trim() || statusFilter.value) ? '没有匹配的订单' : '暂无订单数据')
 
-const completedCount = computed(() => orderList.value.filter(order => order.orderStatus === ORDER_STATUS.COMPLETED).length)
-const draftCount = computed(() => orderList.value.filter(order => order.orderStatus === ORDER_STATUS.DRAFT).length)
+// 卡片数字来自后端全量统计，不是当前页
+const statusCounts = ref([])
+
+function countOf(status) {
+    const hit = statusCounts.value.find(item => item.orderStatus === status)
+    return Number(hit?.mount || 0)
+}
+
+const completedCount = computed(() => countOf(ORDER_STATUS.COMPLETED))
+const draftCount = computed(() => countOf(ORDER_STATUS.DRAFT))
+const totalOrderCount = computed(() => statusCounts.value.reduce((sum, item) => sum + Number(item.mount || 0), 0))
 const totalAmount = computed(() => orderList.value.reduce((total, order) => total + Number(order.actualPrice || 0), 0))
 
 let searchTimer = null
 
-onMounted(fetchOrders)
+onMounted(() => {
+    fetchOrders()
+    fetchCounts()
+})
 
 onBeforeUnmount(() => clearTimeout(searchTimer))
+
+// 全量统计：订单新增/状态变化后重新拉一次
+async function fetchCounts() {
+    try {
+        statusCounts.value = await orderInterface.countByStatus()
+    } catch {
+        statusCounts.value = []
+    }
+}
+
+// 刷新按钮同时刷新列表和统计
+async function refreshAll() {
+    await Promise.all([fetchOrders(), fetchCounts()])
+}
 
 async function fetchOrders() {
     loading.value = true

@@ -2,6 +2,7 @@ package com.superkl.backend.service.order;
 
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
+import com.superkl.backend.common.extralreturn.OrderCounts;
 import com.superkl.backend.converter.order.OrderConverter;
 import com.superkl.backend.dto.order.OrderCreateDto;
 import com.superkl.backend.dto.stock.StockContext;
@@ -174,6 +175,12 @@ public class OrderService {
         // 空关键词不参与过滤；否则会拼出 LIKE ''，一条也查不到
         String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
         return OrderConverter.toInfoPage(orderRepository.findPage(pattern, status, pageable));
+    }
+
+    // 按状态统计订单数量（全量）
+    @Transactional(readOnly = true)
+    public List<OrderCounts> countByStatus() {
+        return orderRepository.countByStatus();
     }
 
     // 6.删除草稿订单
