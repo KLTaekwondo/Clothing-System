@@ -1,53 +1,90 @@
 <template>
-    <div class="option-value-picker">
-        <div :class="showError ? 'picker-controls-error' : 'picker-controls'">
+    <div
+        ref="rootRef"
+        class="option-picker"
+    >
+        <div :class="triggerClass">
             <input
-                :class="showError ? 'picker-input-error' : 'picker-input'"
+                :aria-expanded="isOpen"
                 :disabled="disabled"
                 :placeholder="placeholder"
                 :value="modelValue"
+                aria-autocomplete="list"
+                aria-haspopup="listbox"
+                autocomplete="off"
+                class="picker-input"
+                role="combobox"
                 type="text"
                 @blur="handleBlur"
+                @focus="handleFocus"
                 @input="handleInput"
+                @keydown.down.prevent="moveActive(1)"
                 @keydown.enter.prevent="handleEnter"
+                @keydown.esc.prevent="handleEscape"
+                @keydown.up.prevent="moveActive(-1)"
             />
-            <select
+            <button
+                v-if="hasValue"
+                aria-label="清空"
+                class="picker-clear"
+                type="button"
+                @mousedown.prevent="clearValue"
+            >×</button>
+            <button
+                :aria-label="selectPlaceholder"
                 :disabled="disabled || options.length === 0"
-                :value="matchedValue"
-                class="picker-select"
-                @change="handleSelect"
+                class="picker-toggle"
+                type="button"
+                @mousedown.prevent="togglePanel"
             >
-                <option
-                    class="picker-placeholder"
-                    disabled
-                    value=""
-                >{{ selectPlaceholder }}</option>
-                <option
-                    v-for="option in filteredOptions"
-                    :key="option.id"
-                    :value="option.optionValue"
+                <svg
+                    :class="isOpen ? 'picker-arrow-open' : 'picker-arrow'"
+                    fill="none"
+                    viewBox="0 0 12 12"
                 >
-                    {{ option.optionValue }}
-                </option>
-            </select>
+                    <path
+                        d="M2.5 4.5L6 8l3.5-3.5"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.4"
+                    />
+                </svg>
+            </button>
         </div>
+
+        <ul
+            v-if="isOpen"
+            class="picker-panel"
+            role="listbox"
+        >
+            <li
+                v-if="filteredOptions.length === 0"
+                class="picker-empty"
+            >没有匹配的值</li>
+            <li
+                v-for="(option, index) in filteredOptions"
+                :key="option.id"
+                :class="index === activeIndex ? 'picker-option-active' : 'picker-option'"
+                role="option"
+                @mousedown.prevent="pick(option)"
+                @mouseenter="activeIndex = index"
+            >{{ option.optionValue }}</li>
+        </ul>
+
         <span
             v-if="showError"
             class="picker-error"
-        >
-            {{ errorMessage }}
-        </span>
+        >{{ errorMessage }}</span>
         <span
             v-else-if="options.length === 0"
             class="picker-hint"
-        >
-            暂无可选值，请先前往选项管理添加
-        </span>
+        >暂无可选值，请先前往选项管理添加</span>
     </div>
 </template>
 
 <script setup>
-import {computed, ref, watch} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 
 const props = defineProps({
     modelValue: {
@@ -64,7 +101,7 @@ const props = defineProps({
     },
     selectPlaceholder: {
         type: String,
-        default: '选择已有值'
+        default: '展开选项'
     },
     errorMessage: {
         type: String,
@@ -74,75 +111,183 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+const rootRef = ref(null)
+const isOpen = ref(false)
+const activeIndex = ref(0)
 const touched = ref(false)
 
-const normalizedValue = computed(() => props.modelValue.trim())
-const normalizedKeyword = computed(() => normalizedValue.value.toLocaleLowerCase())
+const hasValue = computed(() => props.modelValue.trim() !== '')
+const keyword = computed(() => props.modelValue.trim().toLocaleLowerCase())
 
 const matchedOption = computed(() => {
     return props.options.find(option => {
-        return option.optionValue?.trim().toLocaleLowerCase() === normalizedKeyword.value
+        return option.optionValue?.trim().toLocaleLowerCase() === keyword.value
     })
 })
 
-const matchedValue = computed(() => matchedOption.value?.optionValue || '')
-
+// 已经精确命中时列出全部，方便直接换成别的值；否则按输入筛选
 const filteredOptions = computed(() => {
-    const keyword = normalizedKeyword.value
-    if (!keyword || matchedOption.value) return props.options
+    if (!keyword.value || matchedOption.value) {
+        return props.options
+    }
     return props.options.filter(option => {
-        return option.optionValue?.toLocaleLowerCase().includes(keyword)
+        return option.optionValue?.toLocaleLowerCase().includes(keyword.value)
     })
 })
 
-const valid = computed(() => Boolean(matchedOption.value))
-const showError = computed(() => touched.value && !valid.value)
+const showError = computed(() => touched.value && !matchedOption.value && !props.disabled)
+
+const triggerClass = computed(() => {
+    if (props.disabled) {
+        return 'picker-trigger-disabled'
+    }
+    if (showError.value) {
+        return 'picker-trigger-error'
+    }
+    return 'picker-trigger'
+})
 
 watch(() => props.modelValue, () => {
-    if (valid.value) touched.value = false
+    if (matchedOption.value) {
+        touched.value = false
+    }
 })
+
+watch(() => props.options.length, () => {
+    if (props.options.length === 0) {
+        isOpen.value = false
+    }
+})
+
+// 边打字边筛时候选会变少，把高亮位置拉回第一个，避免按 Enter 选到不存在的项
+watch(filteredOptions, () => {
+    activeIndex.value = 0
+})
+
+onMounted(() => {
+    document.addEventListener('mousedown', handleOutside)
+})
+
+onBeforeUnmount(() => {
+    document.removeEventListener('mousedown', handleOutside)
+})
+
+function handleOutside(event) {
+    if (!rootRef.value?.contains(event.target)) {
+        closePanel()
+        touched.value = true
+    }
+}
+
+function handleFocus() {
+    openPanel()
+}
+
+function openPanel() {
+    if (props.disabled || props.options.length === 0) {
+        return
+    }
+    isOpen.value = true
+    activeIndex.value = 0
+}
+
+function closePanel() {
+    isOpen.value = false
+}
+
+function togglePanel() {
+    if (isOpen.value) {
+        closePanel()
+        return
+    }
+    openPanel()
+}
 
 function handleInput(event) {
     emit('update:modelValue', event.target.value)
+    openPanel()
 }
 
-function handleSelect(event) {
-    touched.value = true
-    emit('update:modelValue', event.target.value)
+function moveActive(step) {
+    if (!isOpen.value) {
+        openPanel()
+        return
+    }
+    const total = filteredOptions.value.length
+    if (total === 0) {
+        return
+    }
+    const next = activeIndex.value + step
+    if (next < 0) {
+        activeIndex.value = total - 1
+        return
+    }
+    if (next >= total) {
+        activeIndex.value = 0
+        return
+    }
+    activeIndex.value = next
 }
 
 function handleEnter() {
-    touched.value = true
-    const option = matchedOption.value || filteredOptions.value[0]
-    if (option) emit('update:modelValue', option.optionValue)
+    if (!isOpen.value) {
+        openPanel()
+        return
+    }
+    const option = filteredOptions.value[activeIndex.value] || matchedOption.value
+    if (option) {
+        pick(option)
+    }
+}
+
+function handleEscape() {
+    closePanel()
+}
+
+function pick(option) {
+    emit('update:modelValue', option.optionValue)
+    touched.value = false
+    closePanel()
+}
+
+function clearValue() {
+    emit('update:modelValue', '')
+    touched.value = false
+    openPanel()
 }
 
 function handleBlur() {
+    // 面板里的点击用了 mousedown.prevent，焦点不会离开输入框，这里只处理真的离开
     touched.value = true
     if (matchedOption.value && props.modelValue !== matchedOption.value.optionValue) {
         emit('update:modelValue', matchedOption.value.optionValue)
     }
+    closePanel()
 }
 
 function validate() {
     touched.value = true
-    return valid.value
+    return Boolean(matchedOption.value)
 }
 
 defineExpose({validate})
 </script>
 
 <style scoped>
-.option-value-picker {
+.option-picker {
+    position: relative;
     width: 100%;
 }
 
-.picker-controls,
-.picker-controls-error {
-    width: 100%;
+.picker-trigger,
+.picker-trigger-error,
+.picker-trigger-disabled {
     display: flex;
-    gap: 0;
-    overflow: hidden;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    padding: 0 8px 0 16px;
     border: 1px solid var(--border-strong);
     border-radius: 999px;
     background: var(--bg-subtle);
@@ -150,98 +295,126 @@ defineExpose({validate})
     transition: var(--transition);
 }
 
-.picker-controls:hover,
-.picker-controls-error:hover {
+.picker-trigger:hover {
     border-color: var(--border-hover);
-    background: var(--bg-subtle);
 }
 
-.picker-controls:focus-within {
+.picker-trigger:focus-within {
     border-color: var(--primary);
     background: var(--bg-card);
     box-shadow: 0 0 0 4px var(--primary-focus), 0 5px 14px rgba(13, 148, 136, 0.08);
 }
 
-.picker-controls-error,
-.picker-controls-error:hover,
-.picker-controls-error:focus-within {
+.picker-trigger-error {
     border-color: var(--error);
     background: var(--error-light);
     box-shadow: 0 0 0 3px var(--error-focus);
 }
 
-.picker-controls .picker-input,
-.picker-controls .picker-input-error,
-.picker-controls-error .picker-input,
-.picker-controls-error .picker-input-error {
-    width: 55%;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
+.picker-trigger-disabled {
+    opacity: 0.6;
+    background: var(--bg-subtle);
 }
 
-.picker-controls .picker-input:focus,
-.picker-controls .picker-input-error:focus,
-.picker-controls-error .picker-input:focus,
-.picker-controls-error .picker-input-error:focus {
+.picker-input {
+    width: 100%;
+    min-width: 0;
+    height: 40px;
     border: none;
     background: transparent;
-    box-shadow: none;
-}
-
-.picker-controls .picker-select,
-.picker-controls-error .picker-select {
-    width: 45%;
-    padding: 0 32px 0 14px;
-    border: none;
-    border-left: 1px solid var(--border);
-    border-radius: 0;
-    color: var(--text-header);
-    background-color: color-mix(in srgb, var(--bg-card) 58%, transparent);
-    background-image: linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%), linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%);
-    background-position: calc(100% - 18px) 17px, calc(100% - 13px) 17px;
-    background-repeat: no-repeat;
-    background-size: 5px 5px, 5px 5px;
-    box-shadow: none;
-    cursor: pointer;
-    appearance: none;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.picker-controls .picker-select:hover,
-.picker-controls-error .picker-select:hover {
-    color: var(--primary);
-    background-color: color-mix(in srgb, var(--bg-card) 86%, transparent);
-}
-
-.picker-controls .picker-select:focus,
-.picker-controls-error .picker-select:focus {
-    border-color: var(--border);
-    color: var(--primary);
-    background-color: color-mix(in srgb, var(--bg-card) 92%, transparent);
-    box-shadow: none;
+    color: var(--text);
+    font-size: 13px;
     outline: none;
 }
 
-.picker-controls .picker-select option,
-.picker-controls-error .picker-select option {
-    padding: 10px 12px;
-    color: var(--text-header);
-    background: var(--bg-card);
-    font-size: 13px;
-}
-
-.picker-controls .picker-select option:checked,
-.picker-controls-error .picker-select option:checked {
-    color: var(--primary-dark);
-    background: var(--primary-light);
-}
-
-.picker-controls .picker-select .picker-placeholder,
-.picker-controls-error .picker-select .picker-placeholder {
+.picker-input::placeholder {
     color: var(--text-muted);
-    background: var(--bg-subtle);
+}
+
+.picker-clear,
+.picker-toggle {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    color: var(--text-muted);
+    background: transparent;
+    cursor: pointer;
+}
+
+.picker-clear {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.picker-clear:hover,
+.picker-toggle:hover {
+    color: var(--primary);
+    background: var(--bg-hover);
+}
+
+.picker-toggle:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.picker-arrow,
+.picker-arrow-open {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.18s ease;
+}
+
+.picker-arrow-open {
+    transform: rotate(180deg);
+}
+
+.picker-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    left: 0;
+    z-index: 30;
+    max-height: 220px;
+    margin: 0;
+    padding: 6px;
+    overflow-y: auto;
+    list-style: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+}
+
+.picker-option,
+.picker-option-active {
+    padding: 9px 12px;
+    border-radius: 9px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.4;
+    cursor: pointer;
+    word-break: break-all;
+}
+
+.picker-option:hover {
+    background: var(--bg-hover);
+}
+
+.picker-option-active {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.picker-empty {
+    padding: 10px 12px;
+    color: var(--text-muted);
+    font-size: 13px;
 }
 
 .picker-error,
@@ -257,29 +430,5 @@ defineExpose({validate})
 
 .picker-hint {
     color: var(--text-muted);
-}
-
-@media (max-width: 560px) {
-    .picker-controls,
-    .picker-controls-error {
-        flex-direction: column;
-    }
-
-    .picker-controls .picker-input,
-    .picker-controls .picker-input-error,
-    .picker-controls-error .picker-input,
-    .picker-controls-error .picker-input-error,
-    .picker-controls .picker-select,
-    .picker-controls-error .picker-select {
-        width: 100%;
-    }
-
-    .picker-controls .picker-select,
-    .picker-controls-error .picker-select {
-        padding: 0 14px;
-        border-left: none;
-        border-top: 1px solid var(--border);
-        background-position: calc(100% - 16px) 17px, calc(100% - 11px) 17px;
-    }
 }
 </style>
