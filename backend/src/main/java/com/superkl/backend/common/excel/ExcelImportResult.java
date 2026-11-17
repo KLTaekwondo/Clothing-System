@@ -1,4 +1,4 @@
-package com.superkl.backend.common;
+package com.superkl.backend.common.excel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.superkl.backend.dto.product.ExcelPreProductCreateDto;

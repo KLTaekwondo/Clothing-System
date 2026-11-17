@@ -1,8 +1,8 @@
 package com.superkl.backend.service.product;
 
-import com.superkl.backend.common.ExcelImportResult;
-import com.superkl.backend.common.ExcelPullList;
-import com.superkl.backend.common.ExcelRow;
+import com.superkl.backend.common.excel.ExcelImportResult;
+import com.superkl.backend.common.excel.ExcelPullList;
+import com.superkl.backend.common.excel.ExcelRow;
 import com.superkl.backend.dto.product.ExcelPreProductCreateDto;
 import com.superkl.backend.dto.product.OptionValueCreateDto;
 import com.superkl.backend.enums.ErrorCodeEnum;

@@ -1,6 +1,6 @@
 package com.superkl.backend.service.dash;
 
-import com.superkl.backend.common.ManageQueryParams;
+import com.superkl.backend.common.extralparams.ManageQueryParams;
 import com.superkl.backend.enums.DirectionEnum;
 import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;

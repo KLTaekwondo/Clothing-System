@@ -1,6 +1,6 @@
 package com.superkl.backend.controller.stock;
 
-import com.superkl.backend.common.PageParam;
+import com.superkl.backend.common.extralparams.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.info.stock.StockRecordInfo;

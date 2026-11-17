@@ -1,7 +1,7 @@
 package com.superkl.backend.utils;
 
-import com.superkl.backend.common.ExcelPullList;
-import com.superkl.backend.common.ExcelRow;
+import com.superkl.backend.common.excel.ExcelPullList;
+import com.superkl.backend.common.excel.ExcelRow;
 import com.superkl.backend.enums.ErrorCodeEnum;
 import com.superkl.backend.exception.BusinessException;
 import jakarta.servlet.http.HttpServletResponse;

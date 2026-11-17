@@ -1,6 +1,6 @@
 package com.superkl.backend.controller.dash;
 
-import com.superkl.backend.common.ManageQueryParams;
+import com.superkl.backend.common.extralparams.ManageQueryParams;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.info.dash.OrderDashInfo;
 import com.superkl.backend.service.dash.FilterDashboardService;

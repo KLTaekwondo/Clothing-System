@@ -1,4 +1,4 @@
-package com.superkl.backend.common;
+package com.superkl.backend.common.extralparams;
 
 import com.superkl.backend.enums.SeasonEnum;
 import lombok.*;

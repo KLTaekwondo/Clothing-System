@@ -1,4 +1,4 @@
-package com.superkl.backend.common;
+package com.superkl.backend.common.extralparams;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

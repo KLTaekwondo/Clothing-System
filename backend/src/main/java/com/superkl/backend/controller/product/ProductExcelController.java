@@ -1,6 +1,7 @@
 package com.superkl.backend.controller.product;
 
-import com.superkl.backend.common.ExcelImportResult;
+import com.superkl.backend.annotation.OpLogs;
+import com.superkl.backend.common.excel.ExcelImportResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.service.product.ProductExcelService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/product-excel")
@@ -33,6 +33,7 @@ public class ProductExcelController {
     }
 
     // 导入商品
+    @OpLogs(module = "商品", description = "一键导入")
     @PostMapping("/import")
     public Result<Void> importProducts(MultipartFile file, boolean autoCreateMissing) throws IOException {
         productExcelService.importProducts(file, autoCreateMissing);

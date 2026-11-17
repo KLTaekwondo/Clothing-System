@@ -1,6 +1,6 @@
 package com.superkl.backend.utils;
 
-import com.superkl.backend.common.ExcelRow;
+import com.superkl.backend.common.excel.ExcelRow;
 import com.superkl.backend.exception.BusinessException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
