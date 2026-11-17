@@ -22,6 +22,7 @@
                             class="search-code-input"
                             placeholder="搜索商品名称或编码"
                             type="text"
+                            @input="handleSearchInput"
                         />
                         <router-link
                             class="btn-primary search-button"
@@ -50,9 +51,9 @@
             <div v-if="loading" class="loading-overlay">
                 <div class="loading-spinner"></div>
             </div>
-            <div v-else-if="filteredList.length === 0" class="empty-state">
+            <div v-else-if="productList.length === 0" class="empty-state">
                 <div class="empty-icon"><IconGraphic name="product"/></div>
-                <div class="empty-text">暂无商品数据</div>
+                <div class="empty-text">{{ emptyText }}</div>
             </div>
             <table v-else class="data-table">
                 <thead>
@@ -72,7 +73,7 @@
                 </thead>
                 <tbody>
                 <tr
-                    v-for="item in filteredList"
+                    v-for="item in productList"
                     :key="item.id"
                     style="cursor:pointer"
                     @dblclick="goDetail(item)"
@@ -153,7 +154,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import productInterface from '../../../axios/interface/ProductInterface.js'
@@ -188,15 +189,13 @@ const pageInfo = ref({
 
 const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
 
-const filteredList = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
-    if (!query) return productList.value
-    return productList.value.filter(item =>
-        item.name?.toLowerCase().includes(query) ||
-        item.code?.toLowerCase().includes(query) ||
-        String(item.id).includes(query)
-    )
-})
+const emptyText = computed(() => searchQuery.value.trim() ? '没有匹配的商品' : '暂无商品数据')
+
+let searchTimer = null
+
+onMounted(fetchList)
+
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 // 放大图跟随光标：默认贴右下方，靠近视口边缘时翻到另一侧，避免被裁掉
 const previewStyle = computed(() => {
@@ -248,7 +247,11 @@ async function handleExport() {
 async function fetchList() {
     loading.value = true
     try {
-        const data = await productInterface.searchPage(pageInfo.value.page, pageInfo.value.size)
+        const data = await productInterface.searchPage(
+            pageInfo.value.page,
+            pageInfo.value.size,
+            searchQuery.value.trim()
+        )
         productList.value = data.content || []
         pageInfo.value = {
             totalElements: data.totalElements || 0,
@@ -261,6 +264,15 @@ async function fetchList() {
     } finally {
         loading.value = false
     }
+}
+
+// 输入停止 300ms 再查，避免每敲一个字打一次接口
+function handleSearchInput() {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchList()
+    }, 300)
 }
 
 function changePage(page) {

@@ -5,7 +5,8 @@ const memberAPI = {
     createMemberByManage: data => backendService.post('/member/register/manage', data),
     updateMember: (id, data) => backendService.put(`/member/update/${id}`, data),
     searchMember: phone => backendService.get(`/member/search/${phone}`),
-    searchMemberList: () => backendService.get('/member/search/list')
+    searchMemberPage: (page, size, keyword, memberLevel) => backendService.get('/member/search/page', {params: {page, size, keyword, memberLevel}}),
+    countByMemberLevel: () => backendService.get('/member/count')
 }
 
 export default memberAPI

@@ -6,6 +6,7 @@ const employeeAPI = {
     deleteEmployee: (id) => backendService.delete(`/employee/delete/${id}`),
     searchEmployee: (id) => backendService.get(`/employee/search/${id}`),
     searchEmployeeList: () => backendService.get("/employee/search/list"),
+    searchEmployeePage: (page, size, keyword) => backendService.get("/employee/search/page", {params: {page, size, keyword}}),
     verifyEmployee: (id) => backendService.get(`/employee/verify/${id}`),
     verifyEmployeeList: () => backendService.get("/employee/verify/list")
 }

@@ -31,6 +31,12 @@ function employeeInterface() {
         return Array.isArray(data) ? data : [];
     }
 
+    // 分页查询员工（keyword 可为空）
+    const searchPage = async (page, size, keyword) => {
+        const data = await employeeAPI.searchEmployeePage(page, size, keyword || '');
+        return data || {content: [], totalElements: 0, totalPages: 0, page: 0, size};
+    }
+
     // 查验员工是否可用
     const verify = async (id) => {
         const data = await employeeAPI.verifyEmployee(id);
@@ -49,6 +55,7 @@ function employeeInterface() {
         softDelete,
         search,
         searchList,
+        searchPage,
         verify,
         verifyList,
     }

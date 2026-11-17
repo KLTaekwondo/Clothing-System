@@ -24,7 +24,7 @@
                         :key="option.value"
                         :class="levelFilter === option.value ? 'filter-tab-active' : 'filter-tab'"
                         type="button"
-                        @click="levelFilter = option.value"
+                        @click="selectLevel(option.value)"
                     >{{ option.label }}</button>
                 </div>
                 <input
@@ -32,6 +32,7 @@
                     class="search-code-input"
                     placeholder="搜索会员姓名或手机号"
                     type="text"
+                    @input="handleSearchInput"
                 />
                 <router-link
                     class="btn-primary search-button"
@@ -46,7 +47,7 @@
             <div class="stats-item">
                 <span class="stats-icon"><IconGraphic name="user"/></span>
                 <span class="stats-body">
-                    <strong>{{ memberList.length }}</strong>
+                    <strong>{{ totalMembers }}</strong>
                     <span>会员总数</span>
                 </span>
             </div>
@@ -81,11 +82,11 @@
                 <div class="loading-spinner"></div>
             </div>
             <div
-                v-else-if="filteredList.length === 0"
+                v-else-if="memberList.length === 0"
                 class="empty-state"
             >
                 <div class="empty-icon"><IconGraphic name="user"/></div>
-                <div class="empty-text">暂无会员数据</div>
+                <div class="empty-text">{{ emptyText }}</div>
             </div>
             <table
                 v-else
@@ -105,7 +106,7 @@
                 </thead>
                 <tbody>
                 <tr
-                    v-for="item in filteredList"
+                    v-for="item in memberList"
                     :key="item.id"
                     @dblclick="goDetail(item)"
                 >
@@ -129,14 +130,23 @@
                 </tr>
                 </tbody>
             </table>
+
+            <TablePagination
+                :loading="loading"
+                :page="pageInfo.page"
+                :total-elements="pageInfo.totalElements"
+                :total-pages="totalPages"
+                @change="changePage"
+            />
         </div>
     </div>
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import memberInterface from '../../../axios/interface/MemberInterface.js'
+import TablePagination from '../../../component/common/TablePagination.vue'
 import {
     MEMBER_LEVEL,
     MEMBER_LEVEL_LABELS,
@@ -153,32 +163,88 @@ const memberList = ref([])
 const searchQuery = ref('')
 const levelFilter = ref('')
 const loading = ref(true)
+const levelCounts = ref([])
 
-const filteredList = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
-    return memberList.value.filter(item => {
-        const matchesLevel = !levelFilter.value || item.memberLevel === levelFilter.value
-        const matchesQuery = !query || [item.memberName, item.memberPhone]
-            .some(value => String(value || '').toLowerCase().includes(query))
-        return matchesLevel && matchesQuery
-    })
+const pageInfo = ref({
+    totalElements: 0,
+    totalPages: 0,
+    page: 0,
+    size: 10
 })
 
-const vipCount = computed(() => memberList.value.filter(item => item.memberLevel === MEMBER_LEVEL.VIP).length)
-const mvpCount = computed(() => memberList.value.filter(item => item.memberLevel === MEMBER_LEVEL.MVP).length)
-const customCount = computed(() => memberList.value.filter(item => item.memberLevel === MEMBER_LEVEL.CUSTOMER).length)
+const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
+const emptyText = computed(() => (searchQuery.value.trim() || levelFilter.value) ? '没有匹配的会员' : '暂无会员数据')
 
-onMounted(fetchList)
+// 会员总数就是各等级人数相加，不用再单独请求
+const totalMembers = computed(() => levelCounts.value.reduce((sum, item) => sum + Number(item.mount || 0), 0))
+
+function countOf(level) {
+    const hit = levelCounts.value.find(item => item.memberLevel === level)
+    return Number(hit?.mount || 0)
+}
+
+const vipCount = computed(() => countOf(MEMBER_LEVEL.VIP))
+const mvpCount = computed(() => countOf(MEMBER_LEVEL.MVP))
+const customCount = computed(() => countOf(MEMBER_LEVEL.CUSTOMER))
+
+let searchTimer = null
+
+onMounted(() => {
+    fetchList()
+    fetchCounts()
+})
+
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 async function fetchList() {
     loading.value = true
     try {
-        memberList.value = await memberInterface.searchMemberList()
+        const data = await memberInterface.searchMemberPage(
+            pageInfo.value.page,
+            pageInfo.value.size,
+            searchQuery.value.trim(),
+            levelFilter.value
+        )
+        memberList.value = data.content || []
+        pageInfo.value = {
+            totalElements: data.totalElements || 0,
+            totalPages: data.totalPages || 0,
+            page: data.page || 0,
+            size: data.size || pageInfo.value.size
+        }
     } catch {
         memberList.value = []
     } finally {
         loading.value = false
     }
+}
+
+async function fetchCounts() {
+    try {
+        levelCounts.value = await memberInterface.countByMemberLevel()
+    } catch {
+        levelCounts.value = []
+    }
+}
+
+// 输入停止 300ms 再查，避免每敲一个字打一次接口
+function handleSearchInput() {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchList()
+    }, 300)
+}
+
+function selectLevel(value) {
+    levelFilter.value = value
+    pageInfo.value.page = 0
+    fetchList()
+}
+
+function changePage(page) {
+    pageInfo.value.page = page
+    fetchList()
 }
 
 function goDetail(item) {

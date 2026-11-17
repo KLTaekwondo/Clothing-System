@@ -21,8 +21,14 @@ function memberInterface() {
         return data || {}
     }
 
-    const searchMemberList = async () => {
-        const data = await memberAPI.searchMemberList()
+    const searchMemberPage = async (page = 0, size = 10, keyword = '', memberLevel = '') => {
+        const data = await memberAPI.searchMemberPage(page, size, keyword, memberLevel || undefined)
+        return data || {content: [], totalElements: 0, totalPages: 0, page: page, size}
+    }
+
+    // 按会员等级统计人数：[{memberLevel, mount}]
+    const countByMemberLevel = async () => {
+        const data = await memberAPI.countByMemberLevel()
         return Array.isArray(data) ? data : []
     }
 
@@ -31,7 +37,8 @@ function memberInterface() {
         createMemberByManage,
         updateMember,
         searchMember,
-        searchMemberList
+        searchMemberPage,
+        countByMemberLevel
     }
 }
 

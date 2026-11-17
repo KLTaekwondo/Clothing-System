@@ -23,7 +23,7 @@
                     class="search-code-input"
                     placeholder="搜索员工姓名或编码"
                     type="text"
-                    @input="filterList"
+                    @input="handleSearchInput"
                 />
                 <router-link
                     class="btn-primary search-button"
@@ -41,9 +41,9 @@
                 <div class="loading-spinner"></div>
             </div>
 
-            <div v-else-if="filteredList.length === 0" class="empty-state">
+            <div v-else-if="employeeList.length === 0" class="empty-state">
                 <div class="empty-icon"><IconGraphic name="user"/></div>
-                <div class="empty-text">暂无员工数据</div>
+                <div class="empty-text">{{ emptyText }}</div>
             </div>
 
             <table v-else class="data-table">
@@ -57,7 +57,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="item in filteredList" :key="item.id" style="cursor:pointer" @dblclick="goDetail(item)">
+                <tr v-for="item in employeeList" :key="item.id" style="cursor:pointer" @dblclick="goDetail(item)">
                     <td><code>{{ item.code }}</code></td>
                     <td><strong>{{ item.name }}</strong></td>
                     <td>
@@ -80,6 +80,14 @@
                 </tr>
                 </tbody>
             </table>
+
+            <TablePagination
+                :loading="loading"
+                :page="pageInfo.page"
+                :total-elements="pageInfo.totalElements"
+                :total-pages="totalPages"
+                @change="changePage"
+            />
         </div>
 
         <!-- 删除确认 -->
@@ -104,36 +112,50 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
-import {useToastStore} from '../../../stores/toastStore.js'
 import employeeInterface from '../../../axios/interface/EmployeeInterface.js'
+import TablePagination from '../../../component/common/TablePagination.vue'
 import {STATUS, STATUS_LABELS} from '../../../constants/status.js'
 
 const router = useRouter()
-const toast = useToastStore()
 const statusLabels = STATUS_LABELS
 
 const employeeList = ref([])
 const searchQuery = ref('')
 const loading = ref(true)
 
-const filteredList = computed(() => {
-    if (!searchQuery.value) return employeeList.value
-    const q = searchQuery.value.toLowerCase()
-    return employeeList.value.filter(e =>
-        e.name?.toLowerCase().includes(q) ||
-        e.code?.toLowerCase().includes(q) ||
-        String(e.id).includes(q)
-    )
+const pageInfo = ref({
+    totalElements: 0,
+    totalPages: 0,
+    page: 0,
+    size: 10
 })
 
+const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
+const emptyText = computed(() => searchQuery.value.trim() ? '没有匹配的员工' : '暂无员工数据')
+
+let searchTimer = null
+
 onMounted(fetchList)
+
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 async function fetchList() {
     loading.value = true
     try {
-        employeeList.value = await employeeInterface.searchList()
+        const data = await employeeInterface.searchPage(
+            pageInfo.value.page,
+            pageInfo.value.size,
+            searchQuery.value.trim()
+        )
+        employeeList.value = data.content || []
+        pageInfo.value = {
+            totalElements: data.totalElements || 0,
+            totalPages: data.totalPages || 0,
+            page: data.page || 0,
+            size: data.size || pageInfo.value.size
+        }
     } catch {
         employeeList.value = []
     } finally {
@@ -141,7 +163,18 @@ async function fetchList() {
     }
 }
 
-function filterList() {
+// 输入停止 300ms 再查，避免每敲一个字打一次接口
+function handleSearchInput() {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchList()
+    }, 300)
+}
+
+function changePage(page) {
+    pageInfo.value.page = page
+    fetchList()
 }
 
 function goDetail(item) {
