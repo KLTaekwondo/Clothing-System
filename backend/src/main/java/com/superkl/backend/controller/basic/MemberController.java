@@ -1,14 +1,19 @@
 package com.superkl.backend.controller.basic;
 
 import com.superkl.backend.annotation.OpLogs;
+import com.superkl.backend.common.extralparams.PageParam;
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
+import com.superkl.backend.common.extralreturn.MemberCounts;
 import com.superkl.backend.dto.basic.MemberCreateDto;
 import com.superkl.backend.dto.basic.MemberMaxCreateDto;
 import com.superkl.backend.dto.basic.MemberUpdateDto;
+import com.superkl.backend.enums.MemberLevelEnum;
 import com.superkl.backend.info.basic.MemberInfo;
 import com.superkl.backend.service.basic.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,14 +49,23 @@ public class MemberController {
     }
 
     // 4.查询所有会员
-    @GetMapping("/search/list")
-    public Result<List<MemberInfo>> searchList() {
-        return Result.success(memberService.searchList());
+    @GetMapping("/search/page")
+    public Result<PageResult<MemberInfo>> searchPage(@RequestParam(required = false) String keyword,
+                                                     @RequestParam(required = false) MemberLevelEnum memberLevel,
+                                                     @Valid PageParam pageParam) {
+        Pageable pageable = pageParam.toPageable();
+        return Result.success(memberService.searchPage(keyword, memberLevel, pageable));
     }
 
     // 5.查询单个会员
     @GetMapping("/search/{phone}")
     public Result<MemberInfo> search(@PathVariable String phone) {
         return Result.success(memberService.search(phone));
+    }
+
+    // 6.一次性统计
+    @GetMapping("/count")
+    public Result<List<MemberCounts>> countByMemberLevel() {
+        return Result.success(memberService.countByMemberLevel());
     }
 }

@@ -2,13 +2,14 @@ package com.superkl.backend.repository.basic;
 
 import com.superkl.backend.entity.basic.Employee;
 import com.superkl.backend.enums.StatusEnum;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
@@ -20,4 +21,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Query("SELECT COUNT(e) > 0 FROM Employee e WHERE e.employeeCode = :employeeCode")
     boolean existsByCode(@Param("employeeCode") String employeeCode);
+
+    @Query("SELECT e FROM Employee e " +
+            "WHERE (:keyword IS NULL OR e.employeeCode LIKE :keyword OR e.employeeName LIKE :keyword) " +
+            "ORDER BY e.employeeId DESC")
+    Page<Employee> pageByCodeOrName(@Param("keyword") String keyword,
+                                    Pageable pageable);
 }

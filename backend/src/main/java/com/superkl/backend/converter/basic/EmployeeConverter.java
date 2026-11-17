@@ -1,10 +1,12 @@
 package com.superkl.backend.converter.basic;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.dto.basic.EmployeeCreateDto;
 import com.superkl.backend.dto.basic.EmployeeUpdateDto;
 import com.superkl.backend.entity.basic.Employee;
 import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.info.basic.EmployeeInfo;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -47,4 +49,10 @@ public class EmployeeConverter {
         employee.setEmployeeName(employeeUpdateDto.getName());
         employee.setStatus(employeeUpdateDto.getStatus());
     }
+
+    // 分页实体转Info分页
+    public static PageResult<EmployeeInfo> toInfoPage(Page<Employee> employees) {
+        Page<EmployeeInfo> page = employees.map(EmployeeConverter::toInfo);
+        return new  PageResult<>(page);
+       }
 }

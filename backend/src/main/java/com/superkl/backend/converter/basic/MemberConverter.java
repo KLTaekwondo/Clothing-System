@@ -1,11 +1,13 @@
 package com.superkl.backend.converter.basic;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.dto.basic.MemberCreateDto;
 import com.superkl.backend.dto.basic.MemberMaxCreateDto;
 import com.superkl.backend.dto.basic.MemberUpdateDto;
 import com.superkl.backend.entity.basic.Member;
 import com.superkl.backend.enums.MemberLevelEnum;
 import com.superkl.backend.info.basic.MemberInfo;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -95,5 +97,11 @@ public class MemberConverter {
         member.setMemberPoints(dto.getPoints());
         member.setMemberBirthday(dto.getBirthday());
         member.setMemberDiscount(dto.getDiscount());
+    }
+
+    // 分页查询会员
+    public static PageResult<MemberInfo> toPageInfo(Page<Member> members) {
+        Page<MemberInfo> page = members.map(MemberConverter::toInfo);
+        return new PageResult<>(page);
     }
 }

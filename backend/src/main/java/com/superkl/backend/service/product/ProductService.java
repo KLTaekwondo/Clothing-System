@@ -128,7 +128,9 @@ public class ProductService {
     }
 
     // 查询所有商品
-    public PageResult<ProductInfo> searchPage(Pageable pageable){
-        return ProductConverter.toInfoPage(productRepository.findPage(pageable));
+    public PageResult<ProductInfo> searchPage(String keyword, Pageable pageable){
+        // 空关键词不参与过滤；否则会拼出 "%null%"，一条也查不到
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        return ProductConverter.toInfoPage(productRepository.findPage(pattern, pageable));
     }
 }

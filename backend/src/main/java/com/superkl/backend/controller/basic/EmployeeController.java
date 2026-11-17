@@ -1,6 +1,8 @@
 package com.superkl.backend.controller.basic;
 
 import com.superkl.backend.annotation.OpLogs;
+import com.superkl.backend.common.extralparams.PageParam;
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.basic.EmployeeCreateDto;
 import com.superkl.backend.dto.basic.EmployeeUpdateDto;
@@ -8,6 +10,7 @@ import com.superkl.backend.info.basic.EmployeeInfo;
 import com.superkl.backend.service.basic.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -78,5 +81,13 @@ public class EmployeeController {
     @GetMapping("/verify/list")
     public Result<List<EmployeeInfo>> verifyList() {
         return Result.success(employeeService.verifyList());
+    }
+
+    // 8.分页查询员工
+    @GetMapping("/search/page")
+    public Result<PageResult<EmployeeInfo>> searchPage(@RequestParam(required = false) String keyword,
+                                                       @Valid PageParam pageParam) {
+        Pageable pageable = pageParam.toPageable();
+        return Result.success(employeeService.searchPage(keyword, pageable));
     }
 }

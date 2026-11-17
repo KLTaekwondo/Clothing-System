@@ -1,7 +1,7 @@
 package com.superkl.backend.controller.product;
 
 import com.superkl.backend.annotation.OpLogs;
-import com.superkl.backend.common.PageParam;
+import com.superkl.backend.common.extralparams.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.product.ProductCreateDto;
@@ -51,8 +51,9 @@ public class ProductController {
 
     // 查询所有商品
     @GetMapping("/page")
-    public Result<PageResult<ProductInfo>> searchPage(@Valid PageParam param) {
-        return Result.success(productService.searchPage(param.toPageable()));
+    public Result<PageResult<ProductInfo>> searchPage(@RequestParam(required = false) String keyword,
+                                                    @Valid PageParam param) {
+        return Result.success(productService.searchPage(keyword, param.toPageable()));
     }
 
     // 上传图片

@@ -16,10 +16,13 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     // 根据产品编码查询商品
     @Query("SELECT p FROM Product p WHERE p.productCode = :productCode")
-    Optional<Product> findByCode(String productCode);
+    Optional<Product> findByCode(@Param("productCode") String productCode);
 
-    @Query("SELECT p FROM Product p ORDER BY p.createTime DESC")
-    Page<Product> findPage(Pageable pageable);
+    @Query("SELECT p FROM Product p " +
+            "WHERE (:keyword IS NULL OR p.productCode LIKE :keyword OR p.productName LIKE :keyword) " +
+            "ORDER BY p.createTime DESC")
+    Page<Product> findPage(@Param("keyword") String keyword,
+                           Pageable pageable);
 
     // 检查商品编码是否已经存在
     @Query("SELECT COUNT(p) > 0 FROM Product p WHERE p.productCode = :productCode")

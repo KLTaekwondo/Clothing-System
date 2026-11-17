@@ -1,5 +1,6 @@
 package com.superkl.backend.service.basic;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.basic.EmployeeConverter;
 import com.superkl.backend.dto.basic.EmployeeCreateDto;
@@ -14,6 +15,8 @@ import com.superkl.backend.repository.basic.EmployeeRepository;
 import com.superkl.backend.repository.basic.WareHouseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,6 +134,15 @@ public class EmployeeService {
         List<Employee> employees = employeeRepository.listByWareHouseAndStatus(wareHouseId, StatusEnum.ENABLE);
         // 转换信息
         return EmployeeConverter.toInfoList(employees);
+    }
+
+    // 分页查询员工
+    @Transactional(readOnly = true)
+    public PageResult<EmployeeInfo> searchPage(String keyword, Pageable pageable) {
+        // 空关键词不参与过滤；否则会拼出 "%null%"，一条也查不到
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        Page<Employee> employees = employeeRepository.pageByCodeOrName(pattern, pageable);
+        return EmployeeConverter.toInfoPage(employees);
     }
 
 }

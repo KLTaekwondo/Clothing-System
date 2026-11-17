@@ -1,6 +1,8 @@
 package com.superkl.backend.service.basic;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
+import com.superkl.backend.common.extralreturn.MemberCounts;
 import com.superkl.backend.converter.basic.MemberConverter;
 import com.superkl.backend.dto.basic.MemberCreateDto;
 import com.superkl.backend.dto.basic.MemberMaxCreateDto;
@@ -13,13 +15,18 @@ import com.superkl.backend.info.basic.MemberInfo;
 import com.superkl.backend.repository.basic.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -167,10 +174,18 @@ public class MemberService {
         return MemberConverter.toInfo(member);
     }
 
-    // 查询所有会员
-    public List<MemberInfo> searchList() {
-        List<Member> members = memberRepository.findAll();
-        return MemberConverter.toInfoList(members);
+    // 分页查询会员
+    public PageResult<MemberInfo> searchPage(String keyword, MemberLevelEnum memberLevel, Pageable pageable) {
+        // 空关键词不参与过滤；否则会拼出 LIKE ''，一条也查不到
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        Page<Member> members = memberRepository.findPage(pattern, memberLevel, pageable);
+        return MemberConverter.toPageInfo(members);
+    }
+
+    // 一次性统计
+    public List<MemberCounts> countByMemberLevel() {
+        // 统计每个等级的会员数量
+        return memberRepository.countByMemberLevel();
     }
 
 }
