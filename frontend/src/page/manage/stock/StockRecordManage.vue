@@ -98,7 +98,7 @@
             </div>
             <div v-else-if="filteredRecords.length === 0" class="empty-state">
                 <div class="empty-icon"><IconGraphic name="document"/></div>
-                <div class="empty-text">暂无库存记录</div>
+                <div class="empty-text">{{ emptyText }}</div>
             </div>
             <table v-else class="data-table">
                 <thead>
@@ -161,7 +161,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import stockRecordInterface from '../../../axios/interface/StockRecordInterface.js'
 import TablePagination from '../../../component/common/TablePagination.vue'
 
@@ -196,37 +196,41 @@ const pageInfo = ref({
 })
 
 const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
+const emptyText = computed(() => searchQuery.value.trim() ? '没有匹配的库存记录' : '暂无库存记录')
 
+// 关键词已经下推到后端，这里只保留「变动方向」这个前端分组筛选
 const filteredRecords = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
-    return recordList.value.filter(item => {
-        const matchesType = !changeTypeFilter.value || getChangeDirection(item.changeType) === changeTypeFilter.value
-        const matchesQuery = !query || [
-            item.sourceNo,
-            item.productCode,
-            item.productName,
-            item.skuCode,
-            item.skuName,
-            item.wareHouseCode,
-            item.wareHouseName,
-            item.operationCode,
-            item.operationName,
-            item.operationRole
-        ].some(value => String(value || '').toLowerCase().includes(query))
-        return matchesType && matchesQuery
-    })
+    if (!changeTypeFilter.value) return recordList.value
+    return recordList.value.filter(item => getChangeDirection(item.changeType) === changeTypeFilter.value)
 })
 
 const inCount = computed(() => recordList.value.filter(item => getChangeDirection(item.changeType) === 'in').length)
 const outCount = computed(() => recordList.value.filter(item => getChangeDirection(item.changeType) === 'out').length)
 const adjustCount = computed(() => recordList.value.filter(item => getChangeDirection(item.changeType) === 'adjust').length)
 
+let searchTimer = null
+
+// 搜索词变化后 300ms 再查，并回到第一页
+watch(searchQuery, () => {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchRecords()
+    }, 300)
+})
+
+onBeforeUnmount(() => clearTimeout(searchTimer))
+
 onMounted(fetchRecords)
 
 async function fetchRecords() {
     loading.value = true
     try {
-        const data = await stockRecordInterface.searchPage(pageInfo.value.page, pageInfo.value.size)
+        const data = await stockRecordInterface.searchPage(
+            pageInfo.value.page,
+            pageInfo.value.size,
+            searchQuery.value.trim()
+        )
         recordList.value = data.content || []
         pageInfo.value = {
             totalElements: data.totalElements || 0,

@@ -72,9 +72,9 @@
             <div v-if="loading" class="loading-overlay">
                 <div class="loading-spinner"></div>
             </div>
-            <div v-else-if="filteredOrders.length === 0" class="empty-state">
+            <div v-else-if="orderList.length === 0" class="empty-state">
                 <div class="empty-icon"><IconGraphic name="order"/></div>
-                <div class="empty-text">暂无采购订单</div>
+                <div class="empty-text">{{ emptyText }}</div>
             </div>
             <table v-else class="data-table">
                 <thead>
@@ -90,7 +90,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="item in filteredOrders" :key="item.id">
+                <tr v-for="item in orderList" :key="item.id">
                     <td><code>{{ item.importOrderNo }}</code></td>
                     <td>{{ item.supplierName || '-' }}</td>
                     <td>{{ item.wareHouseName || '-' }}</td>
@@ -141,7 +141,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '../../../stores/toastStore.js'
 import {useConfirmStore} from '../../../stores/confirmStore.js'
@@ -175,27 +175,36 @@ const pageInfo = ref({
 })
 
 const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
-
-const filteredOrders = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
-    return orderList.value.filter(item => {
-        const matchesStatus = !statusFilter.value || item.status === statusFilter.value
-        const matchesQuery = !query || [item.importOrderNo, item.supplierName]
-            .some(value => String(value || '').toLowerCase().includes(query))
-        return matchesStatus && matchesQuery
-    })
-})
+const emptyText = computed(() => (searchQuery.value.trim() || statusFilter.value) ? '没有匹配的采购单' : '暂无采购单')
 
 const draftCount = computed(() => orderList.value.filter(item => item.status === AUDIT_STATUS.DRAFT).length)
 const checkingCount = computed(() => orderList.value.filter(item => item.status === AUDIT_STATUS.CHECKING).length)
 const totalAmount = computed(() => orderList.value.reduce((sum, item) => sum + Number(item.totalAmount || 0), 0))
+
+let searchTimer = null
+
+// 搜索词/状态变化后 300ms 再查，并回到第一页
+watch([searchQuery, statusFilter], () => {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchList()
+    }, 300)
+})
+
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 onMounted(fetchList)
 
 async function fetchList() {
     loading.value = true
     try {
-        const data = await importOrderInterface.searchPage(pageInfo.value.page, pageInfo.value.size)
+        const data = await importOrderInterface.searchPage(
+            pageInfo.value.page,
+            pageInfo.value.size,
+            searchQuery.value.trim(),
+            statusFilter.value
+        )
         orderList.value = data.content || []
         pageInfo.value = {
             totalElements: data.totalElements || 0,

@@ -27,6 +27,7 @@
                             class="search-code-input"
                             placeholder="搜索订单编号、员工、会员或备注"
                             type="text"
+                            @input="handleSearchInput"
                         />
                         <input
                             v-model="startDate"
@@ -87,14 +88,14 @@
             </div>
 
             <div
-                v-else-if="filteredOrders.length === 0"
+                v-else-if="orderList.length === 0"
                 class="empty-panel"
             >
                 <IconGraphic name="order"/>
-                <strong>{{ orderList.length ? '没有符合条件的订单' : '当前仓库暂无已完成订单' }}</strong>
-                <span>{{ orderList.length ? '可以修改关键词重新搜索' : '在收银台完成收款后即可看到订单记录' }}</span>
+                <strong>{{ emptyText }}</strong>
+                <span>{{ searchQuery.trim() ? '可以修改关键词重新搜索' : '在收银台完成收款后即可看到订单记录' }}</span>
                 <button
-                    v-if="!orderList.length"
+                    v-if="!searchQuery.trim()"
                     class="checkout-link"
                     @click="goCheckout"
                 >返回收银台</button>
@@ -105,7 +106,7 @@
                 class="orders-list"
             >
                 <article
-                    v-for="order in filteredOrders"
+                    v-for="order in orderList"
                     :key="order.id"
                     class="order-card"
                 >
@@ -276,7 +277,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '../../stores/toastStore.js'
 import orderInterface from '../../axios/interface/OrderInterface.js'
@@ -332,14 +333,9 @@ const pageActualAmount = computed(() => {
     return orderList.value.reduce((sum, order) => sum + Number(order.actualPrice || 0), 0).toFixed(2)
 })
 
-const filteredOrders = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
-    if (!query) return orderList.value
-    return orderList.value.filter(order => {
-        return [order.orderNo, order.employeeName, order.memberPhone, order.remark]
-            .some(value => String(value || '').toLowerCase().includes(query))
-    })
-})
+const emptyText = computed(() => searchQuery.value.trim() ? '没有匹配的订单' : '当前条件暂无订单')
+
+let searchTimer = null
 
 onMounted(() => {
     fetchOrders()
@@ -367,7 +363,7 @@ async function fetchOrders() {
     const endTime = `${endDate.value}T23:59:59`
     loading.value = true
     try {
-        const data = await orderInterface.searchCurrentCompletePage(pageInfo.value.page, pageInfo.value.size, startTime, endTime, filterEmployeeId.value || null)
+        const data = await orderInterface.searchCurrentCompletePage(pageInfo.value.page, pageInfo.value.size, startTime, endTime, filterEmployeeId.value || null, searchQuery.value.trim())
         orderList.value = data.content || []
         pageInfo.value = {
             totalElements: data.totalElements || 0,
@@ -401,9 +397,17 @@ function applyDateFilter() {
     fetchPayStats()
 }
 
+// 输入停止 300ms 再查，避免每敲一个字打一次接口
+function handleSearchInput() {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchOrders()
+    }, 300)
+}
+
 function changePage(page) {
     pageInfo.value.page = page
-    searchQuery.value = ''
     fetchOrders()
 }
 

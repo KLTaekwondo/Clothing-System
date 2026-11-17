@@ -27,6 +27,7 @@
                             class="search-code-input"
                             placeholder="搜索订单编号、员工或备注"
                             type="text"
+                            @input="handleSearchInput"
                         />
                         <button
                             :disabled="loading"
@@ -48,14 +49,14 @@
         </div>
 
         <div
-            v-else-if="filteredDrafts.length === 0"
+            v-else-if="draftList.length === 0"
             class="empty-panel"
         >
             <IconGraphic name="order"/>
-            <strong>{{ draftList.length ? '没有符合条件的挂单' : '当前仓库暂无挂单' }}</strong>
-            <span>{{ draftList.length ? '可以修改关键词重新搜索' : '在收银台添加商品后即可挂单' }}</span>
+            <strong>{{ emptyText }}</strong>
+            <span>{{ searchQuery.trim() ? '可以修改关键词重新搜索' : '在收银台添加商品后即可挂单' }}</span>
             <button
-                v-if="!draftList.length"
+                v-if="!searchQuery.trim()"
                 class="checkout-link"
                 @click="goCheckout"
             >返回收银台</button>
@@ -66,7 +67,7 @@
             class="draft-list"
         >
             <article
-                v-for="order in filteredDrafts"
+                v-for="order in draftList"
                 :key="order.id"
                 class="draft-card"
             >
@@ -226,7 +227,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import orderInterface from '../../axios/interface/OrderInterface.js'
 import {PAY_METHOD_LABELS} from '../../constants/payMethod.js'
@@ -250,22 +251,22 @@ const pageInfo = ref({
 })
 
 const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
+const emptyText = computed(() => searchQuery.value.trim() ? '没有匹配的挂单' : '暂无挂单数据')
 
-const filteredDrafts = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
-    if (!query) return draftList.value
-    return draftList.value.filter(order => {
-        return [order.orderNo, order.employeeName, order.remark]
-            .some(value => String(value || '').toLowerCase().includes(query))
-    })
-})
+let searchTimer = null
 
 onMounted(fetchDrafts)
+
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 async function fetchDrafts() {
     loading.value = true
     try {
-        const data = await orderInterface.searchCurrentDraftPage(pageInfo.value.page, pageInfo.value.size)
+        const data = await orderInterface.searchCurrentDraftPage(
+            pageInfo.value.page,
+            pageInfo.value.size,
+            searchQuery.value.trim()
+        )
         draftList.value = data.content || []
         pageInfo.value = {
             totalElements: data.totalElements || 0,
@@ -280,9 +281,17 @@ async function fetchDrafts() {
     }
 }
 
+// 输入停止 300ms 再查，避免每敲一个字打一次接口
+function handleSearchInput() {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchDrafts()
+    }, 300)
+}
+
 function changePage(page) {
     pageInfo.value.page = page
-    searchQuery.value = ''
     fetchDrafts()
 }
 

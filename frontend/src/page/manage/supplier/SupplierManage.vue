@@ -23,6 +23,7 @@
                     class="search-code-input"
                     placeholder="搜索供应商编码、名称或电话"
                     type="text"
+                    @input="handleSearchInput"
                 />
                 <router-link
                     class="btn-primary search-button"
@@ -45,14 +46,7 @@
                 class="empty-state"
             >
                 <div class="empty-icon"><IconGraphic name="supplier"/></div>
-                <div class="empty-text">暂无供应商数据</div>
-            </div>
-            <div
-                v-else-if="filteredList.length === 0"
-                class="empty-state"
-            >
-                <div class="empty-icon"><IconGraphic name="search"/></div>
-                <div class="empty-text">没有匹配的供应商</div>
+                <div class="empty-text">{{ emptyText }}</div>
             </div>
             <table
                 v-else
@@ -70,7 +64,7 @@
                 </thead>
                 <tbody>
                 <tr
-                    v-for="item in filteredList"
+                    v-for="item in supplierList"
                     :key="item.id"
                     class="supplier-row"
                     @dblclick="goDetail(item)"
@@ -101,6 +95,14 @@
                 </tr>
                 </tbody>
             </table>
+
+            <TablePagination
+                :loading="loading"
+                :page="pageInfo.page"
+                :total-elements="pageInfo.totalElements"
+                :total-pages="totalPages"
+                @change="changePage"
+            />
         </div>
 
         <div
@@ -133,9 +135,10 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import supplierInterface from '../../../axios/interface/SupplierInterface.js'
+import TablePagination from '../../../component/common/TablePagination.vue'
 import {STATUS, STATUS_LABELS} from '../../../constants/status.js'
 
 const router = useRouter()
@@ -147,26 +150,56 @@ const showDisableConfirm = ref(false)
 const disableTarget = ref(null)
 const disabling = ref(false)
 
-const filteredList = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
-    if (!query) return supplierList.value
-    return supplierList.value.filter(item => {
-        return [item.supplierCode, item.supplierName, item.contactPhone]
-            .some(value => String(value || '').toLowerCase().includes(query))
-    })
+const pageInfo = ref({
+    totalElements: 0,
+    totalPages: 0,
+    page: 0,
+    size: 10
 })
 
+const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
+const emptyText = computed(() => searchQuery.value.trim() ? '没有匹配的供应商' : '暂无供应商数据')
+
+let searchTimer = null
+
 onMounted(fetchList)
+
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 async function fetchList() {
     loading.value = true
     try {
-        supplierList.value = await supplierInterface.searchList()
+        const data = await supplierInterface.searchPage(
+            pageInfo.value.page,
+            pageInfo.value.size,
+            searchQuery.value.trim()
+        )
+        supplierList.value = data.content || []
+        pageInfo.value = {
+            totalElements: data.totalElements || 0,
+            totalPages: data.totalPages || 0,
+            page: data.page || 0,
+            size: data.size || pageInfo.value.size
+        }
     } catch {
         supplierList.value = []
     } finally {
         loading.value = false
     }
+}
+
+// 输入停止 300ms 再查，避免每敲一个字打一次接口
+function handleSearchInput() {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchList()
+    }, 300)
+}
+
+function changePage(page) {
+    pageInfo.value.page = page
+    fetchList()
 }
 
 function goDetail(item) {

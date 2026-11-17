@@ -22,29 +22,25 @@
                     <button
                         :class="statusFilter === '' ? 'filter-tab-active' : 'filter-tab'"
                         type="button"
-                        @click="statusFilter = ''"
+                        @click="selectStatus('')"
                     >全部</button>
                     <button
                         :class="statusFilter === ORDER_STATUS.COMPLETED ? 'filter-tab-active' : 'filter-tab'"
                         type="button"
-                        @click="statusFilter = ORDER_STATUS.COMPLETED"
+                        @click="selectStatus(ORDER_STATUS.COMPLETED)"
                     >已完成</button>
                     <button
                         :class="statusFilter === ORDER_STATUS.DRAFT ? 'filter-tab-active' : 'filter-tab'"
                         type="button"
-                        @click="statusFilter = ORDER_STATUS.DRAFT"
+                        @click="selectStatus(ORDER_STATUS.DRAFT)"
                     >挂单</button>
-                    <button
-                        :class="statusFilter === ORDER_STATUS.REFUND ? 'filter-tab-active' : 'filter-tab'"
-                        type="button"
-                        @click="statusFilter = ORDER_STATUS.REFUND"
-                    >已退款</button>
                 </div>
                 <input
                     v-model="searchQuery"
                     class="search-code-input"
                     placeholder="搜索订单号、员工或仓库"
                     type="text"
+                    @input="handleSearchInput"
                 />
                 <button
                     class="btn-outline search-button"
@@ -95,9 +91,9 @@
             <div v-if="loading" class="loading-overlay">
                 <div class="loading-spinner"></div>
             </div>
-            <div v-else-if="filteredOrders.length === 0" class="empty-state">
+            <div v-else-if="orderList.length === 0" class="empty-state">
                 <div class="empty-icon"><IconGraphic name="order"/></div>
-                <div class="empty-text">暂无订单数据</div>
+                <div class="empty-text">{{ emptyText }}</div>
             </div>
             <table v-else class="data-table">
                 <thead>
@@ -114,7 +110,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="order in filteredOrders" :key="order.id" style="cursor:pointer" @dblclick="goDetail(order)">
+                <tr v-for="order in orderList" :key="order.id" style="cursor:pointer" @dblclick="goDetail(order)">
                     <td><code>{{ order.orderNo }}</code></td>
                     <td>
                             <span :class="statusClass(order.orderStatus)" class="status-badge">
@@ -146,7 +142,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import orderInterface from '../../../axios/interface/OrderInterface.js'
 import TablePagination from '../../../component/common/TablePagination.vue'
@@ -168,27 +164,27 @@ const pageInfo = ref({
 })
 
 const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
-
-const filteredOrders = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
-    return orderList.value.filter(order => {
-        const matchesStatus = !statusFilter.value || order.orderStatus === statusFilter.value
-        const matchesQuery = !query || [order.orderNo, order.employeeName, order.warehouseName, order.remark]
-            .some(value => String(value || '').toLowerCase().includes(query))
-        return matchesStatus && matchesQuery
-    })
-})
+const emptyText = computed(() => (searchQuery.value.trim() || statusFilter.value) ? '没有匹配的订单' : '暂无订单数据')
 
 const completedCount = computed(() => orderList.value.filter(order => order.orderStatus === ORDER_STATUS.COMPLETED).length)
 const draftCount = computed(() => orderList.value.filter(order => order.orderStatus === ORDER_STATUS.DRAFT).length)
 const totalAmount = computed(() => orderList.value.reduce((total, order) => total + Number(order.actualPrice || 0), 0))
 
+let searchTimer = null
+
 onMounted(fetchOrders)
+
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 async function fetchOrders() {
     loading.value = true
     try {
-        const data = await orderInterface.searchPage(pageInfo.value.page, pageInfo.value.size)
+        const data = await orderInterface.searchPage(
+            pageInfo.value.page,
+            pageInfo.value.size,
+            searchQuery.value.trim(),
+            statusFilter.value
+        )
         orderList.value = data.content || []
         pageInfo.value = {
             totalElements: data.totalElements || 0,
@@ -201,6 +197,21 @@ async function fetchOrders() {
     } finally {
         loading.value = false
     }
+}
+
+// 输入停止 300ms 再查，避免每敲一个字打一次接口
+function handleSearchInput() {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchOrders()
+    }, 300)
+}
+
+function selectStatus(value) {
+    statusFilter.value = value
+    pageInfo.value.page = 0
+    fetchOrders()
 }
 
 function changePage(page) {

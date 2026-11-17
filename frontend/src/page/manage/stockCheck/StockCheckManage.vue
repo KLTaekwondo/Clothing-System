@@ -72,11 +72,11 @@
                 <div class="loading-spinner"></div>
             </div>
             <div
-                v-else-if="filteredChecks.length === 0"
+                v-else-if="checkList.length === 0"
                 class="empty-state"
             >
                 <div class="empty-icon"><IconGraphic name="document"/></div>
-                <div class="empty-text">暂无库存盘点单</div>
+                <div class="empty-text">{{ emptyText }}</div>
             </div>
             <table
                 v-else
@@ -94,7 +94,7 @@
                 </thead>
                 <tbody>
                 <tr
-                    v-for="item in filteredChecks"
+                    v-for="item in checkList"
                     :key="item.id"
                 >
                     <td><code>{{ item.stockCheckNo }}</code></td>
@@ -168,7 +168,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import {useToastStore} from '../../../stores/toastStore.js'
 import {useConfirmStore} from '../../../stores/confirmStore.js'
 import stockCheckInterface from '../../../axios/interface/StockCheckInterface.js'
@@ -196,29 +196,36 @@ const pageInfo = ref({
 })
 
 const totalPages = computed(() => Math.max(pageInfo.value.totalPages || 1, 1))
+const emptyText = computed(() => (searchQuery.value.trim() || statusFilter.value) ? '没有匹配的盘点单' : '暂无盘点单')
+
 const draftCount = computed(() => checkList.value.filter(item => item.status === AUDIT_STATUS.DRAFT).length)
 const checkingCount = computed(() => checkList.value.filter(item => item.status === AUDIT_STATUS.CHECKING).length)
 const activeCount = computed(() => draftCount.value + checkingCount.value)
 
-const filteredChecks = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase()
-    return checkList.value.filter(item => {
-        const matchesStatus = !statusFilter.value || item.status === statusFilter.value
-        const matchesQuery = !query || [
-            item.stockCheckNo,
-            item.wareHouseName,
-            item.wareHouseCode
-        ].some(value => String(value || '').toLowerCase().includes(query))
-        return matchesStatus && matchesQuery
-    })
+let searchTimer = null
+
+// 搜索词/状态变化后 300ms 再查，并回到第一页
+watch([searchQuery, statusFilter], () => {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+        pageInfo.value.page = 0
+        fetchList()
+    }, 300)
 })
+
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 onMounted(fetchList)
 
 async function fetchList() {
     loading.value = true
     try {
-        const data = await stockCheckInterface.searchPage(pageInfo.value.page, pageInfo.value.size)
+        const data = await stockCheckInterface.searchPage(
+            pageInfo.value.page,
+            pageInfo.value.size,
+            searchQuery.value.trim(),
+            statusFilter.value
+        )
         checkList.value = data.content || []
         pageInfo.value = {
             totalElements: data.totalElements || 0,
