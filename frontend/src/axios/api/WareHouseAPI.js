@@ -6,6 +6,7 @@ const wareHouseAPI = {
     deleteWareHouse: (id) => backendService.delete(`/warehouse/delete/${id}`),
     searchWareHouse: (id) => backendService.get(`/warehouse/search/${id}`),
     searchWareHouseList: () => backendService.get("/warehouse/search/list"),
+    searchWareHousePage: (page, size, keyword) => backendService.get("/warehouse/page", {params: {page, size, keyword}}),
     login: (data) => backendService.post("/warehouse/login", data),
     logout: () => backendService.post("/warehouse/logout")
 

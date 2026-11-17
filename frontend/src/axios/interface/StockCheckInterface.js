@@ -36,8 +36,8 @@ function stockCheckInterface() {
         return data || {};
     }
 
-    const searchPage = async (page = 0, size = 10) => {
-        const data = await stockCheckAPI.searchStockCheckPage(page, size);
+    const searchPage = async (page = 0, size = 10, keyword = '') => {
+        const data = await stockCheckAPI.searchStockCheckPage(page, size, keyword);
         return data || {
             content: [],
             totalElements: 0,

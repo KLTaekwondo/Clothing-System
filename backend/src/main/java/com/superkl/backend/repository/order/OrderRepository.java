@@ -19,17 +19,30 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
     @Query("SELECT o FROM Order o " +
             "JOIN FETCH o.employee " +
             "JOIN FETCH o.wareHouse " +
-            "WHERE o.wareHouse.wareHouseId = :warehouseId AND o.status = :status")
+            "WHERE o.wareHouse.wareHouseId = :warehouseId " +
+            "AND o.status = :status " +
+            "AND (:keyword IS NULL " +
+            "OR o.orderNo LIKE :keyword " +
+            "OR o.employee.employeeName LIKE :keyword) " +
+            "ORDER BY o.createTime DESC")
     Page<Order> pageByWareHouseAndStatus(@Param("warehouseId") Long warehouseId ,
                                          @Param("status") OrderStatusEnum status ,
+                                         @Param("keyword") String keyword,
                                          Pageable pageable);
 
     // 后端总返回订单分页
     @Query("SELECT o FROM Order o " +
             "JOIN FETCH o.employee " +
             "JOIN FETCH o.wareHouse " +
+            "WHERE (:keyword IS NULL " +
+            "OR o.orderNo LIKE :keyword " +
+            "OR o.employee.employeeName LIKE :keyword " +
+            "OR o.wareHouse.wareHouseName LIKE :keyword) " +
+            "AND (:status IS NULL OR o.status = :status) " +
             "ORDER BY o.createTime DESC")
-    Page<Order> findPage(Pageable pageable);
+    Page<Order> findPage(@Param("keyword") String keyword,
+                         @Param("status") OrderStatusEnum status,
+                         Pageable pageable);
 
     // 收银台总返回订单分页
     @Query("SELECT o FROM Order o " +
@@ -39,12 +52,17 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
             "AND o.createTime < :endTime " +
             "AND o.status = :status " +
             "AND (:employeeId IS NULL OR o.employee.employeeId = :employeeId) " +
-            "AND o.wareHouse.wareHouseId = :warehouseId ")
+            "AND o.wareHouse.wareHouseId = :warehouseId " +
+            "AND (:keyword IS NULL " +
+            "OR o.orderNo LIKE :keyword " +
+            "OR o.employee.employeeName LIKE :keyword) " +
+            "ORDER BY o.createTime DESC")
     Page<Order> findPageCheckOut(@Param("startTime") LocalDateTime startTime,
                                  @Param("endTime") LocalDateTime endTime,
                                  @Param("status") OrderStatusEnum status,
                                  @Param("employeeId") Long employeeId,
                                  @Param("warehouseId") Long warehouseId,
+                                 @Param("keyword") String keyword,
                                  Pageable pageable);
 
     // 后端查看总订单销售额汇总

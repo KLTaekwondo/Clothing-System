@@ -5,11 +5,13 @@ import com.superkl.backend.common.extralparams.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.order.ImportOrderDraftDto;
+import com.superkl.backend.enums.AuditStatusEnum;
 import com.superkl.backend.info.order.ImportOrderInfo;
 import com.superkl.backend.info.order.ImportOrderWithItemsInfo;
 import com.superkl.backend.service.order.ImportOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -66,8 +68,11 @@ public class ImportOrderController {
 
     //7. 获取订单列表
     @GetMapping("/page")
-    public Result<PageResult<ImportOrderInfo>> searchPage(@Valid PageParam param) {
-        return Result.success(importOrderService.searchPage(param.toPageable()));
+    public Result<PageResult<ImportOrderInfo>> searchPage(@RequestParam(required = false) String keyword,
+                                                          @RequestParam(required = false) AuditStatusEnum status,
+                                                          @Valid PageParam param) {
+        Pageable pageable = param.toPageable();
+        return Result.success(importOrderService.searchPage(keyword, status, pageable));
     }
 
     //8. 删除订单

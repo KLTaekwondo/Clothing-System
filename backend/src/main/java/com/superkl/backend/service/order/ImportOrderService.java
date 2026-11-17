@@ -3,6 +3,7 @@ package com.superkl.backend.service.order;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.order.ImportOrderConverter;
+import com.superkl.backend.enums.AuditStatusEnum;
 import com.superkl.backend.dto.order.ImportOrderDraftDto;
 import com.superkl.backend.dto.stock.StockContext;
 import com.superkl.backend.entity.order.ImportOrder;
@@ -187,8 +188,10 @@ public class ImportOrderService {
 
     // 查询进货订单列表
     @Transactional(readOnly = true)
-    public PageResult<ImportOrderInfo> searchPage(Pageable pageable){
-        Page<ImportOrder> importOrders = importOrderRepository.findPage(pageable);
+    public PageResult<ImportOrderInfo> searchPage(String keyword, AuditStatusEnum status, Pageable pageable){
+        // 处理空字符串
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        Page<ImportOrder> importOrders = importOrderRepository.findPage(pattern, status, pageable);
         return ImportOrderConverter.toInfoPage(importOrders);
     }
 

@@ -36,8 +36,8 @@ function orderInterface() {
         return data || {};
     }
 
-    const searchPage = async (page = 0, size = 10) => {
-        const data = await orderAPI.searchOrderPage(page, size);
+    const searchPage = async (page = 0, size = 10, keyword = '', status = '') => {
+        const data = await orderAPI.searchOrderPage(page, size, keyword, status || undefined);
         return data || {
             content: [],
             totalElements: 0,
@@ -47,8 +47,8 @@ function orderInterface() {
         };
     }
 
-    const searchCurrentDraftPage = async (page = 0, size = 10) => {
-        const data = await orderAPI.searchCurrentDraftOrderPage(page, size);
+    const searchCurrentDraftPage = async (page = 0, size = 10, keyword = '') => {
+        const data = await orderAPI.searchCurrentDraftOrderPage(page, size, keyword);
         return data || {
             content: [],
             totalElements: 0,
@@ -58,8 +58,8 @@ function orderInterface() {
         };
     }
 
-    const searchCurrentCompletePage = async (page = 0, size = 10, startTime = Now, endTime = NowEnd, employeeId = null) => {
-        const data = await orderAPI.searchCurrentCompleteOrderPage(page, size, startTime, endTime, employeeId);
+    const searchCurrentCompletePage = async (page = 0, size = 10, startTime = Now, endTime = NowEnd, employeeId = null, keyword = '') => {
+        const data = await orderAPI.searchCurrentCompleteOrderPage(page, size, startTime, endTime, employeeId, keyword);
         return data || {
             content: [],
             totalElements: 0,

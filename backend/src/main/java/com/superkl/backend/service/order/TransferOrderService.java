@@ -191,8 +191,10 @@ public class TransferOrderService {
 
     // 查找所有转移订单
     @Transactional(readOnly = true)
-    public PageResult<TransferOrderInfo> searchPage(Pageable pageable){
-        return TransferOrderConverter.toInfoPage(transferOrderRepository.findPage(pageable));
+    public PageResult<TransferOrderInfo> searchPage(String keyword, AuditStatusEnum status, Pageable pageable){
+        // 空关键词不参与过滤；否则会拼出 LIKE ''，一条也查不到
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        return TransferOrderConverter.toInfoPage(transferOrderRepository.findPage(pattern, status, pageable));
     }
 
 

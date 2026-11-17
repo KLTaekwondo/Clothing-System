@@ -2,7 +2,9 @@ package com.superkl.backend.controller.basic;
 
 import com.superkl.backend.annotation.LimitRate;
 import com.superkl.backend.annotation.OpLogs;
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
+import com.superkl.backend.common.extralparams.PageParam;
 import com.superkl.backend.dto.basic.LoginDto;
 import com.superkl.backend.dto.basic.WareHouseCreateDto;
 import com.superkl.backend.dto.basic.WareHouseUpdateDto;
@@ -66,6 +68,13 @@ public class WareHouseController {
     @GetMapping("/search/list")
     public Result<List<WareHouseInfo>> searchList() {
         return Result.success(wareHouseService.searchList());
+    }
+
+    // 分页查询仓库（下拉仍用上面的 search/list）
+    @GetMapping("/page")
+    public Result<PageResult<WareHouseInfo>> searchPage(@RequestParam(required = false) String keyword,
+                                                        PageParam pageParam) {
+        return Result.success(wareHouseService.searchPage(keyword, pageParam.toPageable()));
     }
 
     // 6.登录

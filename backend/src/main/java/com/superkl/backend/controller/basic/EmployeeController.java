@@ -84,7 +84,7 @@ public class EmployeeController {
     }
 
     // 8.分页查询员工
-    @GetMapping("/search/page")
+    @GetMapping("/page")
     public Result<PageResult<EmployeeInfo>> searchPage(@RequestParam(required = false) String keyword,
                                                        @Valid PageParam pageParam) {
         Pageable pageable = pageParam.toPageable();

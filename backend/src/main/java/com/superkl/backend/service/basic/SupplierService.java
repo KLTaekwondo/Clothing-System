@@ -1,5 +1,6 @@
 package com.superkl.backend.service.basic;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.converter.basic.SupplierConverter;
 import com.superkl.backend.dto.basic.SupplierCreateDto;
 import com.superkl.backend.dto.basic.SupplierUpdateDto;
@@ -10,6 +11,7 @@ import com.superkl.backend.exception.BusinessException;
 import com.superkl.backend.info.basic.SupplierInfo;
 import com.superkl.backend.repository.basic.SupplierRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,10 +64,15 @@ public class SupplierService {
         return SupplierConverter.toInfo(supplier);
     }
 
-    // 5. 查询所有供应商
-    public List<SupplierInfo> searchList () {
-        return supplierRepository.findAll().stream()
-                .map(SupplierConverter::toInfo)
-                .toList();
+    // 5. 查询所有供应商（下拉/筛选用，需要全量）
+    public List<SupplierInfo> searchList() {
+        List<Supplier> suppliers = supplierRepository.findAll();
+        return SupplierConverter.toInfoList(suppliers);
+    }
+
+    // 6. 分页查询供应商
+    public PageResult<SupplierInfo> searchPage(String keyword ,Pageable pageable) {
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        return SupplierConverter.toInfoPage(supplierRepository.findPage(pattern, pageable));
     }
 }

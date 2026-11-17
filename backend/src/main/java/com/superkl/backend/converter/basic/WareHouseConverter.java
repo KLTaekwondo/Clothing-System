@@ -1,9 +1,11 @@
 package com.superkl.backend.converter.basic;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.dto.basic.WareHouseCreateDto;
 import com.superkl.backend.dto.basic.WareHouseUpdateDto;
 import com.superkl.backend.entity.basic.WareHouse;
 import com.superkl.backend.info.basic.WareHouseInfo;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -43,5 +45,11 @@ public class WareHouseConverter {
         wareHouse.setWareHouseCode(wareHouseUpdateDto.getCode());
         wareHouse.setWareHouseName(wareHouseUpdateDto.getName());
         wareHouse.setStatus(wareHouseUpdateDto.getStatus());
+    }
+
+    // 分页查询仓库列表
+    public static PageResult<WareHouseInfo> toPageInfo(Page<WareHouse> warehouses) {
+        Page<WareHouseInfo> page = warehouses.map(WareHouseConverter::toInfo);
+        return new PageResult<>(page);
     }
 }

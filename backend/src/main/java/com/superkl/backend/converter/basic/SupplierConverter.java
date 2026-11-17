@@ -1,9 +1,11 @@
 package com.superkl.backend.converter.basic;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.dto.basic.SupplierCreateDto;
 import com.superkl.backend.dto.basic.SupplierUpdateDto;
 import com.superkl.backend.entity.basic.Supplier;
 import com.superkl.backend.info.basic.SupplierInfo;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -48,5 +50,11 @@ public class SupplierConverter {
         supplier.setContactPhone(dto.getContactPhone());
         supplier.setStatus(dto.getStatus());
         supplier.setRemark(dto.getRemark());
+    }
+
+    // 分页查询转Info列表
+    public static PageResult<SupplierInfo> toInfoPage(Page<Supplier> suppliers){
+        Page<SupplierInfo> page = suppliers.map(SupplierConverter::toInfo);
+        return new PageResult<>(page);
     }
 }

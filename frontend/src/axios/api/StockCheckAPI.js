@@ -7,10 +7,11 @@ const stockCheckAPI = {
     rejectStockCheck: (id) => backendService.put(`/stockCheck/reject/${id}`),
     updateStockCheck: (id, data) => backendService.put(`/stockCheck/update/${id}`, data),
     searchStockCheck: (id) => backendService.get(`/stockCheck/detail/${id}`),
-    searchStockCheckPage: (page, size) => backendService.get("/stockCheck/page", {
+    searchStockCheckPage: (page, size, keyword) => backendService.get("/stockCheck/page", {
         params: {
             page,
-            size
+            size,
+            keyword
         }
     }),
     deleteStockCheck: (id) => backendService.delete(`/stockCheck/delete/${id}`),

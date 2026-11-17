@@ -17,8 +17,16 @@ import java.time.LocalDateTime;
 public interface ImportOrderRepository extends JpaRepository<ImportOrder, Long> {
     @Query("SELECT i FROM ImportOrder i " +
             "JOIN FETCH i.wareHouse " +
+            "JOIN FETCH i.supplier " +
+            "WHERE (:keyword IS NULL " +
+            "OR i.importOrderNo LIKE :keyword " +
+            "OR i.wareHouse.wareHouseName LIKE :keyword " +
+            "OR i.supplier.supplierName LIKE :keyword) " +
+            "AND (:status IS NULL OR i.status = :status) " +
             "ORDER BY i.createTime DESC")
-    Page<ImportOrder> findPage(Pageable pageable);
+    Page<ImportOrder> findPage(@Param("keyword") String keyword,
+                               @Param("status") AuditStatusEnum status,
+                               Pageable pageable);
 
 
     // 查询指定季节的进货金额

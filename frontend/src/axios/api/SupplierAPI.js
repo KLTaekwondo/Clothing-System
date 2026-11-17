@@ -6,6 +6,7 @@ const supplierAPI = {
     deleteSupplier: (id) => backendService.delete(`/supplier/delete/${id}`),
     searchSupplier: (code) => backendService.get(`/supplier/search/${code}`),
     searchSupplierList: () => backendService.get("/supplier/search/list"),
+    searchSupplierPage: (page, size, keyword) => backendService.get("/supplier/page", {params: {page, size, keyword}}),
 }
 
 export default supplierAPI;

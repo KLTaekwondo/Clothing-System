@@ -1,5 +1,6 @@
 package com.superkl.backend.service.basic;
 
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.basic.WareHouseConverter;
 import com.superkl.backend.dto.basic.LoginDto;
@@ -24,6 +25,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -142,6 +145,13 @@ public class WareHouseService {
     public List<WareHouseInfo> searchList() {
         List<WareHouse> wareHouseList = wareHouseRepository.findAll();
         return WareHouseConverter.toInfoList(wareHouseList);
+    }
+
+    // 分页查询仓库列表
+    public PageResult<WareHouseInfo> searchPage(String keyword , Pageable pageable) {
+        // 空关键词不参与过滤；否则会拼出 LIKE ''，一条也查不到
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        return WareHouseConverter.toPageInfo(wareHouseRepository.findPage(pattern, pageable));
     }
 
     // 登录

@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -19,7 +20,8 @@ public class StockRecordController {
 
     //1. 获取库存记录列表
     @GetMapping("/page")
-    public Result<PageResult<StockRecordInfo>> searchPage(@Valid PageParam param) {
-        return Result.success(stockRecordService.searchPage(param.toPageable()));
+    public Result<PageResult<StockRecordInfo>> searchPage(@RequestParam(required = false) String keyword,
+                                                          @Valid PageParam param) {
+        return Result.success(stockRecordService.searchPage(keyword, param.toPageable()));
     }
 }

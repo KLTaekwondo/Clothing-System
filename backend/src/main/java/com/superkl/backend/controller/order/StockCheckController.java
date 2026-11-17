@@ -5,6 +5,7 @@ import com.superkl.backend.common.extralparams.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.order.StockCheckDraftDto;
+import com.superkl.backend.enums.AuditStatusEnum;
 import com.superkl.backend.info.order.StockCheckInfo;
 import com.superkl.backend.info.order.StockCheckWithItemsInfo;
 import com.superkl.backend.service.order.StockCheckService;
@@ -67,9 +68,11 @@ public class StockCheckController {
 
     // 7. 查询库存盘点单分页列表
     @GetMapping("/page")
-    public Result<PageResult<StockCheckInfo>> page(@Valid PageParam pageParam) {
+    public Result<PageResult<StockCheckInfo>> page(@RequestParam(required = false) String keyword,
+                                                   @RequestParam(required = false) AuditStatusEnum status,
+                                                   @Valid PageParam pageParam) {
         Pageable pageable = pageParam.toPageable();
-        return Result.success(stockCheckService.searchPage(pageable));
+        return Result.success(stockCheckService.searchPage(keyword, status, pageable));
     }
 
     // 8. 删除草稿

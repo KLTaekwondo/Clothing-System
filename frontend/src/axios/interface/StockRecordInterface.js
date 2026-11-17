@@ -1,8 +1,8 @@
 import StockRecordAPI from "../api/StockRecordAPI.js";
 
 function StockRecordInterface(){
-    const searchPage =async (page = 0,size = 10) =>{
-        const data = await StockRecordAPI.searchStockRecordPage(page,size);
+    const searchPage = async (page = 0, size = 10, keyword = '') => {
+        const data = await StockRecordAPI.searchStockRecordPage(page, size, keyword);
         return data || {
             content: [],
             totalElements: 0,

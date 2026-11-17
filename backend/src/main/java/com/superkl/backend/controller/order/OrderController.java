@@ -5,6 +5,7 @@ import com.superkl.backend.common.extralparams.PageParam;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
 import com.superkl.backend.dto.order.OrderCreateDto;
+import com.superkl.backend.enums.OrderStatusEnum;
 import com.superkl.backend.info.order.OrderInfo;
 import com.superkl.backend.info.order.OrderWithItemsInfo;
 import com.superkl.backend.service.order.OrderService;
@@ -54,9 +55,11 @@ public class OrderController {
 
     // 5.查询订单订单列表
     @GetMapping("/page")
-    public Result<PageResult<OrderInfo>> searchPage(@Valid PageParam pageParam) {
+    public Result<PageResult<OrderInfo>> searchPage(@RequestParam(required = false) String keyword,
+                                                    @RequestParam(required = false) OrderStatusEnum status,
+                                                    @Valid PageParam pageParam) {
         Pageable pageable = pageParam.toPageable();
-        return Result.success(orderService.searchPage(pageable));
+        return Result.success(orderService.searchPage(keyword, status, pageable));
     }
 
     // 6.删除草稿订单
@@ -69,9 +72,10 @@ public class OrderController {
 
     // 7.收银前端查询当前登录仓库账户的挂单列表
     @GetMapping("/search/wareHouse/draft")
-    public Result<PageResult<OrderInfo>> searchDraftPage(@Valid PageParam pageParam) {
+    public Result<PageResult<OrderInfo>> searchDraftPage(@RequestParam(required = false) String keyword,
+                                                         @Valid PageParam pageParam) {
         Pageable pageable = pageParam.toPageable();
-        return Result.success(orderService.searchDraftByWareHouseId(pageable));
+        return Result.success(orderService.searchDraftByWareHouseId(keyword, pageable));
     }
 
     // 8.收银前段查询当前登录仓库的完成订单列表
@@ -79,8 +83,9 @@ public class OrderController {
     public Result<PageResult<OrderInfo>> searchCompletePage(@RequestParam LocalDateTime startTime,
                                                             @RequestParam LocalDateTime endTime,
                                                             @RequestParam(required = false) Long employeeId,
+                                                            @RequestParam(required = false) String keyword,
                                                             @Valid PageParam pageParam) {
         Pageable pageable = pageParam.toPageable();
-        return Result.success(orderService.searchCompletePageByWareHouseId(startTime, endTime,employeeId,pageable));
+        return Result.success(orderService.searchCompletePageByWareHouseId(startTime, endTime, employeeId, keyword, pageable));
     }
 }

@@ -1,13 +1,16 @@
 package com.superkl.backend.controller.basic;
 
 import com.superkl.backend.annotation.OpLogs;
+import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.Result;
+import com.superkl.backend.common.extralparams.PageParam;
 import com.superkl.backend.dto.basic.SupplierCreateDto;
 import com.superkl.backend.dto.basic.SupplierUpdateDto;
 import com.superkl.backend.info.basic.SupplierInfo;
 import com.superkl.backend.service.basic.SupplierService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,9 +51,17 @@ public class SupplierController {
         return Result.success(supplierService.search(supplierCode));
     }
 
-    // 获取所有供应商
+    // 获取所有供应商（下拉/筛选用，需要全量）
     @GetMapping("/search/list")
     public Result<List<SupplierInfo>> searchList() {
         return Result.success(supplierService.searchList());
+    }
+
+    // 分页查询供应商
+    @GetMapping("/page")
+    public Result<PageResult<SupplierInfo>> searchPage(@RequestParam(required = false) String keyword, PageParam pageParam) {
+        // 转换为Pageable
+        Pageable pageable = pageParam.toPageable();
+        return Result.success(supplierService.searchPage(keyword, pageable));
     }
 }

@@ -1,11 +1,14 @@
 package com.superkl.backend.repository.basic;
 
 import com.superkl.backend.entity.basic.WareHouse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,4 +24,9 @@ public interface WareHouseRepository extends JpaRepository<WareHouse, Long> {
     // 检查仓库名称是否已经存在
     @Query("SELECT COUNT(w) > 0 FROM WareHouse w WHERE w.wareHouseName = :wareHouseName")
     boolean existsByName(@Param("wareHouseName") String wareHouseName);
+
+    @Query("SELECT w FROM WareHouse w " +
+            "WHERE (:keyword IS NULL OR w.wareHouseCode LIKE :keyword OR w.wareHouseName LIKE :keyword)" +
+            "ORDER BY w.wareHouseId DESC")
+    Page<WareHouse> findPage(@Param("keyword") String keyword, Pageable pageable);
 }

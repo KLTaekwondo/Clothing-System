@@ -170,8 +170,10 @@ public class OrderService {
 
     // 5.查询订单订单列表
     @Transactional(readOnly = true)
-    public PageResult<OrderInfo> searchPage(Pageable pageable) {
-        return OrderConverter.toInfoPage(orderRepository.findPage(pageable));
+    public PageResult<OrderInfo> searchPage(String keyword, OrderStatusEnum status, Pageable pageable) {
+        // 空关键词不参与过滤；否则会拼出 LIKE ''，一条也查不到
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        return OrderConverter.toInfoPage(orderRepository.findPage(pattern, status, pageable));
     }
 
     // 6.删除草稿订单
@@ -190,9 +192,10 @@ public class OrderService {
 
     // 7.查询当前仓库的挂单列表
     @Transactional(readOnly = true)
-    public PageResult<OrderInfo> searchDraftByWareHouseId(Pageable pageable) {
+    public PageResult<OrderInfo> searchDraftByWareHouseId(String keyword, Pageable pageable) {
         Long wareHouseId = RequestUser.notNull().getRequestId();
-        Page<Order> orders = orderRepository.pageByWareHouseAndStatus(wareHouseId,OrderStatusEnum.DRAFT,pageable);
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        Page<Order> orders = orderRepository.pageByWareHouseAndStatus(wareHouseId, OrderStatusEnum.DRAFT, pattern, pageable);
         return OrderConverter.toInfoPage(orders);
     }
 
@@ -201,10 +204,12 @@ public class OrderService {
     public PageResult<OrderInfo> searchCompletePageByWareHouseId(LocalDateTime startTime,
                                                                  LocalDateTime endTime,
                                                                  Long employeeId,
+                                                                 String keyword,
                                                                  Pageable pageable) {
         Long wareHouseId = RequestUser.notNull().getRequestId();
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
         Page<Order> orders = orderRepository.findPageCheckOut(startTime, endTime,
-                OrderStatusEnum.COMPLETED,employeeId,wareHouseId,pageable);
+                OrderStatusEnum.COMPLETED, employeeId, wareHouseId, pattern, pageable);
         return OrderConverter.toInfoPage(orders);
     }
 

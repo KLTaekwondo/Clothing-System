@@ -31,6 +31,12 @@ function wareHouseInterface() {
         return Array.isArray(data) ? data : [];
     }
 
+    // 分页查询仓库（下拉仍然用 searchList）
+    const searchPage = async (page = 0, size = 10, keyword = '') => {
+        const data = await wareHouseAPI.searchWareHousePage(page, size, keyword);
+        return data || {content: [], totalElements: 0, totalPages: 0, page: page, size};
+    }
+
     // 登录
     const login = async (body) => {
         const data = await wareHouseAPI.login(body);
@@ -49,6 +55,7 @@ function wareHouseInterface() {
         softDelete,
         search,
         searchList,
+        searchPage,
         login,
         logout
     }

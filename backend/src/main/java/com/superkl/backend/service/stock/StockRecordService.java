@@ -18,8 +18,10 @@ public class StockRecordService {
 
     // 查询库存记录列表
     @Transactional(readOnly = true)
-    public PageResult<StockRecordInfo> searchPage(Pageable pageable){
-        Page<StockRecord> stockRecords = stockRecordRepository.findPage(pageable);
+    public PageResult<StockRecordInfo> searchPage(String keyword, Pageable pageable){
+        // 空关键词不参与过滤；否则会拼出 LIKE ''，一条也查不到
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        Page<StockRecord> stockRecords = stockRecordRepository.findPage(pattern, pageable);
         return StockRecordConverter.toInfoPage(stockRecords);
     }
 }

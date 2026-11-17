@@ -49,7 +49,7 @@ public class MemberController {
     }
 
     // 4.查询所有会员
-    @GetMapping("/search/page")
+    @GetMapping("/page")
     public Result<PageResult<MemberInfo>> searchPage(@RequestParam(required = false) String keyword,
                                                      @RequestParam(required = false) MemberLevelEnum memberLevel,
                                                      @Valid PageParam pageParam) {

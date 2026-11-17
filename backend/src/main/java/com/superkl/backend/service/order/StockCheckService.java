@@ -3,6 +3,7 @@ package com.superkl.backend.service.order;
 import com.superkl.backend.common.PageResult;
 import com.superkl.backend.common.RequestUser;
 import com.superkl.backend.converter.order.StockCheckConverter;
+import com.superkl.backend.enums.AuditStatusEnum;
 import com.superkl.backend.dto.order.StockCheckDraftDto;
 import com.superkl.backend.dto.stock.StockContext;
 import com.superkl.backend.entity.basic.WareHouse;
@@ -147,8 +148,10 @@ public class StockCheckService {
     }
 
     // 查询库存分页
-    public PageResult<StockCheckInfo> searchPage(Pageable pageable) {
-        Page<StockCheck> page = stockCheckRepository.findPage(pageable);
+    public PageResult<StockCheckInfo> searchPage(String keyword, AuditStatusEnum status, Pageable pageable) {
+        // 空关键词不参与过滤；否则会拼出 LIKE ''，一条也查不到
+        String pattern = (keyword == null || keyword.isBlank()) ? null : "%" + keyword.trim() + "%";
+        Page<StockCheck> page = stockCheckRepository.findPage(pattern, status, pageable);
         return StockCheckConverter.toInfoPage(page);
     }
 
